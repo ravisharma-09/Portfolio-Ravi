@@ -3,6 +3,10 @@ let cursors;
 let keys;
 let computer;
 let interactText;
+let interactKey ;
+let interacted = false;
+let aboutPanel;
+let aboutText;
 // hi---------------------------------------------------------------------------------
 
 function preload() {
@@ -22,37 +26,71 @@ function create() {
   room.setDisplaySize(window.innerWidth,window.innerHeight);
 
   player = this.add.sprite(300,200,"player");
-  player.setScale(0.2);
+  player.setScale(0.1);
 
-  computer = this.add.sprite(500,250,"computer");
-  computer.setScale(0.3);
+  computer = {
+  x: 500,
+  y: 340
+  };
   
   cursors = this.input.keyboard.createCursorKeys();
   keys = this.input.keyboard.addKeys("W,A,S,D");
-interactText = this.add.text(30, 30, "", {
-  fontSize: "28px",
-  fill: "#ffffff"
+  interactKey = this.input.keyboard.addKey("E");
+interactText = this.add.text(computer.x, computer.y - 80, "", {
+  fontSize: "32px",
+  fill: "#ffffff",   
+  backgroundColor: "#6e6a6a"
 });
-}
+
+interactText.setOrigin(0.5);
+aboutPanel = this.add.rectangle(
+  this.cameras.main.width / 2,
+  this.cameras.main.height / 2,
+  500,
+  300,
+  0x000000,
+  0.8
+);
+
+aboutPanel.setVisible(false);
+
+aboutText = this.add.text(
+  this.cameras.main.width / 2,
+  this.cameras.main.height / 2,
+  "Hi, I'm Ravi 👋\n\nI build interactive projects\nand love coding.",
+  {
+    fontSize: "28px",
+    fill: "#ffffff",
+    align: "center"
+  }
+);
+
+aboutText.setOrigin(0.5);
+aboutText.setVisible(false);
+
+interactText.setOrigin(0.5);
+};
+
+
 
 // hi ---------------------------------------------------------------------------------
 
 function update(){
 
    if(cursors.left.isDown || keys.A.isDown){
-    player.x -= 2
+    player.x -= 3
   }
 
   if(cursors.right.isDown || keys.D.isDown){
-    player.x += 2
+    player.x += 3
   }
 
   if(cursors.up.isDown || keys.W.isDown){
-    player.y -= 2     
+    player.y -= 3    
   }
 
   if(cursors.down.isDown || keys.S.isDown){
-    player.y += 2
+    player.y += 3
   }
   player.x = Phaser.Math.Clamp(player.x, 0, this.cameras.main.width);
   player.y = Phaser.Math.Clamp(player.y, 0, this.cameras.main.height);
@@ -63,13 +101,23 @@ let distance = Phaser.Math.Distance.Between(
   computer.y
 );
 
-if(distance < 120){
-  interactText.setText("Press E to Interact");
-}else{
-  interactText.setText("");
-}
-}
+if(distance < 100){
 
+  if(!interacted){
+    interactText.setText("Press E to Interact");
+  }
+
+  if(Phaser.Input.Keyboard.JustDown(interactKey)){
+    interacted = true;
+  aboutPanel.setVisible(true);
+  aboutText.setVisible(true);
+  }
+}
+else{
+  interactText.setText("");
+  interacted = false;
+}
+}
 // hi ---------------------------------------------------------------------------------
 
 const config = {
