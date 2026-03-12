@@ -13,8 +13,12 @@ let closeHint;  // closing with esc
 let photoFrame;
 let projectPanel; // for photo frame interaction
 let projectText; // for photo frame interaction
+let trophyShelf ; // for trophy 
+let achievementPanel; // trophy interaction panel
+let achievementText; // text inside trophy interaction panel
 const deskRange = 80;
 const projectRange = 60;
+const trophyRange = 60;
 
 const marginX = 80;
 const marginTop = 80;
@@ -37,7 +41,7 @@ class StartScene extends Phaser.Scene {
       this.scale.height / 2 - 40,
       "Ravi Sharma Portfolio",
       {
-        fontSize: "48px",
+        fontSize: "55px",
         fill: "#ffffff"
       }
     ).setOrigin(0.5);
@@ -45,9 +49,9 @@ class StartScene extends Phaser.Scene {
     this.add.text(
       this.scale.width / 2,
       this.scale.height / 2 + 20,
-      "Press ENTER to Start",
+      "[ Press <_ENTER_> to Start ▶️ ]",
       {
-        fontSize: "24px",
+        fontSize: "30px",
         fill: "#aaaaaa"
       }
     ).setOrigin(0.5);
@@ -94,12 +98,17 @@ room.setOrigin(0);
   this.cameras.main.startFollow(player);
 
 desk = {
-  x: 200,
-  y: 250
+  x: 180,
+  y: 220
 };
 photoFrame = {
-  x: 780,
+  x: 790,
   y: 160
+};
+trophyShelf = {
+  x: 600,
+  y: 130
+  
 };
   
   cursors = this.input.keyboard.createCursorKeys();
@@ -165,6 +174,33 @@ projectText.setOrigin(0.5);
 projectText.setVisible(false);
 projectText.setScrollFactor(0);
 
+achievementPanel = this.add.rectangle(
+  this.scale.width / 2,
+  this.scale.height / 2,
+  500,
+  300,
+  0x000000,
+  0.8
+);
+
+achievementPanel.setVisible(false);
+achievementPanel.setScrollFactor(0);
+
+achievementText = this.add.text(
+  this.scale.width / 2,
+  this.scale.height / 2,
+  "Achievements\n\n🏆 Hack Club Builder\n🏆 Portfolio Game Created\n🏆 Open Source Learner",
+  {
+    fontSize: "28px",
+    fill: "#ffffff",
+    align: "center"
+  }
+);
+
+achievementText.setOrigin(0.5);
+achievementText.setVisible(false);
+achievementText.setScrollFactor(0);
+
 // close hint
 closeHint = this.add.text(
   this.scale.width / 2,
@@ -192,12 +228,13 @@ aboutText.setScrollFactor(0);
 // hi ---------------------------------------------------------------------------------
 
  update(){
-  if(aboutPanel.visible || projectPanel.visible){
+  if(aboutPanel.visible || projectPanel.visible || achievementPanel.visible){
 
   if(Phaser.Input.Keyboard.JustDown(closeKey)){
     aboutPanel.setVisible(false);
     aboutText.setVisible(false);
-
+    achievementPanel.setVisible(false);
+    achievementText.setVisible(false);
     projectPanel.setVisible(false);
     projectText.setVisible(false);
 
@@ -212,19 +249,19 @@ aboutText.setScrollFactor(0);
 
 
    if(cursors.left.isDown || keys.A.isDown){
-    player.x -= 3.5
+    player.x -= 4
   }
 
   if(cursors.right.isDown || keys.D.isDown){
-    player.x += 3.5
+    player.x += 4
   }
 
   if(cursors.up.isDown || keys.W.isDown){
-    player.y -= 3.5    
+    player.y -= 4  
   }
 
   if(cursors.down.isDown || keys.S.isDown){
-    player.y += 3.5
+    player.y += 4
   }
 
 
@@ -246,6 +283,12 @@ let projectDistance = Phaser.Math.Distance.Between(
   photoFrame.y
 );
 
+let trophyDistance = Phaser.Math.Distance.Between(
+  player.x,
+  player.y,
+  trophyShelf.x,
+  trophyShelf.y
+);
 
 interactText.setPosition(desk.x, desk.y - 100);
 
@@ -255,7 +298,7 @@ interactText.setText("");
 
 if(distance < deskRange){
 
-  interactText.setPosition(desk.x, desk.y - 100);
+  interactText.setPosition(desk.x+30, desk.y - 80);
   interactText.setText("Press E to Interact");
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
@@ -265,10 +308,23 @@ if(distance < deskRange){
   }
 
 }
+else if(trophyDistance < trophyRange){
+
+  interactText.setPosition(trophyShelf.x, trophyShelf.y - 90);
+  interactText.setText("Press E to view achievements");
+
+  if(Phaser.Input.Keyboard.JustDown(interactKey)){
+    achievementPanel.setVisible(true);
+    achievementText.setVisible(true);
+    closeHint.setVisible(true);
+  }
+
+}
+
 
 else if(projectDistance < projectRange){
 
-  interactText.setPosition(photoFrame.x + 60, photoFrame.y - 90);
+  interactText.setPosition(photoFrame.x + 60, photoFrame.y - 120);
   interactText.setText("Press E to view projects");
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
@@ -298,3 +354,4 @@ const config = {
 
 
 const game = new Phaser.Game(config);
+         
