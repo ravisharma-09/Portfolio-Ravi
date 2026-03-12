@@ -5,11 +5,16 @@ let desk;
 let interactText;
 let interactKey ;
 let interacted = false;
-let aboutPanel;
-let aboutText;
+let aboutPanel;    // desk interaction panel
+let aboutText;  //  desk interaction text
 let room;
-let closeKey;
-let closehint;
+let closeKey;      
+let closehint;   // closing with esc
+let photoFrame;
+let projectPanel; // for photo frame interaction
+let projectText; // for photo frame interaction
+const deskRange = 80;
+const projectRange = 60;
 
 const marginX = 80;
 const marginTop = 80;
@@ -41,6 +46,10 @@ desk = {
   x: 200,
   y: 250
 };
+photoFrame = {
+  x: 780,
+  y: 160
+};
   
   cursors = this.input.keyboard.createCursorKeys();
   keys = this.input.keyboard.addKeys("W,A,S,D");
@@ -53,7 +62,7 @@ interactText = this.add.text(desk.x, desk.y - 80, "", {
 });
 
 interactText.setOrigin(0.5);
-
+// about 
 aboutPanel = this.add.rectangle(
   this.scale.width / 2,
   this.scale.height / 2,
@@ -77,12 +86,41 @@ aboutText = this.add.text(
 );
 
 
+//for photo 
+projectPanel = this.add.rectangle(
+  this.scale.width / 2,
+  this.scale.height / 2,
+  500,
+  300,
+  0x000000,
+  0.8
+);
+
+projectPanel.setVisible(false);
+projectPanel.setScrollFactor(0);
+
+projectText = this.add.text(
+  this.scale.width / 2,
+  this.scale.height / 2,
+  "Projects:  \n\n Portfolio Game  \n More coming soon!!!...\n\n😎",
+  {
+    fontSize: "28px",
+    fill: "#ffffff",
+    align: "center"
+  }
+);
+
+projectText.setOrigin(0.5);
+projectText.setVisible(false);
+projectText.setScrollFactor(0);
+
+// close hint
 closeHint = this.add.text(
   this.scale.width / 2,
   this.scale.height / 2 + 100,
   "Press ESC to close",
   {
-    fontSize: "20px",
+    fontSize: "25px",
     fill: "#aaaaaa"
   }
 );
@@ -103,32 +141,39 @@ aboutText.setScrollFactor(0);
 // hi ---------------------------------------------------------------------------------
 
 function update(){
-  if(aboutPanel.visible){
+  if(aboutPanel.visible || projectPanel.visible){
 
   if(Phaser.Input.Keyboard.JustDown(closeKey)){
     aboutPanel.setVisible(false);
     aboutText.setVisible(false);
+
+    projectPanel.setVisible(false);
+    projectText.setVisible(false);
+
     closeHint.setVisible(false);
+
     interacted = false;
   }
 
   return;
 }
 
+
+
    if(cursors.left.isDown || keys.A.isDown){
-    player.x -= 3
+    player.x -= 3.5
   }
 
   if(cursors.right.isDown || keys.D.isDown){
-    player.x += 3
+    player.x += 3.5
   }
 
   if(cursors.up.isDown || keys.W.isDown){
-    player.y -= 3    
+    player.y -= 3.5    
   }
 
   if(cursors.down.isDown || keys.S.isDown){
-    player.y += 3
+    player.y += 3.5
   }
 
 
@@ -143,28 +188,46 @@ let distance = Phaser.Math.Distance.Between(
   desk.y
 );
 
-interactText.setPosition(desk.x, desk.y - 80);
+let projectDistance = Phaser.Math.Distance.Between(
+  player.x,
+  player.y,
+  photoFrame.x,
+  photoFrame.y
+);
+
+
+interactText.setPosition(desk.x, desk.y - 100);
 
 
 
+interactText.setText("");
 
-if(distance < 100){
+if(distance < deskRange){
 
-  if(!interacted){
-    interactText.setText("Press E to Interact");
-  }
+  interactText.setPosition(desk.x, desk.y - 100);
+  interactText.setText("Press E to Interact");
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
-    interacted = true;
-  aboutPanel.setVisible(true);
-  aboutText.setVisible(true);
-  closeHint.setVisible(true);
+    aboutPanel.setVisible(true);
+    aboutText.setVisible(true);
+    closeHint.setVisible(true);
   }
+
 }
-else{
-  interactText.setText("");
-  interacted = false;
+
+else if(projectDistance < projectRange){
+
+  interactText.setPosition(photoFrame.x + 60, photoFrame.y - 90);
+  interactText.setText("Press E to view projects");
+
+  if(Phaser.Input.Keyboard.JustDown(interactKey)){
+    projectPanel.setVisible(true);
+    projectText.setVisible(true);
+    closeHint.setVisible(true);
+  }
+
 }
+
 }
 // hi ---------------------------------------------------------------------------------
 
