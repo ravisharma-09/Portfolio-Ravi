@@ -8,6 +8,13 @@ let interacted = false;
 let aboutPanel;
 let aboutText;
 let room;
+let closeKey;
+let closehint;
+
+const marginX = 80;
+const marginTop = 80;
+const marginBottom = 170;
+
 // hi---------------------------------------------------------------------------------
 
 function preload() {
@@ -38,6 +45,7 @@ desk = {
   cursors = this.input.keyboard.createCursorKeys();
   keys = this.input.keyboard.addKeys("W,A,S,D");
   interactKey = this.input.keyboard.addKey("E");
+  closeKey = this.input.keyboard.addKey("ESC");
 interactText = this.add.text(desk.x, desk.y - 80, "", {
   fontSize: "32px",
   fill: "#ffffff",   
@@ -68,6 +76,21 @@ aboutText = this.add.text(
   }
 );
 
+
+closeHint = this.add.text(
+  this.scale.width / 2,
+  this.scale.height / 2 + 100,
+  "Press ESC to close",
+  {
+    fontSize: "20px",
+    fill: "#aaaaaa"
+  }
+);
+
+closeHint.setOrigin(0.5);
+closeHint.setVisible(false);
+closeHint.setScrollFactor(0);
+
 aboutText.setOrigin(0.5);
 aboutText.setVisible(false);
 aboutPanel.setScrollFactor(0);
@@ -81,6 +104,14 @@ aboutText.setScrollFactor(0);
 
 function update(){
   if(aboutPanel.visible){
+
+  if(Phaser.Input.Keyboard.JustDown(closeKey)){
+    aboutPanel.setVisible(false);
+    aboutText.setVisible(false);
+    closeHint.setVisible(false);
+    interacted = false;
+  }
+
   return;
 }
 
@@ -99,9 +130,7 @@ function update(){
   if(cursors.down.isDown || keys.S.isDown){
     player.y += 3
   }
-const marginX = 80;
-const marginTop = 80;
-const marginBottom = 170;
+
 
 player.x = Phaser.Math.Clamp(player.x, marginX, room.width - marginX);
 player.y = Phaser.Math.Clamp(player.y, marginTop, room.height - marginBottom);
@@ -129,6 +158,7 @@ if(distance < 100){
     interacted = true;
   aboutPanel.setVisible(true);
   aboutText.setVisible(true);
+  closeHint.setVisible(true);
   }
 }
 else{
