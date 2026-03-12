@@ -1,51 +1,54 @@
 let player;
 let cursors;
 let keys;
-let computer;
+let desk;
 let interactText;
 let interactKey ;
 let interacted = false;
 let aboutPanel;
 let aboutText;
+let room;
 // hi---------------------------------------------------------------------------------
 
 function preload() {
   this.load.image("player", "assets/player.png");
   this.load.image("room", "assets/room.png");
-  this.load.image("computer", "assets/computer.png");
+
 }
 
 // hi---------------------------------------------------------------------------------
 
 function create() {
+  
+ room = this.add.image(0, 0, "room");
+room.setOrigin(0);
 
-  let centerX = this.cameras.main.width / 2;
-  let centerY = this.cameras.main.height / 2;
+  this.cameras.main.setBounds(0, 0, room.width, room.height);
 
-  let room = this.add.image(centerX, centerY, "room");
-  room.setDisplaySize(window.innerWidth,window.innerHeight);
-
-  player = this.add.sprite(300,200,"player");
+  player = this.add.sprite(480,400,"player");
   player.setScale(0.1);
 
-  computer = {
-  x: 500,
-  y: 340
-  };
+  this.cameras.main.startFollow(player);
+
+desk = {
+  x: 200,
+  y: 250
+};
   
   cursors = this.input.keyboard.createCursorKeys();
   keys = this.input.keyboard.addKeys("W,A,S,D");
   interactKey = this.input.keyboard.addKey("E");
-interactText = this.add.text(computer.x, computer.y - 80, "", {
+interactText = this.add.text(desk.x, desk.y - 80, "", {
   fontSize: "32px",
   fill: "#ffffff",   
   backgroundColor: "#6e6a6a"
 });
 
 interactText.setOrigin(0.5);
+
 aboutPanel = this.add.rectangle(
-  this.cameras.main.width / 2,
-  this.cameras.main.height / 2,
+  this.scale.width / 2,
+  this.scale.height / 2,
   500,
   300,
   0x000000,
@@ -55,8 +58,8 @@ aboutPanel = this.add.rectangle(
 aboutPanel.setVisible(false);
 
 aboutText = this.add.text(
-  this.cameras.main.width / 2,
-  this.cameras.main.height / 2,
+  this.scale.width / 2,
+  this.scale.height / 2,
   "Hi, I'm Ravi 👋\n\nI build interactive projects\nand love coding.",
   {
     fontSize: "28px",
@@ -67,8 +70,9 @@ aboutText = this.add.text(
 
 aboutText.setOrigin(0.5);
 aboutText.setVisible(false);
+aboutPanel.setScrollFactor(0);
+aboutText.setScrollFactor(0);
 
-interactText.setOrigin(0.5);
 };
 
 
@@ -76,6 +80,9 @@ interactText.setOrigin(0.5);
 // hi ---------------------------------------------------------------------------------
 
 function update(){
+  if(aboutPanel.visible){
+  return;
+}
 
    if(cursors.left.isDown || keys.A.isDown){
     player.x -= 3
@@ -92,14 +99,25 @@ function update(){
   if(cursors.down.isDown || keys.S.isDown){
     player.y += 3
   }
-  player.x = Phaser.Math.Clamp(player.x, 0, this.cameras.main.width);
-  player.y = Phaser.Math.Clamp(player.y, 0, this.cameras.main.height);
+const marginX = 80;
+const marginTop = 80;
+const marginBottom = 170;
+
+player.x = Phaser.Math.Clamp(player.x, marginX, room.width - marginX);
+player.y = Phaser.Math.Clamp(player.y, marginTop, room.height - marginBottom);
+
+
 let distance = Phaser.Math.Distance.Between(
   player.x,
   player.y,
-  computer.x,
-  computer.y
+  desk.x,
+  desk.y
 );
+
+interactText.setPosition(desk.x, desk.y - 80);
+
+
+
 
 if(distance < 100){
 
@@ -122,17 +140,20 @@ else{
 
 const config = {
   type: Phaser.AUTO,
-  width:window.innerWidth,
-  height:window.innerHeight,
+  width: 1280,
+  height: 720,
   parent: "game-container",
   backgroundColor: "#0f172a",
   scene: {
     preload: preload,
     create: create,
     update: update
+  },
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH
   }
 }
-
 
 
 
