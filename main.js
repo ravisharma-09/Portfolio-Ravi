@@ -9,7 +9,7 @@ let aboutPanel;    // desk interaction panel
 let aboutText;  //  desk interaction text
 let room;
 let closeKey;      
-let closehint;   // closing with esc
+let closeHint;  // closing with esc
 let photoFrame;
 let projectPanel; // for photo frame interaction
 let projectText; // for photo frame interaction
@@ -20,9 +20,60 @@ const marginX = 80;
 const marginTop = 80;
 const marginBottom = 170;
 
+
+
+
+
+
+class StartScene extends Phaser.Scene {
+  constructor(){
+    super("StartScene");
+  }
+
+  create(){
+
+    this.add.text(
+      this.scale.width / 2,
+      this.scale.height / 2 - 40,
+      "Ravi Sharma Portfolio",
+      {
+        fontSize: "48px",
+        fill: "#ffffff"
+      }
+    ).setOrigin(0.5);
+
+    this.add.text(
+      this.scale.width / 2,
+      this.scale.height / 2 + 20,
+      "Press ENTER to Start",
+      {
+        fontSize: "24px",
+        fill: "#aaaaaa"
+      }
+    ).setOrigin(0.5);
+
+    this.input.keyboard.once("keydown-ENTER", () => {
+      this.scene.start("GameScene");
+    });
+
+  }
+}
+
+
+
+
+class GameScene extends Phaser.Scene {
+
+constructor(){
+  super("GameScene");
+}
+
+
+
+
 // hi---------------------------------------------------------------------------------
 
-function preload() {
+preload() {
   this.load.image("player", "assets/player.png");
   this.load.image("room", "assets/room.png");
 
@@ -30,7 +81,7 @@ function preload() {
 
 // hi---------------------------------------------------------------------------------
 
-function create() {
+ create() {
   
  room = this.add.image(0, 0, "room");
 room.setOrigin(0);
@@ -140,7 +191,7 @@ aboutText.setScrollFactor(0);
 
 // hi ---------------------------------------------------------------------------------
 
-function update(){
+ update(){
   if(aboutPanel.visible || projectPanel.visible){
 
   if(Phaser.Input.Keyboard.JustDown(closeKey)){
@@ -228,7 +279,7 @@ else if(projectDistance < projectRange){
 
 }
 
-}
+}}
 // hi ---------------------------------------------------------------------------------
 
 const config = {
@@ -237,11 +288,7 @@ const config = {
   height: 720,
   parent: "game-container",
   backgroundColor: "#0f172a",
-  scene: {
-    preload: preload,
-    create: create,
-    update: update
-  },
+  scene: [StartScene, GameScene],
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH
