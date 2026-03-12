@@ -16,10 +16,13 @@ let projectText; // for photo frame interaction
 let trophyShelf ; // for trophy 
 let achievementPanel; // trophy interaction panel
 let achievementText; // text inside trophy interaction panel
-const deskRange = 80;
+let bookshelf;
+let skillsPanel;
+let skillsText;
+const deskRange = 70;
 const projectRange = 60;
-const trophyRange = 60;
-
+const trophyRange = 70;
+const skillsRange = 85;
 const marginX = 80;
 const marginTop = 80;
 const marginBottom = 170;
@@ -109,6 +112,10 @@ trophyShelf = {
   x: 600,
   y: 130
   
+};
+bookshelf = {
+  x: 1350,
+  y: 260
 };
   
   cursors = this.input.keyboard.createCursorKeys();
@@ -201,6 +208,34 @@ achievementText.setOrigin(0.5);
 achievementText.setVisible(false);
 achievementText.setScrollFactor(0);
 
+
+skillsPanel = this.add.rectangle(
+  this.scale.width / 2,
+  this.scale.height / 2,
+  500,
+  300,
+  0x000000,
+  0.8
+);
+
+skillsPanel.setVisible(false);
+skillsPanel.setScrollFactor(0);
+
+skillsText = this.add.text(
+  this.scale.width / 2,
+  this.scale.height / 2,
+  "Skills\n\nJavaScript\nHTML\nCSS\nPhaser.js\nGit",
+  {
+    fontSize: "28px",
+    fill: "#ffffff",
+    align: "center"
+  }
+);
+
+skillsText.setOrigin(0.5);
+skillsText.setVisible(false);
+skillsText.setScrollFactor(0);
+
 // close hint
 closeHint = this.add.text(
   this.scale.width / 2,
@@ -228,7 +263,7 @@ aboutText.setScrollFactor(0);
 // hi ---------------------------------------------------------------------------------
 
  update(){
-  if(aboutPanel.visible || projectPanel.visible || achievementPanel.visible){
+  if(aboutPanel.visible || projectPanel.visible || achievementPanel.visible || skillsPanel.visible){
 
   if(Phaser.Input.Keyboard.JustDown(closeKey)){
     aboutPanel.setVisible(false);
@@ -237,7 +272,8 @@ aboutText.setScrollFactor(0);
     achievementText.setVisible(false);
     projectPanel.setVisible(false);
     projectText.setVisible(false);
-
+    skillsPanel.setVisible(false);
+    skillsText.setVisible(false);
     closeHint.setVisible(false);
 
     interacted = false;
@@ -249,19 +285,19 @@ aboutText.setScrollFactor(0);
 
 
    if(cursors.left.isDown || keys.A.isDown){
-    player.x -= 4
+    player.x -= 3.5
   }
 
   if(cursors.right.isDown || keys.D.isDown){
-    player.x += 4
+    player.x += 3.5
   }
 
   if(cursors.up.isDown || keys.W.isDown){
-    player.y -= 4  
+    player.y -= 3.5
   }
 
   if(cursors.down.isDown || keys.S.isDown){
-    player.y += 4
+    player.y += 3.5
   }
 
 
@@ -288,6 +324,12 @@ let trophyDistance = Phaser.Math.Distance.Between(
   player.y,
   trophyShelf.x,
   trophyShelf.y
+);
+let skillsDistance = Phaser.Math.Distance.Between(
+  player.x,
+  player.y,
+  bookshelf.x,
+  bookshelf.y
 );
 
 interactText.setPosition(desk.x, desk.y - 100);
@@ -330,6 +372,17 @@ else if(projectDistance < projectRange){
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
     projectPanel.setVisible(true);
     projectText.setVisible(true);
+    closeHint.setVisible(true);
+  }
+}
+else if(skillsDistance < skillsRange){
+
+  interactText.setPosition(bookshelf.x - 40, bookshelf.y - 210);
+  interactText.setText("Press E to view skills");
+
+  if(Phaser.Input.Keyboard.JustDown(interactKey)){
+    skillsPanel.setVisible(true);
+    skillsText.setVisible(true);
     closeHint.setVisible(true);
   }
 
