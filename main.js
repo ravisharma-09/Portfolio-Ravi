@@ -523,9 +523,9 @@ const config = {
   transparent: true,
   scene: [StartScene, GameScene, MiniGameScene],
   scale: {
-    mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_BOTH
-  }
+  mode: Phaser.Scale.ENVELOP,
+  autoCenter: Phaser.Scale.CENTER_BOTH
+}
 }
 
 const game = new Phaser.Game(config);
