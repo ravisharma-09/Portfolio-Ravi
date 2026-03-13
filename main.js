@@ -51,7 +51,8 @@ class StartScene extends Phaser.Scene {
       "Ravi Sharma Portfolio",
       {
         fontSize: "55px",
-        fill: "#ffffff"
+        fill: "#ffffff",
+        backgroundColor : "black",
       }
     ).setOrigin(0.5);
 
@@ -61,13 +62,14 @@ class StartScene extends Phaser.Scene {
   "[ Press <_ENTER_> to Start ▶️ ]",
   {
     fontSize: "30px",
-    fill: "#aaaaaa"
+    fill: "red",
+    backgroundColor : "rgba(0, 0, 0, 0.9)",
   }
 ).setOrigin(0.5);
 this.tweens.add({
   targets: startText,
   alpha: 0,
-  duration: 400,
+  duration: 700,
   yoyo: true,
   repeat: -1
 });
@@ -342,7 +344,7 @@ aboutText.setScrollFactor(0);
 
 update(){
 
-if(aboutPanel.visible || projectPanel.visible || achievementPanel.visible || skillsPanel.visible || contactPanel.visible || doorPanel.visible){
+if(aboutPanel.visible || projectPanel.visible || achievementPanel.visible || skillsPanel.visible || contactPanel.visible ){
   interactText.setVisible(false);
   if(Phaser.Input.Keyboard.JustDown(closeKey)){
     aboutPanel.setVisible(false);
@@ -366,6 +368,13 @@ if(aboutPanel.visible || projectPanel.visible || achievementPanel.visible || ski
 }
 if(doorPanel.visible){
   interactText.setVisible(false);
+
+  if(Phaser.Input.Keyboard.JustDown(closeKey)){
+    doorPanel.setVisible(false);
+    doorText.setVisible(false);
+    closeHint.setVisible(false);
+  }
+
   if(Phaser.Input.Keyboard.JustDown(this.key1)){
     this.scene.start("StartScene");
   }
@@ -373,6 +382,7 @@ if(doorPanel.visible){
   if(Phaser.Input.Keyboard.JustDown(this.key2)){
     this.scene.start("MiniGameScene");
   }
+
   return;
 }
 
@@ -497,15 +507,19 @@ class MiniGameScene extends Phaser.Scene {
     this.add.text(
       this.scale.width / 2,
       this.scale.height / 2,
-      "Mini Game Coming Soon!!!\n\nStay Tuned 😎",
+      "Mini Game Coming Soon!!!\n\nStay Tuned 😎 \n\n\n\n press ESC to return",
+      
       {
         fontSize: "50px",
         fill: "#ffffff",
+        backgroundColor: "black",
       }
     ).setOrigin(0.5);
    
       this.escKey = this.input.keyboard.addKey("ESC");
-
+  this.input.keyboard.on("keydown-ESC", () => {
+  this.scene.start("GameScene");
+    });
 
 
 
@@ -530,3 +544,4 @@ const config = {
 }
 
 const game = new Phaser.Game(config);
+

@@ -23,7 +23,7 @@ body {
     grid-template-rows: auto auto;
     scroll-behavior: smooth;
     margin: 0;
-   animation: bg-anim 7s linear infinite;
+   animation: bg-anim 15s linear infinite;
     font-family: 'Times New Roman', Times, serif;
 }
 @keyframes bg-anim {
@@ -82,6 +82,5 @@ a {
         display: none !important
     }
 }
-
 
 
