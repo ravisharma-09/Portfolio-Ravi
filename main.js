@@ -19,6 +19,9 @@ let achievementText; // text inside trophy interaction panel
 let bookshelf;
 let skillsPanel;
 let skillsText;
+let mailbox;
+let contactPanel;   // ADDED
+let contactText;    // ADDED
 const deskRange = 70;
 const projectRange = 60;
 const trophyRange = 70;
@@ -26,11 +29,7 @@ const skillsRange = 85;
 const marginX = 80;
 const marginTop = 80;
 const marginBottom = 170;
-
-
-
-
-
+const mailRange = 70;
 
 class StartScene extends Phaser.Scene {
   constructor(){
@@ -49,16 +48,22 @@ class StartScene extends Phaser.Scene {
       }
     ).setOrigin(0.5);
 
-    this.add.text(
-      this.scale.width / 2,
-      this.scale.height / 2 + 20,
-      "[ Press <_ENTER_> to Start ▶️ ]",
-      {
-        fontSize: "30px",
-        fill: "#aaaaaa"
-      }
-    ).setOrigin(0.5);
-
+  let startText = this.add.text(
+  this.scale.width / 2,
+  this.scale.height / 2 + 20,
+  "[ Press <_ENTER_> to Start ▶️ ]",
+  {
+    fontSize: "30px",
+    fill: "#aaaaaa"
+  }
+).setOrigin(0.5);
+this.tweens.add({
+  targets: startText,
+  alpha: 0,
+  duration: 400,
+  yoyo: true,
+  repeat: -1
+});
     this.input.keyboard.once("keydown-ENTER", () => {
       this.scene.start("GameScene");
     });
@@ -66,24 +71,17 @@ class StartScene extends Phaser.Scene {
   }
 }
 
-
-
-
 class GameScene extends Phaser.Scene {
 
 constructor(){
   super("GameScene");
 }
 
-
-
-
 // hi---------------------------------------------------------------------------------
 
 preload() {
   this.load.image("player", "assets/player.png");
   this.load.image("room", "assets/room.png");
-
 }
 
 // hi---------------------------------------------------------------------------------
@@ -98,7 +96,7 @@ room.setOrigin(0);
   player = this.add.sprite(480,400,"player");
   player.setScale(0.1);
 
-  this.cameras.main.startFollow(player);
+  this.cameras.main.startFollow(player, true, 0.08, 0.08);
 
 desk = {
   x: 180,
@@ -111,11 +109,14 @@ photoFrame = {
 trophyShelf = {
   x: 600,
   y: 130
-  
 };
 bookshelf = {
-  x: 1350,
+  x: 1360,
   y: 260
+};
+mailbox = {
+  x: 1320,
+  y: 650
 };
   
   cursors = this.input.keyboard.createCursorKeys();
@@ -129,6 +130,7 @@ interactText = this.add.text(desk.x, desk.y - 80, "", {
 });
 
 interactText.setOrigin(0.5);
+
 // about 
 aboutPanel = this.add.rectangle(
   this.scale.width / 2,
@@ -151,7 +153,6 @@ aboutText = this.add.text(
     align: "center"
   }
 );
-
 
 //for photo 
 projectPanel = this.add.rectangle(
@@ -208,11 +209,10 @@ achievementText.setOrigin(0.5);
 achievementText.setVisible(false);
 achievementText.setScrollFactor(0);
 
-
 skillsPanel = this.add.rectangle(
   this.scale.width / 2,
   this.scale.height / 2,
-  500,
+  600,
   300,
   0x000000,
   0.8
@@ -224,7 +224,7 @@ skillsPanel.setScrollFactor(0);
 skillsText = this.add.text(
   this.scale.width / 2,
   this.scale.height / 2,
-  "Skills\n\nJavaScript\nHTML\nCSS\nPhaser.js\nGit",
+  "Skills:\nJavaScript\nHTML\nCSS\nPhaser.js\nGit\npython",
   {
     fontSize: "28px",
     fill: "#ffffff",
@@ -236,10 +236,37 @@ skillsText.setOrigin(0.5);
 skillsText.setVisible(false);
 skillsText.setScrollFactor(0);
 
+contactPanel = this.add.rectangle(
+  this.scale.width / 2,
+  this.scale.height / 2,
+  500,
+  300,
+  0x000000,
+  0.8
+);
+
+contactPanel.setVisible(false);
+contactPanel.setScrollFactor(0);
+
+contactText = this.add.text(
+  this.scale.width / 2,
+  this.scale.height / 2,
+  "Contact\n\n📧 rravisharma817@gmail.com",
+  {
+    fontSize: "28px",
+    fill: "#ffffff",
+    align: "center"
+  }
+);
+
+contactText.setOrigin(0.5);
+contactText.setVisible(false);
+contactText.setScrollFactor(0);
+
 // close hint
 closeHint = this.add.text(
   this.scale.width / 2,
-  this.scale.height / 2 + 100,
+  this.scale.height / 2 + 125,
   "Press ESC to close",
   {
     fontSize: "25px",
@@ -258,13 +285,12 @@ aboutText.setScrollFactor(0);
 
 };
 
-
-
 // hi ---------------------------------------------------------------------------------
 
- update(){
-  if(aboutPanel.visible || projectPanel.visible || achievementPanel.visible || skillsPanel.visible){
+update(){
 
+if(aboutPanel.visible || projectPanel.visible || achievementPanel.visible || skillsPanel.visible || contactPanel.visible){
+  interactText.setVisible(false);
   if(Phaser.Input.Keyboard.JustDown(closeKey)){
     aboutPanel.setVisible(false);
     aboutText.setVisible(false);
@@ -274,6 +300,8 @@ aboutText.setScrollFactor(0);
     projectText.setVisible(false);
     skillsPanel.setVisible(false);
     skillsText.setVisible(false);
+    contactPanel.setVisible(false);
+    contactText.setVisible(false);
     closeHint.setVisible(false);
 
     interacted = false;
@@ -282,64 +310,35 @@ aboutText.setScrollFactor(0);
   return;
 }
 
+if(cursors.left.isDown || keys.A.isDown){
+  player.x -= 3
+}
 
+if(cursors.right.isDown || keys.D.isDown){
+  player.x += 3
+}
 
-   if(cursors.left.isDown || keys.A.isDown){
-    player.x -= 3.5
-  }
+if(cursors.up.isDown || keys.W.isDown){
+  player.y -= 3
+}
 
-  if(cursors.right.isDown || keys.D.isDown){
-    player.x += 3.5
-  }
-
-  if(cursors.up.isDown || keys.W.isDown){
-    player.y -= 3.5
-  }
-
-  if(cursors.down.isDown || keys.S.isDown){
-    player.y += 3.5
-  }
-
+if(cursors.down.isDown || keys.S.isDown){
+  player.y += 3
+}
 
 player.x = Phaser.Math.Clamp(player.x, marginX, room.width - marginX);
 player.y = Phaser.Math.Clamp(player.y, marginTop, room.height - marginBottom);
 
+let distance = Phaser.Math.Distance.Between(player.x,player.y,desk.x,desk.y);
+let projectDistance = Phaser.Math.Distance.Between(player.x,player.y,photoFrame.x,photoFrame.y);
+let trophyDistance = Phaser.Math.Distance.Between(player.x,player.y,trophyShelf.x,trophyShelf.y);
+let skillsDistance = Phaser.Math.Distance.Between(player.x,player.y,bookshelf.x,bookshelf.y);
+let mailDistance = Phaser.Math.Distance.Between(player.x,player.y,mailbox.x,mailbox.y);
 
-let distance = Phaser.Math.Distance.Between(
-  player.x,
-  player.y,
-  desk.x,
-  desk.y
-);
-
-let projectDistance = Phaser.Math.Distance.Between(
-  player.x,
-  player.y,
-  photoFrame.x,
-  photoFrame.y
-);
-
-let trophyDistance = Phaser.Math.Distance.Between(
-  player.x,
-  player.y,
-  trophyShelf.x,
-  trophyShelf.y
-);
-let skillsDistance = Phaser.Math.Distance.Between(
-  player.x,
-  player.y,
-  bookshelf.x,
-  bookshelf.y
-);
-
-interactText.setPosition(desk.x, desk.y - 100);
-
-
-
-interactText.setText("");
+interactText.setVisible(false);
 
 if(distance < deskRange){
-
+  interactText.setVisible(true);
   interactText.setPosition(desk.x+30, desk.y - 80);
   interactText.setText("Press E to Interact");
 
@@ -351,7 +350,7 @@ if(distance < deskRange){
 
 }
 else if(trophyDistance < trophyRange){
-
+  interactText.setVisible(true);
   interactText.setPosition(trophyShelf.x, trophyShelf.y - 90);
   interactText.setText("Press E to view achievements");
 
@@ -362,10 +361,8 @@ else if(trophyDistance < trophyRange){
   }
 
 }
-
-
 else if(projectDistance < projectRange){
-
+  interactText.setVisible(true);
   interactText.setPosition(photoFrame.x + 60, photoFrame.y - 120);
   interactText.setText("Press E to view projects");
 
@@ -376,8 +373,8 @@ else if(projectDistance < projectRange){
   }
 }
 else if(skillsDistance < skillsRange){
-
-  interactText.setPosition(bookshelf.x - 40, bookshelf.y - 210);
+  interactText.setVisible(true);
+  interactText.setPosition(bookshelf.x - 70, bookshelf.y - 220);
   interactText.setText("Press E to view skills");
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
@@ -387,9 +384,19 @@ else if(skillsDistance < skillsRange){
   }
 
 }
+else if(mailDistance < mailRange){
+  interactText.setVisible(true);
+  interactText.setPosition(mailbox.x, mailbox.y - 140);
+  interactText.setText("Press E to contact");
+
+  if(Phaser.Input.Keyboard.JustDown(interactKey)){
+    contactPanel.setVisible(true);
+    contactText.setVisible(true);
+    closeHint.setVisible(true);
+  }
+}
 
 }}
-// hi ---------------------------------------------------------------------------------
 
 const config = {
   type: Phaser.AUTO,
@@ -404,7 +411,4 @@ const config = {
   }
 }
 
-
-
 const game = new Phaser.Game(config);
-         
