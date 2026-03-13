@@ -24,7 +24,7 @@ let contactPanel;
 let contactText;    // 
 const deskRange = 70;
 const projectRange = 60;
-const trophyRange = 70;
+const trophyRange = 85;
 const skillsRange = 85;
 const marginX = 80;
 const marginTop = 80;
