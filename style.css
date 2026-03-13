@@ -5,11 +5,11 @@
 }
 
 #game-container{
+  width:100vw;
+  height:100vh;
   display:flex;
   justify-content:center;
   align-items:center;
-  width:100vw;
-  height:100vh;
 }
 #game-container canvas {
   display: block;
@@ -74,7 +74,9 @@ a {
 }
 * {
     scrollbar-width: none;
+    
 }
+
 @media print {
     * {
         display: none !important

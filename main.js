@@ -104,6 +104,7 @@ room.setOrigin(0);
   player.setScale(0.1);
 
   this.cameras.main.startFollow(player, true, 0.08, 0.08);
+  this.cameras.main.centerOn(room.width / 2, room.height / 2);
 
 desk = {
   x: 180,
@@ -523,7 +524,7 @@ const config = {
   transparent: true,
   scene: [StartScene, GameScene, MiniGameScene],
   scale: {
-  mode: Phaser.Scale.ENVELOP,
+  mode: Phaser.Scale.FIT,
   autoCenter: Phaser.Scale.CENTER_BOTH
 }
 }
