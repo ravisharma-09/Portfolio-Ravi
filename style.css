@@ -3,3 +3,68 @@
     margin: 0%;
 
 }
+body {
+
+    background: url("assets/bg-dot.svg") black;
+    color: white;
+    display: grid;
+    grid-template-rows: auto auto;
+    scroll-behavior: smooth;
+    margin: 0;
+   animation: bg-anim 5s linear infinite;
+    font-family: 'Times New Roman', Times, serif;
+}
+@keyframes bg-anim {
+   
+    0% {
+    background-position: 0px 0px;
+  }
+  25% {
+    background-position: 200px 100px;
+  }
+  50% {
+    background-position: 400px 200px;
+  }
+  75% {
+    background-position: 200px 100px;
+  }
+  100% {
+    background-position: 0px 0px;
+  }
+}
+* {
+    user-select: none;
+    overflow-anchor: none;
+}
+a {
+    text-decoration: none;
+    color: white;
+}
+@keyframes zoom-in {
+    0% {
+        scale: 1;
+    }
+    100% {
+        scale: 1.1;
+    }
+}
+@keyframes zoom-out {
+    0% {
+        scale: 1.1;
+    }
+    100% {
+        scale: 1;
+    }
+}
+
+::-webkit-scrollbar {
+    display: none;
+}
+* {
+    scrollbar-width: none;
+}
+@media print {
+    * {
+        display: none !important
+    }
+}

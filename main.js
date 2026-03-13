@@ -20,8 +20,8 @@ let bookshelf;
 let skillsPanel;
 let skillsText;
 let mailbox;
-let contactPanel;   // ADDED
-let contactText;    // ADDED
+let contactPanel;   
+let contactText;    // 
 const deskRange = 70;
 const projectRange = 60;
 const trophyRange = 70;
@@ -29,7 +29,14 @@ const skillsRange = 85;
 const marginX = 80;
 const marginTop = 80;
 const marginBottom = 170;
-const mailRange = 70;
+const mailRange = 90;
+
+let door;
+const doorRange = 105;
+
+let doorPanel;
+let doorText;
+
 
 class StartScene extends Phaser.Scene {
   constructor(){
@@ -115,14 +122,20 @@ bookshelf = {
   y: 260
 };
 mailbox = {
-  x: 1320,
+  x: 1340,
   y: 650
+};
+door = {
+  x:1130,
+  y: 230
 };
   
   cursors = this.input.keyboard.createCursorKeys();
   keys = this.input.keyboard.addKeys("W,A,S,D");
   interactKey = this.input.keyboard.addKey("E");
   closeKey = this.input.keyboard.addKey("ESC");
+  this.key1 = this.input.keyboard.addKey("ONE");
+this.key2 = this.input.keyboard.addKey("TWO");
 interactText = this.add.text(desk.x, desk.y - 80, "", {
   fontSize: "32px",
   fill: "#ffffff",   
@@ -224,7 +237,7 @@ skillsPanel.setScrollFactor(0);
 skillsText = this.add.text(
   this.scale.width / 2,
   this.scale.height / 2,
-  "Skills:\nJavaScript\nHTML\nCSS\nPhaser.js\nGit\npython",
+  "Skills:\nJavaScript\nHTML\nCSS\nPhaser.js\nGit\nPython",
   {
     fontSize: "28px",
     fill: "#ffffff",
@@ -259,9 +272,41 @@ contactText = this.add.text(
   }
 );
 
+
 contactText.setOrigin(0.5);
 contactText.setVisible(false);
 contactText.setScrollFactor(0);
+
+
+doorPanel = this.add.rectangle(
+  this.scale.width / 2,
+  this.scale.height / 2,
+  500,
+  300,
+  0x000000,
+  0.8
+); 
+doorPanel.setVisible(false);
+doorPanel.setScrollFactor(0);   
+doorText = this.add.text(
+  this.scale.width / 2,
+  this.scale.height / 2,
+  "Door🚪\n\n1 Exit Portfolio\n\n2 Play Mini Game",
+  {
+    fontSize: "28px",
+    fill: "#ffffff",
+    align: "center"
+  } );
+  doorText.setOrigin(0.5);
+  doorText.setVisible(false);
+  doorText.setScrollFactor(0);
+  doorText.setDepth(1);
+
+
+
+
+
+
 
 // close hint
 closeHint = this.add.text(
@@ -283,13 +328,20 @@ aboutText.setVisible(false);
 aboutPanel.setScrollFactor(0);
 aboutText.setScrollFactor(0);
 
+
+
+
+
+
+
+
 };
 
 // hi ---------------------------------------------------------------------------------
 
 update(){
 
-if(aboutPanel.visible || projectPanel.visible || achievementPanel.visible || skillsPanel.visible || contactPanel.visible){
+if(aboutPanel.visible || projectPanel.visible || achievementPanel.visible || skillsPanel.visible || contactPanel.visible || doorPanel.visible){
   interactText.setVisible(false);
   if(Phaser.Input.Keyboard.JustDown(closeKey)){
     aboutPanel.setVisible(false);
@@ -302,11 +354,24 @@ if(aboutPanel.visible || projectPanel.visible || achievementPanel.visible || ski
     skillsText.setVisible(false);
     contactPanel.setVisible(false);
     contactText.setVisible(false);
+    doorPanel.setVisible(false);
+    doorText.setVisible(false);
     closeHint.setVisible(false);
-
+    
     interacted = false;
   }
 
+  return;
+}
+if(doorPanel.visible){
+  interactText.setVisible(false);
+  if(Phaser.Input.Keyboard.JustDown(this.key1)){
+    this.scene.start("StartScene");
+  }
+
+  if(Phaser.Input.Keyboard.JustDown(this.key2)){
+    this.scene.start("MiniGameScene");
+  }
   return;
 }
 
@@ -333,8 +398,19 @@ let distance = Phaser.Math.Distance.Between(player.x,player.y,desk.x,desk.y);
 let projectDistance = Phaser.Math.Distance.Between(player.x,player.y,photoFrame.x,photoFrame.y);
 let trophyDistance = Phaser.Math.Distance.Between(player.x,player.y,trophyShelf.x,trophyShelf.y);
 let skillsDistance = Phaser.Math.Distance.Between(player.x,player.y,bookshelf.x,bookshelf.y);
-let mailDistance = Phaser.Math.Distance.Between(player.x,player.y,mailbox.x,mailbox.y);
 
+let mailDistance = Phaser.Math.Distance.Between(
+  player.x,
+  player.y,
+  mailbox.x,
+  mailbox.y);
+
+let doorDistance = Phaser.Math.Distance.Between(
+  player.x,
+  player.y,
+  door.x,
+  door.y
+);
 interactText.setVisible(false);
 
 if(distance < deskRange){
@@ -395,16 +471,57 @@ else if(mailDistance < mailRange){
     closeHint.setVisible(true);
   }
 }
+else if(doorDistance < doorRange){
 
+  interactText.setVisible(true);
+  interactText.setPosition(door.x, door.y - 200);
+  interactText.setText("Press E to use door");
+
+  if(Phaser.Input.Keyboard.JustDown(interactKey)){
+    doorPanel.setVisible(true);
+    doorText.setVisible(true);
+    closeHint.setVisible(true);
+  }
+
+}
 }}
+
+
+
+class MiniGameScene extends Phaser.Scene {
+  constructor(){
+    super("MiniGameScene");
+  }
+  create(){
+    this.add.text(
+      this.scale.width / 2,
+      this.scale.height / 2,
+      "Mini Game Coming Soon!!!\n\nStay Tuned 😎",
+      {
+        fontSize: "50px",
+        fill: "#ffffff",
+      }
+    ).setOrigin(0.5);
+   
+      this.escKey = this.input.keyboard.addKey("ESC");
+
+
+
+
+
+
+
+
+  }
+}
 
 const config = {
   type: Phaser.AUTO,
   width: 1280,
   height: 720,
   parent: "game-container",
-  backgroundColor: "#0f172a",
-  scene: [StartScene, GameScene],
+  transparent: true,
+  scene: [StartScene, GameScene, MiniGameScene],
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH
