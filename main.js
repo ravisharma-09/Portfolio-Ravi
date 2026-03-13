@@ -210,7 +210,7 @@ achievementPanel.setScrollFactor(0);
 achievementText = this.add.text(
   this.scale.width / 2,
   this.scale.height / 2,
-  "Achievements\n\n🏆 Hack Club Builder\n🏆 Portfolio Game Created\n🏆 Open Source Learner",
+  "Achievements\n\n🏆 Hack Club Builder\n🏆 Portfolio Game Created\n🏆 Community Contributor",
   {
     fontSize: "28px",
     fill: "#ffffff",
@@ -381,7 +381,7 @@ if(cursors.left.isDown || keys.A.isDown){
 
 if(cursors.right.isDown || keys.D.isDown){
   player.x += 3
-}
+} 
 
 if(cursors.up.isDown || keys.W.isDown){
   player.y -= 3

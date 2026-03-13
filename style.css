@@ -3,7 +3,19 @@
     margin: 0%;
 
 }
+
+#game-container{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  width:100vw;
+  height:100vh;
+}
+#game-container canvas {
+  display: block;
+}
 body {
+  height:100vh;
 
     background: url("assets/bg-dot.svg") black;
     color: white;
