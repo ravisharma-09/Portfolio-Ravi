@@ -516,10 +516,10 @@ class MiniGameScene extends Phaser.Scene {
     this.infoText = this.add.text(
   this.scale.width / 2,
   this.scale.height / 2,
- "Collect yellow coins.\n\nOne coin is fake.\nYes they look identical.\n\nGood luck.\n\n1 Easy🫢  2 Medium😎  3 Hard🫡",
+ "Collect yellow coins.\n\n Some coins are fake.('dont be greedy')\nYes they look identical.\n\nGood luck.\n\n1 Easy🫢  2 Medium😎  3 Hard🫡",
   {
     fontSize: "32px",
-    fill: "#be080e",
+    fill: "#0fc236",
     align: "center",
     backgroundColor: "rgba(0, 0, 0, 0.9)"
   }
