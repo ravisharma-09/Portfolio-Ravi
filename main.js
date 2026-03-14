@@ -524,6 +524,15 @@ class MiniGameScene extends Phaser.Scene {
     backgroundColor: "rgba(0, 0, 0, 0.9)"
   }
 ).setOrigin(0.5);
+this.add.text(
+  this.scale.width / 2,
+  100,
+  "Press ESC to return to portfolio",
+  {
+    fontSize: "20px",
+    fill: "#aaaaaa"
+  }
+).setOrigin(0.5);
       this.key1 = this.input.keyboard.addKey("ONE");
 this.key2 = this.input.keyboard.addKey("TWO");
 this.key3 = this.input.keyboard.addKey("THREE");
@@ -560,31 +569,51 @@ this.scoreText.setShadow(0, 0, "#00ffff", 12, true, true);
   this.infoText.setText("");
 
   this.coins = [];
-  
   for(let i = 0; i < this.realCoinsCount; i++){
-    let coin = this.add.circle(
-      Phaser.Math.Between(100,1180),
-      Phaser.Math.Between(100,620),
-      12,
-      0xffff00
-    );
 
-    this.coins.push(coin);
-  }
+  let coin = this.add.circle(
+    Phaser.Math.Between(100,1180),
+    Phaser.Math.Between(100,620),
+    12,
+    0xffff00
+  );
 
+  coin.collected = false;
+
+  this.coins.push(coin);
+
+  this.tweens.add({
+    targets: coin,
+    y: coin.y - 10,
+    duration: 800,
+    yoyo: true,
+    repeat: -1,
+    ease: "Sine.easeInOut"
+  });
+
+}
   this.fakeCoins = [];
+for(let i = 0; i < this.fakeCoinsCount; i++){
 
-  for(let i = 0; i < this.fakeCoinsCount; i++){
+  let fake = this.add.circle(
+    Phaser.Math.Between(100,1180),
+    Phaser.Math.Between(100,620),
+    12,
+    0xffff00
+  );
 
-    let fake = this.add.circle(
-      Phaser.Math.Between(100,1180),
-      Phaser.Math.Between(100,620),
-      12,
-      0xffff00
-    );
+  this.fakeCoins.push(fake);
 
-    this.fakeCoins.push(fake);
-  }
+  this.tweens.add({
+    targets: fake,
+    y: fake.y - 10,
+    duration: 800,
+    yoyo: true,
+    repeat: -1,
+    ease: "Sine.easeInOut"
+  });
+
+}
 
 }
 
@@ -646,14 +675,41 @@ for(let coin of this.coins){
     this.player.y,
     coin.x,
     coin.y
-  );
-if(distance < 30){
+  );if(distance < 30 && !coin.collected){
 
-  this.score += 1;
+  coin.collected = true;
 
-  this.scoreText.setText("Score: " + this.score);
+  this.tweens.add({
+    targets: coin,
+    scale: 1.8,
+    duration: 80,
+    yoyo: true,
+    onComplete: () => {
 
- for(let c of this.coins){
+      this.score += 1;
+      this.scoreText.setText("Score: " + this.score);
+
+      let plusText = this.add.text(
+        coin.x,
+        coin.y,
+        "+1",
+        {
+          fontSize: "28px",
+          fill: "#ffff00"
+        }
+      ).setOrigin(0.5);
+
+      this.tweens.add({
+        targets: plusText,
+        y: coin.y - 50,
+        alpha: 0,
+        duration: 500,
+        onComplete: () => {
+          plusText.destroy();
+        }
+      });
+
+      for(let c of this.coins){
 
   do{
     c.x = Phaser.Math.Between(100,1180);
@@ -687,6 +743,15 @@ for(let f of this.fakeCoins){
 
 }
 
+      coin.setScale(1);
+      coin.setAlpha(1);
+      coin.collected = false;
+
+    }
+  });
+
+
+
 }
 }
 
@@ -702,6 +767,13 @@ let fakeDistance = Phaser.Math.Distance.Between(
 if(fakeDistance < 30 && !this.gameOver){
 
   this.gameOver = true;
+  for(let coin of this.coins){
+  coin.setVisible(false);
+}
+
+for(let fake of this.fakeCoins){
+  fake.setVisible(false);
+}
 
   let gameOverText = this.add.text(
     this.scale.width / 2,
@@ -753,5 +825,3 @@ const config = {
 }
 
 const game = new Phaser.Game(config);
-
-
