@@ -229,7 +229,7 @@ skillsPanel = this.add.rectangle(
   this.scale.width / 2,
   this.scale.height / 2,
   600,
-  300,
+  400,
   0x000000,
   0.8
 );
@@ -239,12 +239,15 @@ skillsPanel.setScrollFactor(0);
 
 skillsText = this.add.text(
   this.scale.width / 2,
-  this.scale.height / 2,
-  "Skills:\nJavaScript\nHTML\nCSS\nPhaser.js\nGit\nPython",
+  this.scale.height / 2.3
+  ,
+  "Skills:\n\nJavaScript\n\nHTML,CSS\n\nPhaser.js\n\nPython,c++",
   {
     fontSize: "28px",
     fill: "#ffffff",
-    align: "center"
+    align: "center",
+    
+
   }
 );
 
@@ -507,8 +510,25 @@ class MiniGameScene extends Phaser.Scene {
     super("MiniGameScene");
   }
   create(){
-    
+    this.difficultySelected = false;
+    this.realCoinsCount = 0;
+    this.fakeCoinsCount = 0;
+    this.infoText = this.add.text(
+  this.scale.width / 2,
+  this.scale.height / 2,
+ "Collect yellow coins.\n\nOne coin is fake.\nYes they look identical.\n\nGood luck.\n\n1 Easy🫢  2 Medium😎  3 Hard🫡",
+  {
+    fontSize: "32px",
+    fill: "#be080e",
+    align: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.9)"
+  }
+).setOrigin(0.5);
+      this.key1 = this.input.keyboard.addKey("ONE");
+this.key2 = this.input.keyboard.addKey("TWO");
+this.key3 = this.input.keyboard.addKey("THREE");
    
+
    
   this.escKey = this.input.keyboard.addKey("ESC");
   this.input.keyboard.on("keydown-ESC", () => {
@@ -517,29 +537,10 @@ class MiniGameScene extends Phaser.Scene {
  this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys("W,A,S,D");
     this.player = this.add.rectangle(640, 360, 40, 40, 0x00ff00);
+    this.player.setVisible(false);
    this.restartKey = this.input.keyboard.addKey("R");
 
-    this.coins = [];
-    this.escText = this.add.text(20, 60, "Press ESC to Exit", {
-      fontSize: "20px",
-      fill: "#ffffff",
-      backgroundColor: "rgba(0, 0, 0, 1)"
-    });
-
-for(let i = 0; i < 3; i++){
-
-  let coin = this.add.circle(
-    Phaser.Math.Between(100,1180),
-    Phaser.Math.Between(100,620),
-    12,
-    0xffff00
-  );
-
-  this.coins.push(coin);
-}
-
-
-this.fakeCoin = this.add.circle(900, 500, 12, 0xffff00);
+   
     this.score = 0;
     this.scoreText = this.add.text(20, 20, "Score: 0", {
 fontSize: "24px",
@@ -551,7 +552,66 @@ this.gameOver = false;
 this.scoreText.setShadow(0, 0, "#00ffff", 12, true, true);
 
   }
+  startGame(){
+    this.player.setVisible(true);
+
+  this.difficultySelected = true;
+
+  this.infoText.setText("");
+
+  this.coins = [];
+  
+  for(let i = 0; i < this.realCoinsCount; i++){
+    let coin = this.add.circle(
+      Phaser.Math.Between(100,1180),
+      Phaser.Math.Between(100,620),
+      12,
+      0xffff00
+    );
+
+    this.coins.push(coin);
+  }
+
+  this.fakeCoins = [];
+
+  for(let i = 0; i < this.fakeCoinsCount; i++){
+
+    let fake = this.add.circle(
+      Phaser.Math.Between(100,1180),
+      Phaser.Math.Between(100,620),
+      12,
+      0xffff00
+    );
+
+    this.fakeCoins.push(fake);
+  }
+
+}
+
+
  update(){ /////////////////////////////////////////////////////////////////////
+  if(!this.difficultySelected){
+
+  if(Phaser.Input.Keyboard.JustDown(this.key1)){
+    this.realCoinsCount = 8;
+    this.fakeCoinsCount = 2;
+    this.startGame();
+  }
+
+  if(Phaser.Input.Keyboard.JustDown(this.key2)){
+    this.realCoinsCount = 6;
+    this.fakeCoinsCount = 4;
+    this.startGame();
+  }
+
+  if(Phaser.Input.Keyboard.JustDown(this.key3)){
+    this.realCoinsCount = 4;
+    this.fakeCoinsCount = 6;
+    this.startGame();
+  }
+
+  return;
+}
 if(this.gameOver){
 
   if(Phaser.Input.Keyboard.JustDown(this.restartKey)){
@@ -593,43 +653,50 @@ if(distance < 30){
 
   this.scoreText.setText("Score: " + this.score);
 
-  for(let c of this.coins){
-
-    do{
-      c.x = Phaser.Math.Between(100,1180);
-      c.y = Phaser.Math.Between(100,620);
-    }
-    while(
-      Phaser.Math.Distance.Between(
-        c.x,
-        c.y,
-        this.player.x,
-        this.player.y
-      ) < 120
-    );
-
-  }
+ for(let c of this.coins){
 
   do{
-    this.fakeCoin.x = Phaser.Math.Between(100,1180);
-    this.fakeCoin.y = Phaser.Math.Between(100,620);
+    c.x = Phaser.Math.Between(100,1180);
+    c.y = Phaser.Math.Between(100,620);
   }
   while(
     Phaser.Math.Distance.Between(
-      this.fakeCoin.x,
-      this.fakeCoin.y,
+      c.x,
+      c.y,
       this.player.x,
       this.player.y
     ) < 120
   );
 
 }
+
+for(let f of this.fakeCoins){
+
+  do{
+    f.x = Phaser.Math.Between(100,1180);
+    f.y = Phaser.Math.Between(100,620);
+  }
+  while(
+    Phaser.Math.Distance.Between(
+      f.x,
+      f.y,
+      this.player.x,
+      this.player.y
+    ) < 120
+  );
+
 }
+
+}
+}
+
+for(let fake of this.fakeCoins){
+
 let fakeDistance = Phaser.Math.Distance.Between(
   this.player.x,
   this.player.y,
-  this.fakeCoin.x,
-  this.fakeCoin.y
+  fake.x,
+  fake.y
 );
 
 if(fakeDistance < 30 && !this.gameOver){
@@ -668,9 +735,9 @@ if(fakeDistance < 30 && !this.gameOver){
  this.player.x = Phaser.Math.Clamp(this.player.x, 20, 1260);
 this.player.y = Phaser.Math.Clamp(this.player.y, 20, 700);
   }
-
-  
+ }
 }
+ 
 
 const config = {
   type: Phaser.AUTO,
