@@ -387,19 +387,19 @@ if(doorPanel.visible){
 }
 
 if(cursors.left.isDown || keys.A.isDown){
-  player.x -= 3
+  player.x -= 8
 }
 
 if(cursors.right.isDown || keys.D.isDown){
-  player.x += 3
+  player.x += 8
 } 
-
+  
 if(cursors.up.isDown || keys.W.isDown){
-  player.y -= 3
+  player.y -= 8
 }
 
 if(cursors.down.isDown || keys.S.isDown){
-  player.y += 3
+  player.y += 8
 }
 
 player.x = Phaser.Math.Clamp(player.x, marginX, room.width - marginX);
@@ -504,30 +504,112 @@ class MiniGameScene extends Phaser.Scene {
     super("MiniGameScene");
   }
   create(){
-    this.add.text(
-      this.scale.width / 2,
-      this.scale.height / 2,
-      "Mini Game Coming Soon!!!\n\nStay Tuned 😎 \n\n\n\n press ESC to return",
-      
-      {
-        fontSize: "50px",
-        fill: "#ffffff",
-        backgroundColor: "black",
-      }
-    ).setOrigin(0.5);
+    
+   
    
       this.escKey = this.input.keyboard.addKey("ESC");
   this.input.keyboard.on("keydown-ESC", () => {
   this.scene.start("GameScene");
     });
 
+    this.player = this.add.rectangle(640, 360, 40, 40, 0x00ff00);
+    this.cursors = this.input.keyboard.createCursorKeys();
+    this.keys = this.input.keyboard.addKeys("W,A,S,D");
+
+    this.coin = this.add.circle(400, 300, 12, 0xffff00);
+
+this.fakeCoin = this.add.circle(900, 500, 12, 0xffff00);
+    this.score = 0;
+    this.scoreText = this.add.text(20, 20, "Score: 0", {
+fontSize: "24px",
+fill: "#ffffff",
+backgroundColor: "rgba(0, 0, 0, 1)"
+});
+this.gameOver = false;
+
+this.scoreText.setShadow(0, 0, "#00ffff", 12, true, true);
+  }
+    update(){
+if(this.gameOver){
+  return;
+}
+  if(this.cursors.left.isDown || this.keys.A.isDown){
+  this.player.x -= 4;
+  }
+
+  if(this.cursors.right.isDown || this.keys.D.isDown){
+  this.player.x += 4;
+  }
+
+  if(this.cursors.up.isDown || this.keys.W.isDown){
+    this.player.y -= 4;
+  }
+
+  if(this.cursors.down.isDown || this.keys.S.isDown){
+  this.player.y += 4;
+  }
 
 
 
+  let distance = Phaser.Math.Distance.Between(
+  this.player.x,
+  this.player.y,
+  this.coin.x,
+  this.coin.y
+);
 
+if(distance < 30){
 
+  this.score += 1;
+
+  this.scoreText.setText("Score: " + this.score);
+
+  this.coin.x = Phaser.Math.Between(100, 1180);
+  this.coin.y = Phaser.Math.Between(100, 620);
+
+  this.fakeCoin.x = Phaser.Math.Between(100, 1180);
+  this.fakeCoin.y = Phaser.Math.Between(100, 620);
+}
+let fakeDistance = Phaser.Math.Distance.Between(
+  this.player.x,
+  this.player.y,
+  this.fakeCoin.x,
+  this.fakeCoin.y
+);
+
+if(fakeDistance < 30 && !this.gameOver){
+
+  this.gameOver = true;
+
+  let gameOverText = this.add.text(
+    this.scale.width / 2,
+    this.scale.height / 2,
+    "GAME OVER",
+    {
+      fontSize: "60px",
+      fill: "#ff0000"
+    }
+  ).setOrigin(0.5);
+
+  this.tweens.add({
+    targets: gameOverText,
+    alpha: 0,
+    duration: 500,
+    yoyo: true,
+    repeat: -1
+  });
+
+  this.player.setVisible(false);
+}
 
   }
+
+
+
+
+
+
+  
 }
 
 const config = {
@@ -544,4 +626,6 @@ const config = {
 }
 
 const game = new Phaser.Game(config);
+
+
 
