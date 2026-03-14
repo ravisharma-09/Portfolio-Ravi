@@ -385,21 +385,24 @@ if(doorPanel.visible){
 
   return;
 }
+let speed = 400;
+let delta = this.game.loop.delta / 1000;
 
 if(cursors.left.isDown || keys.A.isDown){
-  player.x -= 8
+  player.x -= speed * delta;
 }
 
 if(cursors.right.isDown || keys.D.isDown){
-  player.x += 8
-} 
-  
+
+  player.x += speed * delta;
+}
+
 if(cursors.up.isDown || keys.W.isDown){
-  player.y -= 8
+  player.y -= speed * delta;
 }
 
 if(cursors.down.isDown || keys.S.isDown){
-  player.y += 8
+  player.y += speed * delta;
 }
 
 player.x = Phaser.Math.Clamp(player.x, marginX, room.width - marginX);
@@ -507,16 +510,34 @@ class MiniGameScene extends Phaser.Scene {
     
    
    
-      this.escKey = this.input.keyboard.addKey("ESC");
+  this.escKey = this.input.keyboard.addKey("ESC");
   this.input.keyboard.on("keydown-ESC", () => {
   this.scene.start("GameScene");
     });
-
-    this.player = this.add.rectangle(640, 360, 40, 40, 0x00ff00);
-    this.cursors = this.input.keyboard.createCursorKeys();
+ this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys("W,A,S,D");
+    this.player = this.add.rectangle(640, 360, 40, 40, 0x00ff00);
+   this.restartKey = this.input.keyboard.addKey("R");
 
-    this.coin = this.add.circle(400, 300, 12, 0xffff00);
+    this.coins = [];
+    this.escText = this.add.text(20, 60, "Press ESC to Exit", {
+      fontSize: "20px",
+      fill: "#ffffff",
+      backgroundColor: "rgba(0, 0, 0, 1)"
+    });
+
+for(let i = 0; i < 3; i++){
+
+  let coin = this.add.circle(
+    Phaser.Math.Between(100,1180),
+    Phaser.Math.Between(100,620),
+    12,
+    0xffff00
+  );
+
+  this.coins.push(coin);
+}
+
 
 this.fakeCoin = this.add.circle(900, 500, 12, 0xffff00);
     this.score = 0;
@@ -528,47 +549,81 @@ backgroundColor: "rgba(0, 0, 0, 1)"
 this.gameOver = false;
 
 this.scoreText.setShadow(0, 0, "#00ffff", 12, true, true);
+
   }
-    update(){
+ update(){ /////////////////////////////////////////////////////////////////////
 if(this.gameOver){
+
+  if(Phaser.Input.Keyboard.JustDown(this.restartKey)){
+    this.scene.restart();
+  }
   return;
 }
-  if(this.cursors.left.isDown || this.keys.A.isDown){
-  this.player.x -= 4;
-  }
+ let speed = 300;
+let delta = this.game.loop.delta / 1000;
 
-  if(this.cursors.right.isDown || this.keys.D.isDown){
-  this.player.x += 4;
-  }
+if(this.cursors.left.isDown || this.keys.A.isDown){
+  this.player.x -= speed * delta;
+}
 
-  if(this.cursors.up.isDown || this.keys.W.isDown){
-    this.player.y -= 4;
-  }
+if(this.cursors.right.isDown || this.keys.D.isDown){
+  this.player.x += speed * delta;
+}
 
-  if(this.cursors.down.isDown || this.keys.S.isDown){
-  this.player.y += 4;
-  }
+if(this.cursors.up.isDown || this.keys.W.isDown){
+  this.player.y -= speed * delta;
+}
+
+if(this.cursors.down.isDown || this.keys.S.isDown){
+  this.player.y += speed * delta;
+}
 
 
+for(let coin of this.coins){
 
   let distance = Phaser.Math.Distance.Between(
-  this.player.x,
-  this.player.y,
-  this.coin.x,
-  this.coin.y
-);
-
+    this.player.x,
+    this.player.y,
+    coin.x,
+    coin.y
+  );
 if(distance < 30){
 
   this.score += 1;
 
   this.scoreText.setText("Score: " + this.score);
 
-  this.coin.x = Phaser.Math.Between(100, 1180);
-  this.coin.y = Phaser.Math.Between(100, 620);
+  for(let c of this.coins){
 
-  this.fakeCoin.x = Phaser.Math.Between(100, 1180);
-  this.fakeCoin.y = Phaser.Math.Between(100, 620);
+    do{
+      c.x = Phaser.Math.Between(100,1180);
+      c.y = Phaser.Math.Between(100,620);
+    }
+    while(
+      Phaser.Math.Distance.Between(
+        c.x,
+        c.y,
+        this.player.x,
+        this.player.y
+      ) < 120
+    );
+
+  }
+
+  do{
+    this.fakeCoin.x = Phaser.Math.Between(100,1180);
+    this.fakeCoin.y = Phaser.Math.Between(100,620);
+  }
+  while(
+    Phaser.Math.Distance.Between(
+      this.fakeCoin.x,
+      this.fakeCoin.y,
+      this.player.x,
+      this.player.y
+    ) < 120
+  );
+
+}
 }
 let fakeDistance = Phaser.Math.Distance.Between(
   this.player.x,
@@ -590,6 +645,15 @@ if(fakeDistance < 30 && !this.gameOver){
       fill: "#ff0000"
     }
   ).setOrigin(0.5);
+  this.add.text(
+  this.scale.width / 2,
+  this.scale.height / 2 + 80,
+  "Press R to Restart",
+  {
+    fontSize: "24px",
+    fill: "#ffffff"
+  }
+).setOrigin(0.5);
 
   this.tweens.add({
     targets: gameOverText,
@@ -601,13 +665,9 @@ if(fakeDistance < 30 && !this.gameOver){
 
   this.player.setVisible(false);
 }
-
+ this.player.x = Phaser.Math.Clamp(this.player.x, 20, 1260);
+this.player.y = Phaser.Math.Clamp(this.player.y, 20, 700);
   }
-
-
-
-
-
 
   
 }
@@ -626,6 +686,5 @@ const config = {
 }
 
 const game = new Phaser.Game(config);
-
 
 
