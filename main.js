@@ -342,6 +342,10 @@ aboutPanel.setScrollFactor(0);
 aboutText.setScrollFactor(0);
 
 
+terminalLogs = [];
+terminalQueue = [];
+isTyping = false;
+
 
 
 terminalContainer = this.add.container(20, this.scale.height - 150);
