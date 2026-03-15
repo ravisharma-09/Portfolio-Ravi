@@ -21,7 +21,14 @@ let skillsPanel;
 let skillsText;
 let mailbox;
 let contactPanel;   
-let contactText;    // 
+let contactText;    
+let terminalContainer;
+let terminalLogs = [];
+let terminalMaxLogs = 6;
+let typingSpeed = 70 ;
+let typingEvent = null;
+let terminalQueue = [];
+let isTyping = false;
 const deskRange = 70;
 const projectRange = 60;
 const trophyRange = 85;
@@ -314,7 +321,7 @@ doorText = this.add.text(
 
 
 
-// close hint
+
 closeHint = this.add.text(
   this.scale.width / 2,
   this.scale.height / 2 + 125,
@@ -337,11 +344,104 @@ aboutText.setScrollFactor(0);
 
 
 
+terminalContainer = this.add.container(20, this.scale.height - 150);
+terminalContainer.setScrollFactor(0);
+terminalContainer.setDepth(10);
+
+let bg = this.add.rectangle(
+  0,
+  0,
+  520,
+  140,
+  0x000000,
+  0.7
+).setOrigin(0);
+
+terminalContainer.add(bg);
+
+
+
+const startupLogs = [
+  "System booting...",
+  "Entering portfolio room...",
+  "Use WASD or Arrow keys to move",
+  "Press E to interact"
+];
+
+startupLogs.forEach(msg => this.addTerminalMessage(msg));
+
 
 
 
 
 };
+addTerminalMessage(message){
+
+  terminalQueue.push(message);
+
+  if(!isTyping){
+    this.processTerminalQueue();
+  }
+
+}
+processTerminalQueue(){
+
+  if(terminalQueue.length === 0){
+    isTyping = false;
+    return;
+  }
+
+  isTyping = true;
+
+  let message = terminalQueue.shift();
+  let time = new Date().toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
+  message = "[" + time + "] " + message;
+
+  for(let l of terminalLogs){
+    l.y -= 22;
+  }
+
+  let log = this.add.text(
+    10,
+    110,
+    "",
+    {
+      fontSize: "18px",
+      fill: "#00ff88"
+    }
+  );
+
+  terminalContainer.add(log);
+  terminalLogs.push(log);
+
+  let index = 0;
+
+  this.time.addEvent({
+    delay: typingSpeed,
+    repeat: message.length - 1,
+    callback: () => {
+
+    log.text = message.slice(0, index) + "_";
+      index++;
+
+      if(index === message.length){
+         log.text =  message;
+        this.processTerminalQueue();
+      }
+
+    }
+  });
+
+  if(terminalLogs.length > terminalMaxLogs){
+    let old = terminalLogs.shift();
+    old.destroy();
+  }
+
+}
+
+
+
+
 
 // hi ---------------------------------------------------------------------------------
 
@@ -439,6 +539,7 @@ if(distance < deskRange){
     aboutPanel.setVisible(true);
     aboutText.setVisible(true);
     closeHint.setVisible(true);
+    this.addTerminalMessage("System:Opening about panel...");
   }
 
 }
@@ -451,6 +552,7 @@ else if(trophyDistance < trophyRange){
     achievementPanel.setVisible(true);
     achievementText.setVisible(true);
     closeHint.setVisible(true);
+    this.addTerminalMessage("System:Opening achievements");
   }
 
 }
@@ -463,6 +565,7 @@ else if(projectDistance < projectRange){
     projectPanel.setVisible(true);
     projectText.setVisible(true);
     closeHint.setVisible(true);
+    this.addTerminalMessage("System:Opening projects panel...");
   }
 }
 else if(skillsDistance < skillsRange){
@@ -474,6 +577,7 @@ else if(skillsDistance < skillsRange){
     skillsPanel.setVisible(true);
     skillsText.setVisible(true);
     closeHint.setVisible(true);
+    this.addTerminalMessage("System:Viewing Skills...");
   }
 
 }
@@ -486,6 +590,8 @@ else if(mailDistance < mailRange){
     contactPanel.setVisible(true);
     contactText.setVisible(true);
     closeHint.setVisible(true);
+    this.addTerminalMessage("System:Opening contact Info");
+
   }
 }
 else if(doorDistance < doorRange){
@@ -498,6 +604,7 @@ else if(doorDistance < doorRange){
     doorPanel.setVisible(true);
     doorText.setVisible(true);
     closeHint.setVisible(true);
+      this.addTerminalMessage("System:Using door...");
   }
 
 }
