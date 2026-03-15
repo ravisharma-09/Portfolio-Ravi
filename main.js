@@ -25,7 +25,7 @@ let contactText;
 let terminalContainer;
 let terminalLogs = [];
 let terminalMaxLogs = 6;
-let typingSpeed = 70 ;
+let typingSpeed = 60 ;
 let typingEvent = null;
 let terminalQueue = [];
 let isTyping = false;
@@ -98,6 +98,7 @@ constructor(){
 preload() {
   this.load.image("player", "assets/player.png");
   this.load.image("room", "assets/room.png");
+  this.load.image("profile", "assets/profile.png");
 }
 
 // hi---------------------------------------------------------------------------------
@@ -106,7 +107,14 @@ preload() {
   
  room = this.add.image(0, 0, "room");
 room.setOrigin(0);
-
+this.cameras.main.fadeIn(600, 0, 0, 0);
+this.cameras.main.setZoom(1.2);
+this.tweens.add({
+  targets: this.cameras.main,
+  zoom: 1,
+  duration: 800,
+  ease: "Sine.easeOut"
+});
   this.cameras.main.setBounds(0, 0, room.width, room.height);
 
   player = this.add.sprite(480,400,"player");
@@ -151,6 +159,14 @@ interactText = this.add.text(desk.x, desk.y - 80, "", {
   fill: "#ffffff",   
   backgroundColor: "#6e6a6a"
 });
+this.tweens.add({
+  targets: interactText,
+  y: "+=6",
+  duration: 700,
+  yoyo: true,
+  repeat: -1,
+  ease: "Sine.easeInOut"
+});
 
 interactText.setOrigin(0.5);
 
@@ -158,31 +174,58 @@ interactText.setOrigin(0.5);
 aboutPanel = this.add.rectangle(
   this.scale.width / 2,
   this.scale.height / 2,
+  550,
   500,
-  300,
   0x000000,
-  0.8
+  0.65
 );
 
 aboutPanel.setVisible(false);
-
 aboutText = this.add.text(
-  this.scale.width / 2,
-  this.scale.height / 2,
-  "Hi, I'm Ravi 👋\n\nI build interactive projects\nand love coding.",
+  this.scale.width / 2 - 80,
+  this.scale.height / 2 - 10
+  ,
+  "👋 Hi, I'm Ravi Sharma\n\n" +
+  "18-year-old developer\n\n" +
+  "ABOUT\n" +
+  "I enjoy building interactive projects\n" +
+  "and experimenting with JavaScript.\n\n" +
+  "INTERESTS\n" +
+  "• Coding\n" +
+  "• Game Development\n" +
+  "• Sleeping (professional level 😴)\n\n" +
+  "HOBBIES\n" +
+  "• Swimming 🏊\n" +
+  "• Gaming\n" +
+  "• Learning new tech",
   {
-    fontSize: "28px",
+    fontSize: "22px",
     fill: "#ffffff",
-    align: "center"
+    align: "left",
+    wordWrap: { width: 380 }
   }
 );
 
-//for photo 
+aboutText.setOrigin(0.5);
+aboutText.setVisible(false);
+
+this.profileImage = this.add.image(
+   this.scale.width / 2 + 170,
+  this.scale.height / 2 - 60,
+  "profile"
+);
+
+
+this.profileImage.setScale(0.17);
+this.profileImage.setVisible(false);
+this.profileImage.setScrollFactor(0);
+this.profileImage.setDepth(8);
+
 projectPanel = this.add.rectangle(
   this.scale.width / 2,
   this.scale.height / 2,
   500,
-  300,
+  350,
   0x000000,
   0.8
 );
@@ -314,8 +357,32 @@ doorText = this.add.text(
   doorText.setVisible(false);
   doorText.setScrollFactor(0);
   doorText.setDepth(1);
+  aboutPanel.setDepth(6);
+projectPanel.setDepth(6);
+achievementPanel.setDepth(6);
+skillsPanel.setDepth(6);
+contactPanel.setDepth(6);
+doorPanel.setDepth(6);
+
+aboutText.setDepth(7);
+projectText.setDepth(7);
+achievementText.setDepth(7);
+skillsText.setDepth(7);
+contactText.setDepth(7);
+doorText.setDepth(7);
 
 
+this.panelOverlay = this.add.rectangle(
+  this.scale.width / 2,
+  this.scale.height / 2,
+  this.scale.width,
+  this.scale.height,
+  0x000000,
+  0
+);
+this.panelOverlay.setScrollFactor(0);
+this.panelOverlay.setDepth(5);
+this.panelOverlay.setVisible(false);
 
 
 
@@ -324,12 +391,14 @@ doorText = this.add.text(
 
 closeHint = this.add.text(
   this.scale.width / 2,
-  this.scale.height / 2 + 125,
+  this.scale.height / 2 -300,
   "Press ESC to close",
   {
     fontSize: "25px",
-    fill: "#aaaaaa"
+    fill: "white",
+    backgroundColor :"gray"
   }
+
 );
 
 closeHint.setOrigin(0.5);
@@ -341,7 +410,7 @@ aboutText.setVisible(false);
 aboutPanel.setScrollFactor(0);
 aboutText.setScrollFactor(0);
 
-
+closeHint.setDepth(7);
 terminalLogs = [];
 terminalQueue = [];
 isTyping = false;
@@ -369,14 +438,22 @@ const startupLogs = [
   "System booting...",
   "Entering portfolio room...",
   "Use WASD or Arrow keys to move",
-  "Press E to interact"
+  
 ];
 
 startupLogs.forEach(msg => this.addTerminalMessage(msg));
 
 
+this.cameras.main.setZoom(1.05);
 
+this.cameras.main.fadeIn(500);
 
+this.tweens.add({
+  targets: this.cameras.main,
+  zoom: 1,
+  duration: 600,
+  ease: "Sine.easeOut"
+});
 
 };
 addTerminalMessage(message){
@@ -442,8 +519,38 @@ processTerminalQueue(){
   }
 
 }
+transitionTo(sceneKey){
+
+  let fade = this.add.rectangle(
+    this.scale.width / 2,
+    this.scale.height / 2,
+    this.scale.width,
+    this.scale.height,
+    0x000000
+  ).setScrollFactor(0).setDepth(20);
+
+  fade.setAlpha(0);
 
 
+  this.tweens.add({
+    targets: this.cameras.main,
+    zoom: 1.05,
+    duration: 200,
+    ease: "Sine.easeInOut"
+  });
+
+
+  this.tweens.add({
+    targets: fade,
+    alpha: 1,
+    duration: 350,
+    delay: 100,
+    onComplete: () => {
+      this.scene.start(sceneKey);
+    }
+  });
+
+}
 
 
 
@@ -467,6 +574,15 @@ if(aboutPanel.visible || projectPanel.visible || achievementPanel.visible || ski
     doorPanel.setVisible(false);
     doorText.setVisible(false);
     closeHint.setVisible(false);
+    this.profileImage.setVisible(false);
+    terminalContainer.setVisible(true);
+    this.tweens.add({
+      targets: this.panelOverlay,
+      alpha: 0,
+      duration: 150,
+    onComplete: () => {
+  this.panelOverlay.setVisible(false);}
+});
     
     interacted = false;
   }
@@ -481,14 +597,13 @@ if(doorPanel.visible){
     doorText.setVisible(false);
     closeHint.setVisible(false);
   }
+if(Phaser.Input.Keyboard.JustDown(this.key1)){
+  this.transitionTo("StartScene");
+}
 
-  if(Phaser.Input.Keyboard.JustDown(this.key1)){
-    this.scene.start("StartScene");
-  }
-
-  if(Phaser.Input.Keyboard.JustDown(this.key2)){
-    this.scene.start("MiniGameScene");
-  }
+if(Phaser.Input.Keyboard.JustDown(this.key2)){
+  this.transitionTo("MiniGameScene");
+}
 
   return;
 }
@@ -540,9 +655,30 @@ if(distance < deskRange){
   interactText.setText("Press E to Interact");
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
-    aboutPanel.setVisible(true);
-    aboutText.setVisible(true);
-    closeHint.setVisible(true);
+   this.panelOverlay.setVisible(true);
+
+this.tweens.add({
+  targets: this.panelOverlay,
+  alpha: 0.75,
+  duration: 200
+});
+aboutPanel.setScale(0.85);
+aboutPanel.setAlpha(0);
+aboutPanel.setVisible(true);
+
+
+aboutText.setAlpha(0);
+aboutText.setVisible(true);
+this.profileImage.setVisible(true);
+terminalContainer.setVisible(false);
+this.tweens.add({
+  targets: [aboutPanel, aboutText],
+  scale: 1,
+  alpha: 1,
+  duration: 700,
+  ease: "Back.out"
+});
+closeHint.setVisible(true);
     this.addTerminalMessage("System:Opening about panel...");
   }
 
@@ -553,11 +689,35 @@ else if(trophyDistance < trophyRange){
   interactText.setText("Press E to view achievements");
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
-    achievementPanel.setVisible(true);
-    achievementText.setVisible(true);
-    closeHint.setVisible(true);
-    this.addTerminalMessage("System:Opening achievements");
-  }
+
+  this.panelOverlay.setVisible(true);
+
+  this.tweens.add({
+    targets: this.panelOverlay,
+    alpha: 0.75,
+    duration: 200
+  });
+
+  achievementPanel.setScale(0.85);
+  achievementPanel.setAlpha(0);
+  achievementPanel.setVisible(true);
+
+  achievementText.setAlpha(0);
+  achievementText.setVisible(true);
+
+  this.tweens.add({
+    targets: [achievementPanel, achievementText],
+    scale: 1,
+    alpha: 1,
+    duration: 600,
+    ease: "Back.out"
+  });
+
+  closeHint.setVisible(true);
+
+  this.addTerminalMessage("System:Opening achievements");
+
+}
 
 }
 else if(projectDistance < projectRange){
@@ -566,23 +726,71 @@ else if(projectDistance < projectRange){
   interactText.setText("Press E to view projects");
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
-    projectPanel.setVisible(true);
-    projectText.setVisible(true);
-    closeHint.setVisible(true);
-    this.addTerminalMessage("System:Opening projects panel...");
-  }
+
+  this.panelOverlay.setVisible(true);
+
+  this.tweens.add({
+    targets: this.panelOverlay,
+    alpha: 0.75,
+    duration: 200
+  });
+
+  projectPanel.setScale(0.85);
+  projectPanel.setAlpha(0);
+  projectPanel.setVisible(true);
+
+  projectText.setAlpha(0);
+  projectText.setVisible(true);
+
+  this.tweens.add({
+    targets: [projectPanel, projectText],
+    scale: 1,
+    alpha: 1,
+    duration: 600,
+    ease: "Back.out"
+  });
+
+  closeHint.setVisible(true);
+
+  this.addTerminalMessage("System:Opening projects panel...");
+
+}
 }
 else if(skillsDistance < skillsRange){
   interactText.setVisible(true);
   interactText.setPosition(bookshelf.x - 70, bookshelf.y - 220);
   interactText.setText("Press E to view skills");
 
-  if(Phaser.Input.Keyboard.JustDown(interactKey)){
-    skillsPanel.setVisible(true);
-    skillsText.setVisible(true);
-    closeHint.setVisible(true);
-    this.addTerminalMessage("System:Viewing Skills...");
-  }
+ if(Phaser.Input.Keyboard.JustDown(interactKey)){
+
+  this.panelOverlay.setVisible(true);
+
+  this.tweens.add({
+    targets: this.panelOverlay,
+    alpha: 0.75,
+    duration: 200
+  });
+
+  skillsPanel.setScale(0.85);
+  skillsPanel.setAlpha(0);
+  skillsPanel.setVisible(true);
+
+  skillsText.setAlpha(0);
+  skillsText.setVisible(true);
+
+  this.tweens.add({
+    targets: [skillsPanel, skillsText],
+    scale: 1,
+    alpha: 1,
+    duration: 600,
+    ease: "Back.out"
+  });
+
+  closeHint.setVisible(true);
+
+  this.addTerminalMessage("System:Viewing Skills...");
+
+}
 
 }
 else if(mailDistance < mailRange){
@@ -591,12 +799,35 @@ else if(mailDistance < mailRange){
   interactText.setText("Press E to contact");
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
-    contactPanel.setVisible(true);
-    contactText.setVisible(true);
-    closeHint.setVisible(true);
-    this.addTerminalMessage("System:Opening contact Info");
 
-  }
+  this.panelOverlay.setVisible(true);
+
+  this.tweens.add({
+    targets: this.panelOverlay,
+    alpha: 0.75,
+    duration: 200
+  });
+
+  contactPanel.setScale(0.85);
+  contactPanel.setAlpha(0);
+  contactPanel.setVisible(true);
+
+  contactText.setAlpha(0);
+  contactText.setVisible(true);
+
+  this.tweens.add({
+    targets: [contactPanel, contactText],
+    scale: 1,
+    alpha: 1,
+    duration: 600,
+    ease: "Back.out"
+  });
+
+  closeHint.setVisible(true);
+
+  this.addTerminalMessage("System:Opening contact Info");
+
+}
 }
 else if(doorDistance < doorRange){
 
@@ -605,8 +836,28 @@ else if(doorDistance < doorRange){
   interactText.setText("Press E to use door");
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
+    this.panelOverlay.setVisible(true);
+
+    this.tweens.add({
+      targets: this.panelOverlay,
+      alpha:0.75,
+      duration:200
+    });
+
+    doorPanel.setScale(0.85);
+    doorPanel.setAlpha(0);
     doorPanel.setVisible(true);
+
+    doorText.setAlpha(0);
     doorText.setVisible(true);
+
+    this.tweens.add({
+      targets: [doorPanel, doorText],
+      scale: 1,
+      alpha: 1 ,
+      duration: 600,
+      ease: "Back.out"
+    })
     closeHint.setVisible(true);
       this.addTerminalMessage("System:Using door...");
   }
@@ -652,8 +903,11 @@ this.key3 = this.input.keyboard.addKey("THREE");
    
   this.escKey = this.input.keyboard.addKey("ESC");
   this.input.keyboard.on("keydown-ESC", () => {
+this.cameras.main.fadeOut(400);
+
+this.time.delayedCall(400, () => {
   this.scene.start("GameScene");
-    });
+});    });
  this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys("W,A,S,D");
     this.player = this.add.rectangle(640, 360, 40, 40, 0x00ff00);
