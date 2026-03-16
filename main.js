@@ -40,6 +40,44 @@ const mailRange = 90;
 
 let door;
 const doorRange = 105;
+let projects = [
+  {
+    title: "Tip Calculator",
+    image: "tip.png",
+    demo: "https://tip-calculator-omega-two.vercel.app/",
+    repo: "https://github.com/ravisharma-09/tip-calculator"
+  },
+  {
+    title: "Stone Paper Scissor",
+    image:"stone.png"
+    demo: "https://stone-paper-nine.vercel.app/",
+    repo: "https://github.com/ravisharma-09/stone-paper"
+  },
+  {
+    title: "Portfolio Ravi",
+        image: "portfolio.png",
+    demo: "https://sharmaravi.in",
+    repo: "https://github.com/ravisharma-09/Portfolio-Ravi"
+  },
+  {
+    title: "Weight Converter",
+    image: "weight.png",
+    demo: "https://weight-converter-nine.vercel.app/",
+    repo: "https://github.com/ravisharma-09/weight-converter"
+  },
+  {
+    title: "Height Converter",
+    image: "height.png",
+    demo: "https://height-converter.vercel.app",
+    repo: "https://github.com/ravisharma-09/height-converter"
+  },
+  {
+    title: "Linkipin",
+    image: "linkipin.png",
+    demo: "https://linkipin.vercel.app/",
+    repo: "https://github.com/ravisharma-09/linkipin"
+  }
+];
 
 let doorPanel;
 let doorText;
@@ -154,6 +192,10 @@ door = {
   closeKey = this.input.keyboard.addKey("ESC");
   this.key1 = this.input.keyboard.addKey("ONE");
 this.key2 = this.input.keyboard.addKey("TWO");
+this.key3 = this.input.keyboard.addKey("THREE");
+this.key4 = this.input.keyboard.addKey("FOUR");
+this.key5 = this.input.keyboard.addKey("FIVE");
+this.key6 = this.input.keyboard.addKey("SIX");
 interactText = this.add.text(desk.x, desk.y - 80, "", {
   fontSize: "32px",
   fill: "#ffffff",   
@@ -236,11 +278,18 @@ projectPanel.setScrollFactor(0);
 projectText = this.add.text(
   this.scale.width / 2,
   this.scale.height / 2,
-  "Projects:  \n\n Portfolio Game  \n More coming soon!!!...\n\n😎",
+  "PROJECTS\n\n"+
+  "1 Tip Calculator\n"+
+  "2 Stone Paper Scissor\n"+
+  "3 Portfolio-Ravi\n"+
+  "4 Weight Converter\n" +
+  "5 Height Converter\n" +
+  "6 Linkipin\n\n" +
+  "Press number to view project",
   {
     fontSize: "28px",
     fill: "#ffffff",
-    align: "center"
+    align: "left"
   }
 );
 
@@ -559,6 +608,30 @@ transitionTo(sceneKey){
 update(){
 
 if(aboutPanel.visible || projectPanel.visible || achievementPanel.visible || skillsPanel.visible || contactPanel.visible ){
+  if(projectPanel.visible){
+
+  if(Phaser.Input.Keyboard.JustDown(this.key1)){
+    window.open("https://tip-calculator-omega-two.vercel.app/", "_blank");
+  }
+
+  if(Phaser.Input.Keyboard.JustDown(this.key2)){
+    window.open("https://stone-paper-nine.vercel.app/", "_blank");
+  }
+  if(Phaser.Input.Keyboard.JustDown(this.key3)){
+    window.open("https://sharmaravi.in", "_blank");
+
+  }
+  if(Phaser.Input.Keyboard.JustDown(this.key4)){
+    window.open("https://weight-converter-nine.vercel.app/", "_blank");
+  }
+   if(Phaser.Input.Keyboard.JustDown(this.key5)){
+    window.open("https://height-converter.vercel.app", "_blank");
+  }
+
+  if(Phaser.Input.Keyboard.JustDown(this.key6)){
+    window.open("https://linkipin.vercel.app/", "_blank");
+  }
+}
   interactText.setVisible(false);
   if(Phaser.Input.Keyboard.JustDown(closeKey)){
     aboutPanel.setVisible(false);
@@ -589,6 +662,8 @@ if(aboutPanel.visible || projectPanel.visible || achievementPanel.visible || ski
 
   return;
 }
+
+
 if(doorPanel.visible){
   interactText.setVisible(false);
 
@@ -898,6 +973,8 @@ this.add.text(
       this.key1 = this.input.keyboard.addKey("ONE");
 this.key2 = this.input.keyboard.addKey("TWO");
 this.key3 = this.input.keyboard.addKey("THREE");
+
+
    
 
    
