@@ -29,6 +29,9 @@ let typingSpeed = 60 ;
 let typingEvent = null;
 let terminalQueue = [];
 let isTyping = false;
+let projectCards = [];
+let selectedProject = 0;
+
 const deskRange = 70;
 const projectRange = 60;
 const trophyRange = 85;
@@ -49,7 +52,7 @@ let projects = [
   },
   {
     title: "Stone Paper Scissor",
-    image:"stone.png"
+    image:"stone.png",
     demo: "https://stone-paper-nine.vercel.app/",
     repo: "https://github.com/ravisharma-09/stone-paper"
   },
@@ -137,6 +140,13 @@ preload() {
   this.load.image("player", "assets/player.png");
   this.load.image("room", "assets/room.png");
   this.load.image("profile", "assets/profile.png");
+  for (let project of projects){
+    this.load.image(
+      project.title,
+      "assets/projects/" + project.image
+    );
+  }
+
 }
 
 // hi---------------------------------------------------------------------------------
@@ -274,6 +284,50 @@ projectPanel = this.add.rectangle(
 
 projectPanel.setVisible(false);
 projectPanel.setScrollFactor(0);
+let startX = this.scale.width / 2 - 200 ;
+let startY = this.scale.height / 2 -80 ;
+let cardWidth = 150 ;
+let cardHeight = 100 ;
+
+for (let i = 0; i < projects.length; i++){
+  let col = i%3 ;
+  let row = Math.floor(i / 3);
+  let x = startX + col*170 ;
+  let y = startY + row*140 ;
+  let card = this.add.image(x, y, projects[i].title);
+  card.setScale(0.18);
+  card.setScrollFactor(0);
+  card.setDepth(7);
+  card.setVisible(false);
+  projectCards.push(card);
+}
+this.updateProjectSelection = () => {
+  for (let i = 0; i < projectCards.length ; i++){
+    if(i === selectedProject){
+      projectCards[i].setScale(0.24);
+      projectCards[i].setTint(0xffffff);
+
+    }
+
+    else{
+      projectCards[i].setScale(0.18);
+      projectCards[i].clearTint()
+    }
+  }
+};
+this.updateProjectSelection();
+
+this.projectImage = this.add.image(
+  this.scale.width / 2,
+  this.scale.height / 2 - 110 ,
+  "profile" 
+);
+
+this.projectImage.setScale(0.35);
+this.projectImage.setVisible(false);
+this.projectImage.setScrollFactor(0);
+this.projectImage.setDepth(7);
+
 
 projectText = this.add.text(
   this.scale.width / 2,
@@ -610,27 +664,59 @@ update(){
 if(aboutPanel.visible || projectPanel.visible || achievementPanel.visible || skillsPanel.visible || contactPanel.visible ){
   if(projectPanel.visible){
 
+  if(Phaser.Input.Keyboard.JustDown(cursors.right)){
+  selectedProject++;
+}
+
+if(Phaser.Input.Keyboard.JustDown(cursors.left)){
+  selectedProject--;
+}
+
+if(Phaser.Input.Keyboard.JustDown(cursors.down)){
+  selectedProject += 3;
+}
+
+if(Phaser.Input.Keyboard.JustDown(cursors.up)){
+  selectedProject -= 3;
+}
+
+selectedProject = Phaser.Math.Wrap(selectedProject, 0, projectCards.length);
+
+this.updateProjectSelection();
+
+
+
+
   if(Phaser.Input.Keyboard.JustDown(this.key1)){
-    window.open("https://tip-calculator-omega-two.vercel.app/", "_blank");
+    this.projectImage.setTexture(projects[0].title);
+    window.open(projects[0].demo, "_blank");
   }
 
   if(Phaser.Input.Keyboard.JustDown(this.key2)){
-    window.open("https://stone-paper-nine.vercel.app/", "_blank");
+    this.projectImage.setTexture(projects[1].title);
+    window.open(projects[1].demo, "_blank");
   }
-  if(Phaser.Input.Keyboard.JustDown(this.key3)){
-    window.open("https://sharmaravi.in", "_blank");
 
+  if(Phaser.Input.Keyboard.JustDown(this.key3)){
+    this.projectImage.setTexture(projects[2].title);
+    window.open(projects[2].demo, "_blank");
   }
+
   if(Phaser.Input.Keyboard.JustDown(this.key4)){
-    window.open("https://weight-converter-nine.vercel.app/", "_blank");
+    this.projectImage.setTexture(projects[3].title);
+    window.open(projects[3].demo, "_blank");
   }
-   if(Phaser.Input.Keyboard.JustDown(this.key5)){
-    window.open("https://height-converter.vercel.app", "_blank");
+
+  if(Phaser.Input.Keyboard.JustDown(this.key5)){
+    this.projectImage.setTexture(projects[4].title);
+    window.open(projects[4].demo, "_blank");
   }
 
   if(Phaser.Input.Keyboard.JustDown(this.key6)){
-    window.open("https://linkipin.vercel.app/", "_blank");
+    this.projectImage.setTexture(projects[5].title);
+    window.open(projects[5].demo, "_blank");
   }
+
 }
   interactText.setVisible(false);
   if(Phaser.Input.Keyboard.JustDown(closeKey)){
@@ -640,6 +726,11 @@ if(aboutPanel.visible || projectPanel.visible || achievementPanel.visible || ski
     achievementText.setVisible(false);
     projectPanel.setVisible(false);
     projectText.setVisible(false);
+    this.projectImage.setVisible(false);
+     for (let card of projectCards){
+    card.setVisible(false);
+  }
+
     skillsPanel.setVisible(false);
     skillsText.setVisible(false);
     contactPanel.setVisible(false);
@@ -810,15 +901,16 @@ else if(projectDistance < projectRange){
     duration: 200
   });
 
-  projectPanel.setScale(0.85);
-  projectPanel.setAlpha(0);
-  projectPanel.setVisible(true);
+ projectPanel.setScale(0.85);
+projectPanel.setAlpha(0);
+projectPanel.setVisible(true);
 
-  projectText.setAlpha(0);
-  projectText.setVisible(true);
+for (let card of projectCards){
+  card.setVisible(true);
+}
 
   this.tweens.add({
-    targets: [projectPanel, projectText],
+    targets: projectPanel,
     scale: 1,
     alpha: 1,
     duration: 600,
