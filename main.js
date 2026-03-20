@@ -907,42 +907,45 @@ class ProjectScene extends Phaser.Scene {
 
   preload() {
   for (let project of projects){
-    this.load.image(
-      project.title,
-      "assets/projects/" + project.image
-    );
-    this.textures.get(project.title).setFilter(Phaser.Textures.FilterMode.LINEAR);
+    this.load.image(project.title, "assets/projects/" + project.image);
+
   }
 
 }
 
 create(){
-this.textures.each(texture => {
-  texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
-  this.game.config.pixelArt = false;
-});
+  this.targetScrollY = 0;
+  this.scrollY = 0;
+this.scrollSpeed = 5;
     this.mode = "grid"; 
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.enterKey = this.input.keyboard.addKey("ENTER");
     this.escKey = this.input.keyboard.addKey("ESC");
 
-this.add.rectangle(640, 360, 1280, 720, 0x0d0d0d, 1);
-
+this.add.rectangle(640, 360, 1280, 720, 0x0d0d0d, 1)
+.setDepth(0);
 
     this.title = this.add.text(40, 50, "PROJECTS", {
-      fontSize: "40px",
-      fill: "#ffffff"
-    }).setOrigin(0,0);
+  fontSize: "40px",
+  fill: "#ffffff"
+})
+.setOrigin(0,0)
+.setDepth(10);
+this.gridContainer = this.add.container(0, 0);
+this.gridContainer.setDepth(1);
 
-
-    this.cards = [];
-let cols = 3;
-let spacingX = 420;
-let spacingY = 300;
+this.cards = [];
+let cols = 2;
+let spacingX = 480;
+let spacingY = 320;
       let totalWidth = cols * spacingX;
 let startX = this.scale.width / 2 - totalWidth / 2 + spacingX / 2;
-          let startY = 280;
+          let startY = 320 ;
+   this.gridContainer = this.add.container(0, 0);
+this.gridContainer.setDepth(1);
+
+
 for(let i = 0; i < projects.length; i++){
 
   let col = i % cols;
@@ -953,36 +956,33 @@ for(let i = 0; i < projects.length; i++){
 
   let container = this.add.container(x, y);
   container.setSize(240,160);
-let bg = this.add.rectangle(0, 0, 380, 240, 0x111111, 0.9);
+let bg = this.add.rectangle(0, 0, 420, 270, 0x111111, 0.9);
 bg.setStrokeStyle(2, 0xffffff, 0.2);
 
-  let img = this.add.image(0, -20, projects[i].title);
- let maxWidth = 340;
-let maxHeight = 180;
-
-let scale = Math.min(
-  maxWidth / img.width,
-  maxHeight / img.height
-);
-
-img.setScale(scale);
+let img = this.add.image(0, -20, projects[i].title);
+img.setDisplaySize(360, 200);
 img.setOrigin(0.5);
-img.setPosition(0, -10);
 
-  let text = this.add.text(0, 110, projects[i].title, {
+let text = this.add.text(0, 120, projects[i].title, {
   fontSize: "18px",
   color: "#ffffff"
 }).setOrigin(0.5);
 
-  container.add([bg, img, text]);
-
+container.add([bg, img, text]);
+  this.gridContainer.add(container);
   this.cards.push(container);
 }
 
 
-    this.detailImage = this.add.image(640, 220, projects[0].title)
-      .setScale(0.4)
-      .setVisible(false);
+   this.detailImage = this.add.image(
+  this.scale.width / 2,
+  this.scale.height / 2 - 120,
+  projects[0].title
+)
+.setDisplaySize(500, 260)
+.setDepth(10)
+.setScrollFactor(0)
+.setVisible(false);
 
     this.detailText = this.add.text(640, 420, "", {
       fontSize: "28px",
@@ -1001,6 +1001,64 @@ img.setPosition(0, -10);
     this.repoKey = this.input.keyboard.addKey("R");
 
     this.updateSelection();
+    this.add.text(this.scale.width - 40, 40, "ESC", {
+      fontSize: "20px",
+      fill:"#aaaaaa"
+    }).setOrigin(1,0);
+    this.add.text(this.scale.width - 40, 65, "Exit", {
+      fontSize: "16px",
+      fill:"#666666"
+    }).setOrigin(1,0);
+
+    let topFade = this.add.rectangle(
+      this.scale.width / 2,
+      0,
+      this.scale.width,
+      120,
+      0x0d0d0d,
+      1
+    ).setOrigin(0.5, 0).setAlpha(0.08).setDepth(5);
+
+
+    topFade.setDepth(5);
+    topFade.setScrollFactor(0);
+
+    let bottomFade = this.add.rectangle(
+    this.scale.width / 2,
+    this.scale.height,
+    this.scale.width,
+    140,
+    0x0d0d0d,
+    1
+    ).setOrigin(0.5, 1).setAlpha(0.25).setDepth(5);
+
+bottomFade.setDepth(5);
+bottomFade.setScrollFactor(0);
+topFade.setAlpha(0.08);
+bottomFade.setAlpha(0.08);
+
+  this.detailOverlay = this.add.rectangle(
+  this.scale.width / 2,
+  this.scale.height / 2,
+  this.scale.width,
+  this.scale.height,
+  0x000000,
+  0.7
+).setDepth(8).setScrollFactor(0).setVisible(false);
+
+this.detailBox = this.add.rectangle(
+  this.scale.width / 2,
+  this.scale.height / 2,
+  800,
+  500,
+  0x111111,
+  0.95
+)
+.setStrokeStyle(2, 0xffffff, 0.2)
+.setDepth(9)
+.setScrollFactor(0)
+.setVisible(false);
+
   }
 
   updateSelection(){
@@ -1053,39 +1111,62 @@ img.setPosition(0, -10);
   }
 
 
-  update(){
-    if(this.mode === "grid"){
-      if(Phaser.Input.Keyboard.JustDown(this.cursors.right)) this.selectedProject++ ;
-      if(Phaser.Input.Keyboard.JustDown(this.cursors.left)) this.selectedProject-- ;
-      if(Phaser.Input.Keyboard.JustDown(this.cursors.down)) this.selectedProject += 3;
-      if(Phaser.Input.Keyboard.JustDown(this.cursors.up)) this.selectedProject -= 3 ;
+ update(){
 
-this.selectedProject = Phaser.Math.Wrap(this.selectedProject, 0, projects.length);
-      this.updateSelection() ;
-      if(Phaser.Input.Keyboard.JustDown(this.enterKey)){
-        this.openDetail();
-      }
-      if(Phaser.Input.Keyboard.JustDown(this.escKey)){
-        this.scene.start("GameScene");
-      }
+  if(this.mode === "grid"){
+
+
+    if(Phaser.Input.Keyboard.JustDown(this.cursors.right)) this.selectedProject++;
+    if(Phaser.Input.Keyboard.JustDown(this.cursors.left)) this.selectedProject--;
+    if(Phaser.Input.Keyboard.JustDown(this.cursors.down)) this.selectedProject += 2;
+    if(Phaser.Input.Keyboard.JustDown(this.cursors.up)) this.selectedProject -= 2;
+
+    this.selectedProject = Phaser.Math.Wrap(this.selectedProject, 0, projects.length);
+    this.updateSelection();
+
+
+    if(Phaser.Input.Keyboard.JustDown(this.enterKey)){
+      this.openDetail();
     }
-    else if(this.mode === "detail"){
 
-      let project = projects[this.selectedProject];
+    if(Phaser.Input.Keyboard.JustDown(this.escKey)){
+      this.scene.start("GameScene");
+    }
+    if (this.cursors.down.isDown) {
+      this.scrollY -= this.scrollSpeed;
+    }
 
-      if(Phaser.Input.Keyboard.JustDown(this.enterKey)){
-        window.open(project.demo, "_blank");
-      }
+if (this.cursors.up.isDown) {
+      this.scrollY += this.scrollSpeed;
+    }
 
-      if(Phaser.Input.Keyboard.JustDown(this.repoKey)){
-        window.open(project.repo, "_blank");
-      }
 
-      if(Phaser.Input.Keyboard.JustDown(this.escKey)){
-        this.closeDetail();
-      }
+let totalRows = Math.ceil(projects.length / 2);
+let contentHeight = totalRows * 320 ;
+let visibleHeight = this.scale.height - 200;
+let maxScroll = -(contentHeight-visibleHeight);
+
+this.scrollY = Phaser.Math.Clamp(this.scrollY, maxScroll, 0);
+this.gridContainer.y += (this.scrollY - this.gridContainer.y) * 0.1;
+  }
+
+  else if(this.mode === "detail"){
+
+    let project = projects[this.selectedProject];
+
+    if(Phaser.Input.Keyboard.JustDown(this.enterKey)){
+      window.open(project.demo, "_blank");
+    }
+
+    if(Phaser.Input.Keyboard.JustDown(this.repoKey)){
+      window.open(project.repo, "_blank");
+    }
+
+    if(Phaser.Input.Keyboard.JustDown(this.escKey)){
+      this.closeDetail();
     }
   }
+}
 }
 
 class MiniGameScene extends Phaser.Scene {
