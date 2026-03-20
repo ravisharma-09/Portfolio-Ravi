@@ -48,37 +48,43 @@ let projects = [
     title: "Tip Calculator",
     image: "tip.png",
     demo: "https://tip-calculator-omega-two.vercel.app/",
-    repo: "https://github.com/ravisharma-09/tip-calculator"
+    repo: "https://github.com/ravisharma-09/tip-calculator",
+    desc: "A simple and responsive Tip Calculator built using HTML, CSS, and JavaScript Enter your bill amount and tip percentage, and get the tip value and total amount instantly. Designed for easy use on both desktop and mobile screens. Perfect for learning DOM manipulation and basic UI with frontend technologies."
   },
   {
     title: "Stone Paper Scissor",
-    image:"stone.png",
+    image: "stone.png",
     demo: "https://stone-paper-nine.vercel.app/",
-    repo: "https://github.com/ravisharma-09/stone-paper"
+    repo: "https://github.com/ravisharma-09/stone-paper",
+    desc: "Stone-Paper Scissor is a fun beginner-level web game built with HTML, CSS, and JavaScript. It lets you play Rock-Paper-Scissors against the computer, showing emoji animations and the win/tie/lose result instantly. This project is great for learning DOM interaction and basic game logic in JavaScript"
   },
   {
     title: "Portfolio Ravi",
-        image: "portfolio.png",
+    image: "portfolio.png",
     demo: "https://sharmaravi.in",
-    repo: "https://github.com/ravisharma-09/Portfolio-Ravi"
+    repo: "https://github.com/ravisharma-09/Portfolio-Ravi",
+    desc: "Portfolio web game based you see this here only"
   },
   {
     title: "Weight Converter",
     image: "weight.png",
     demo: "https://weight-converter-nine.vercel.app/",
-    repo: "https://github.com/ravisharma-09/weight-converter"
+    repo: "https://github.com/ravisharma-09/weight-converter",
+    desc: "This is a simple web project that converts pounds to kilograms. The user enters weight in pounds and the result in kilograms appears instantly."
   },
   {
     title: "Height Converter",
     image: "height.png",
     demo: "https://height-converter.vercel.app",
-    repo: "https://github.com/ravisharma-09/height-converter"
+    repo: "https://github.com/ravisharma-09/height-converter",
+    desc: "Height Converter is a simple web app that converts height from feet and inches into centimeters. It is built using HTML, CSS and JavaScript and helps users quickly calculate their height in different units."
   },
   {
     title: "Linkipin",
     image: "linkipin.png",
     demo: "https://linkipin.vercel.app/",
-    repo: "https://github.com/ravisharma-09/linkipin"
+    repo: "https://github.com/ravisharma-09/linkipin",
+    desc: "only ui based connection social media ui made to show how interactive social media shoul look"
   }
 ];
 
@@ -380,9 +386,9 @@ achievementText.setScrollFactor(0);
 
 skillsPanel = this.add.rectangle(
   this.scale.width / 2,
-  this.scale.height / 2,
-  600,
+  this.scale.height / 2-40,
   400,
+  350,
   0x000000,
   0.8
 );
@@ -684,39 +690,6 @@ selectedProject = Phaser.Math.Wrap(selectedProject, 0, projectCards.length);
 
 this.updateProjectSelection();
 
-
-
-
-  if(Phaser.Input.Keyboard.JustDown(this.key1)){
-    this.projectImage.setTexture(projects[0].title);
-    window.open(projects[0].demo, "_blank");
-  }
-
-  if(Phaser.Input.Keyboard.JustDown(this.key2)){
-    this.projectImage.setTexture(projects[1].title);
-    window.open(projects[1].demo, "_blank");
-  }
-
-  if(Phaser.Input.Keyboard.JustDown(this.key3)){
-    this.projectImage.setTexture(projects[2].title);
-    window.open(projects[2].demo, "_blank");
-  }
-
-  if(Phaser.Input.Keyboard.JustDown(this.key4)){
-    this.projectImage.setTexture(projects[3].title);
-    window.open(projects[3].demo, "_blank");
-  }
-
-  if(Phaser.Input.Keyboard.JustDown(this.key5)){
-    this.projectImage.setTexture(projects[4].title);
-    window.open(projects[4].demo, "_blank");
-  }
-
-  if(Phaser.Input.Keyboard.JustDown(this.key6)){
-    this.projectImage.setTexture(projects[5].title);
-    window.open(projects[5].demo, "_blank");
-  }
-
 }
   interactText.setVisible(false);
   if(Phaser.Input.Keyboard.JustDown(closeKey)){
@@ -900,14 +873,7 @@ else if(projectDistance < projectRange){
     alpha: 0.75,
     duration: 200
   });
-
- projectPanel.setScale(0.85);
-projectPanel.setAlpha(0);
-projectPanel.setVisible(true);
-
-for (let card of projectCards){
-  card.setVisible(true);
-}
+this.transitionTo("ProjectScene");
 
   this.tweens.add({
     targets: projectPanel,
@@ -1032,7 +998,155 @@ else if(doorDistance < doorRange){
 }
 }}
 
+class ProjectScene extends Phaser.Scene {
+  constructor(){
+    super("ProjectScene");
+  }
 
+  init(data){
+    this.selectedProject = data?.index || 0 ;
+
+  }
+
+create(){
+
+    this.mode = "grid"; 
+
+    this.cursors = this.input.keyboard.createCursorKeys();
+    this.enterKey = this.input.keyboard.addKey("ENTER");
+    this.escKey = this.input.keyboard.addKey("ESC");
+
+    this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.9);
+
+
+    this.title = this.add.text(640, 50, "PROJECTS", {
+      fontSize: "40px",
+      fill: "#ffffff"
+    }).setOrigin(0.5);
+
+
+    this.cards = [];
+
+    let startX = 300;
+    let startY = 200;
+
+    for(let i = 0; i < projects.length; i++){
+
+      let col = i % 3;
+      let row = Math.floor(i / 3);
+
+      let x = startX + col * 300;
+      let y = startY + row * 200;
+
+      let card = this.add.image(x, y, projects[i].title);
+      card.setScale(0.25);
+
+      this.cards.push(card);
+    }
+
+
+    this.detailImage = this.add.image(640, 220, projects[0].title)
+      .setScale(0.4)
+      .setVisible(false);
+
+    this.detailText = this.add.text(640, 420, "", {
+      fontSize: "28px",
+      fill: "#ffffff",
+      align: "center"
+    }).setOrigin(0.5).setVisible(false);
+
+    this.infoText = this.add.text(640, 650,
+      "ENTER = Open Demo | R = Repo | ESC = Back",
+      {
+        fontSize: "20px",
+        fill: "#aaaaaa"
+      }
+    ).setOrigin(0.5).setVisible(false);
+
+    this.repoKey = this.input.keyboard.addKey("R");
+
+    this.updateSelection();
+  }
+
+  updateSelection(){
+    for(let i = 0; i < this.cards.length; i++){
+      if(i === this.selectedProject){
+        this.cards[i].setScale(0.32);
+        this.cards[i].setTint(0xffffff);
+      } else {
+        this.cards[i].setScale(0.25);
+        this.cards[i].clearTint();
+      }
+    }
+  }
+
+  openDetail(){
+
+    let project = projects[this.selectedProject];
+
+    this.mode = "detail";
+
+
+    this.cards.forEach(c => c.setVisible(false));
+    this.detailImage.setTexture(project.title);
+    this.detailImage.setVisible(true);
+
+    this.detailText.setText(project.title);
+    this.detailText.setVisible(true);
+
+    this.infoText.setVisible(true);
+
+    this.detailText.setText(
+      project.title +'\n\n'+project.desc
+    );
+  }
+
+  closeDetail(){
+
+    this.mode = "grid";
+    this.cards.forEach(c => c.setVisible(true));
+
+
+    this.detailImage.setVisible(false);
+    this.detailText.setVisible(false);
+    this.infoText.setVisible(false);
+  }
+
+
+  update(){
+    if(this.mode === "grid"){
+      if(Phaser.Input.Keyboard.JustDown(this.cursors.right)) this.selectedProject++ ;
+      if(Phaser.Input.Keyboard.JustDown(this.cursors.left)) this.selectedProject-- ;
+      if(Phaser.Input.Keyboard.JustDown(this.cursors.down)) this.selectedProject += 3;
+      if(Phaser.Input.Keyboard.JustDown(this.cursors.up)) this.selectedProject -= 3 ;
+
+this.selectedProject = Phaser.Math.Wrap(this.selectedProject, 0, projects.length);
+      this.updateSelection() ;
+      if(Phaser.Input.Keyboard.JustDown(this.enterKey)){
+        this.openDetail();
+      }
+      if(Phaser.Input.Keyboard.JustDown(this.escKey)){
+        this.scene.start("GameScene");
+      }
+    }
+    else if(this.mode === "detail"){
+
+      let project = projects[this.selectedProject];
+
+      if(Phaser.Input.Keyboard.JustDown(this.enterKey)){
+        window.open(project.demo, "_blank");
+      }
+
+      if(Phaser.Input.Keyboard.JustDown(this.repoKey)){
+        window.open(project.repo, "_blank");
+      }
+
+      if(Phaser.Input.Keyboard.JustDown(this.escKey)){
+        this.closeDetail();
+      }
+    }
+  }
+}
 
 class MiniGameScene extends Phaser.Scene {
   constructor(){
@@ -1351,8 +1465,7 @@ const config = {
   height: 720,
   parent: "game-container",
   transparent: true,
-  scene: [StartScene, GameScene, MiniGameScene],
-  scale: {
+scene: [StartScene, GameScene, ProjectScene, MiniGameScene],  scale: {
   mode: Phaser.Scale.FIT,
   autoCenter: Phaser.Scale.CENTER_BOTH
 }
