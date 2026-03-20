@@ -11,7 +11,7 @@ let room;
 let closeKey;      
 let closeHint;  // closing with esc
 let photoFrame;
-let projectPanel; // for photo frame interaction
+let isPanelOpen = false;
 let projectText; // for photo frame interaction
 let trophyShelf ; // for trophy 
 let achievementPanel; // trophy interaction panel
@@ -279,83 +279,8 @@ this.profileImage.setVisible(false);
 this.profileImage.setScrollFactor(0);
 this.profileImage.setDepth(8);
 
-projectPanel = this.add.rectangle(
-  this.scale.width / 2,
-  this.scale.height / 2,
-  500,
-  350,
-  0x000000,
-  0.8
-);
-
-projectPanel.setVisible(false);
-projectPanel.setScrollFactor(0);
-let startX = this.scale.width / 2 - 200 ;
-let startY = this.scale.height / 2 -80 ;
-let cardWidth = 150 ;
-let cardHeight = 100 ;
-
-for (let i = 0; i < projects.length; i++){
-  let col = i%3 ;
-  let row = Math.floor(i / 3);
-  let x = startX + col*170 ;
-  let y = startY + row*140 ;
-  let card = this.add.image(x, y, projects[i].title);
-  card.setScale(0.18);
-  card.setScrollFactor(0);
-  card.setDepth(7);
-  card.setVisible(false);
-  projectCards.push(card);
-}
-this.updateProjectSelection = () => {
-  for (let i = 0; i < projectCards.length ; i++){
-    if(i === selectedProject){
-      projectCards[i].setScale(0.24);
-      projectCards[i].setTint(0xffffff);
-
-    }
-
-    else{
-      projectCards[i].setScale(0.18);
-      projectCards[i].clearTint()
-    }
-  }
-};
-this.updateProjectSelection();
-
-this.projectImage = this.add.image(
-  this.scale.width / 2,
-  this.scale.height / 2 - 110 ,
-  "profile" 
-);
-
-this.projectImage.setScale(0.35);
-this.projectImage.setVisible(false);
-this.projectImage.setScrollFactor(0);
-this.projectImage.setDepth(7);
 
 
-projectText = this.add.text(
-  this.scale.width / 2,
-  this.scale.height / 2,
-  "PROJECTS\n\n"+
-  "1 Tip Calculator\n"+
-  "2 Stone Paper Scissor\n"+
-  "3 Portfolio-Ravi\n"+
-  "4 Weight Converter\n" +
-  "5 Height Converter\n" +
-  "6 Linkipin\n\n" +
-  "Press number to view project",
-  {
-    fontSize: "28px",
-    fill: "#ffffff",
-    align: "left"
-  }
-);
-
-projectText.setOrigin(0.5);
-projectText.setVisible(false);
-projectText.setScrollFactor(0);
 
 achievementPanel = this.add.rectangle(
   this.scale.width / 2,
@@ -467,14 +392,12 @@ doorText = this.add.text(
   doorText.setScrollFactor(0);
   doorText.setDepth(1);
   aboutPanel.setDepth(6);
-projectPanel.setDepth(6);
 achievementPanel.setDepth(6);
 skillsPanel.setDepth(6);
 contactPanel.setDepth(6);
 doorPanel.setDepth(6);
 
 aboutText.setDepth(7);
-projectText.setDepth(7);
 achievementText.setDepth(7);
 skillsText.setDepth(7);
 contactText.setDepth(7);
@@ -563,8 +486,14 @@ this.tweens.add({
   duration: 600,
   ease: "Sine.easeOut"
 });
+aboutPanel.setVisible(false);
+achievementPanel.setVisible(false);
+skillsPanel.setVisible(false);
+contactPanel.setVisible(false);
 
-};
+} 
+
+
 addTerminalMessage(message){
 
   terminalQueue.push(message);
@@ -662,47 +591,19 @@ transitionTo(sceneKey){
 }
 
 
-
 // hi ---------------------------------------------------------------------------------
 
 update(){
+if(isPanelOpen){
 
-if(aboutPanel.visible || projectPanel.visible || achievementPanel.visible || skillsPanel.visible || contactPanel.visible ){
-  if(projectPanel.visible){
-
-  if(Phaser.Input.Keyboard.JustDown(cursors.right)){
-  selectedProject++;
-}
-
-if(Phaser.Input.Keyboard.JustDown(cursors.left)){
-  selectedProject--;
-}
-
-if(Phaser.Input.Keyboard.JustDown(cursors.down)){
-  selectedProject += 3;
-}
-
-if(Phaser.Input.Keyboard.JustDown(cursors.up)){
-  selectedProject -= 3;
-}
-
-selectedProject = Phaser.Math.Wrap(selectedProject, 0, projectCards.length);
-
-this.updateProjectSelection();
-
-}
   interactText.setVisible(false);
   if(Phaser.Input.Keyboard.JustDown(closeKey)){
+    isPanelOpen = false;
     aboutPanel.setVisible(false);
     aboutText.setVisible(false);
     achievementPanel.setVisible(false);
     achievementText.setVisible(false);
-    projectPanel.setVisible(false);
-    projectText.setVisible(false);
-    this.projectImage.setVisible(false);
-     for (let card of projectCards){
-    card.setVisible(false);
-  }
+   
 
     skillsPanel.setVisible(false);
     skillsText.setVisible(false);
@@ -794,6 +695,7 @@ if(distance < deskRange){
   interactText.setText("Press E to Interact");
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
+    isPanelOpen = true;
    this.panelOverlay.setVisible(true);
 
 this.tweens.add({
@@ -828,7 +730,7 @@ else if(trophyDistance < trophyRange){
   interactText.setText("Press E to view achievements");
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
-
+isPanelOpen = true;
   this.panelOverlay.setVisible(true);
 
   this.tweens.add({
@@ -875,13 +777,7 @@ else if(projectDistance < projectRange){
   });
 this.transitionTo("ProjectScene");
 
-  this.tweens.add({
-    targets: projectPanel,
-    scale: 1,
-    alpha: 1,
-    duration: 600,
-    ease: "Back.out"
-  });
+  
 
   closeHint.setVisible(true);
 
@@ -895,7 +791,7 @@ else if(skillsDistance < skillsRange){
   interactText.setText("Press E to view skills");
 
  if(Phaser.Input.Keyboard.JustDown(interactKey)){
-
+  isPanelOpen = true;
   this.panelOverlay.setVisible(true);
 
   this.tweens.add({
@@ -932,7 +828,7 @@ else if(mailDistance < mailRange){
   interactText.setText("Press E to contact");
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
-
+    isPanelOpen = true;
   this.panelOverlay.setVisible(true);
 
   this.tweens.add({
@@ -969,6 +865,7 @@ else if(doorDistance < doorRange){
   interactText.setText("Press E to use door");
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
+    isPanelOpen = true;
     this.panelOverlay.setVisible(true);
 
     this.tweens.add({
@@ -1008,41 +905,79 @@ class ProjectScene extends Phaser.Scene {
 
   }
 
-create(){
+  preload() {
+  for (let project of projects){
+    this.load.image(
+      project.title,
+      "assets/projects/" + project.image
+    );
+    this.textures.get(project.title).setFilter(Phaser.Textures.FilterMode.LINEAR);
+  }
 
+}
+
+create(){
+this.textures.each(texture => {
+  texture.setFilter(Phaser.Textures.FilterMode.NEAREST);
+  this.game.config.pixelArt = false;
+});
     this.mode = "grid"; 
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.enterKey = this.input.keyboard.addKey("ENTER");
     this.escKey = this.input.keyboard.addKey("ESC");
 
-    this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.9);
+this.add.rectangle(640, 360, 1280, 720, 0x0d0d0d, 1);
 
 
-    this.title = this.add.text(640, 50, "PROJECTS", {
+    this.title = this.add.text(40, 50, "PROJECTS", {
       fontSize: "40px",
       fill: "#ffffff"
-    }).setOrigin(0.5);
+    }).setOrigin(0,0);
 
 
     this.cards = [];
+let cols = 3;
+let spacingX = 420;
+let spacingY = 300;
+      let totalWidth = cols * spacingX;
+let startX = this.scale.width / 2 - totalWidth / 2 + spacingX / 2;
+          let startY = 280;
+for(let i = 0; i < projects.length; i++){
 
-    let startX = 300;
-    let startY = 200;
+  let col = i % cols;
+  let row = Math.floor(i / cols);
 
-    for(let i = 0; i < projects.length; i++){
+  let x = startX + col * spacingX;
+  let y = startY + row * spacingY;
 
-      let col = i % 3;
-      let row = Math.floor(i / 3);
+  let container = this.add.container(x, y);
+  container.setSize(240,160);
+let bg = this.add.rectangle(0, 0, 380, 240, 0x111111, 0.9);
+bg.setStrokeStyle(2, 0xffffff, 0.2);
 
-      let x = startX + col * 300;
-      let y = startY + row * 200;
+  let img = this.add.image(0, -20, projects[i].title);
+ let maxWidth = 340;
+let maxHeight = 180;
 
-      let card = this.add.image(x, y, projects[i].title);
-      card.setScale(0.25);
+let scale = Math.min(
+  maxWidth / img.width,
+  maxHeight / img.height
+);
 
-      this.cards.push(card);
-    }
+img.setScale(scale);
+img.setOrigin(0.5);
+img.setPosition(0, -10);
+
+  let text = this.add.text(0, 110, projects[i].title, {
+  fontSize: "18px",
+  color: "#ffffff"
+}).setOrigin(0.5);
+
+  container.add([bg, img, text]);
+
+  this.cards.push(container);
+}
 
 
     this.detailImage = this.add.image(640, 220, projects[0].title)
@@ -1070,15 +1005,20 @@ create(){
 
   updateSelection(){
     for(let i = 0; i < this.cards.length; i++){
-      if(i === this.selectedProject){
-        this.cards[i].setScale(0.32);
-        this.cards[i].setTint(0xffffff);
-      } else {
-        this.cards[i].setScale(0.25);
-        this.cards[i].clearTint();
-      }
+
+    if(i === this.selectedProject){
+
+      this.cards[i].setScale(1.1);   
+      this.cards[i].setDepth(10);    
+
+    } else {
+
+      this.cards[i].setScale(1);     
+      this.cards[i].setDepth(1);
+
     }
   }
+}
 
   openDetail(){
 
