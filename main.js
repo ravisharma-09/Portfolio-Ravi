@@ -152,6 +152,10 @@ preload() {
       "assets/projects/" + project.image
     );
   }
+  this.load.audio("click", "assets/sounds/click.mp3");
+  this.load.audio("hover", "assets/sounds/hover.mp3");
+  this.load.audio("open", "assets/sounds/open.mp3");
+  this.load.audio("close", "assets/sounds/close.mp3");
 
 }
 
@@ -176,6 +180,14 @@ this.tweens.add({
 
   this.cameras.main.startFollow(player, true, 0.08, 0.08);
   this.cameras.main.centerOn(room.width / 2, room.height / 2);
+
+//soundsss
+this.sounds ={
+  click: this.sound.add("click", { volume: 0.4}),
+  hover: this.sound.add("hover", { volume: 0.2}),
+  open: this.sound.add("open", { volume: 0.4}),
+  close: this.sound.add("close", { volume: 0.4}),
+};
 
 desk = {
   x: 180,
@@ -591,6 +603,7 @@ transitionTo(sceneKey){
 // hi ---------------------------------------------------------------------------------
 
 update(){
+  
 if(isPanelOpen){
 
   interactText.setVisible(false);
@@ -695,6 +708,7 @@ if(distance < deskRange){
   interactText.setText("Press E to Interact");
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
+    this.sounds.click.play();
     isPanelOpen = true;
    this.panelOverlay.setVisible(true);
 
@@ -730,6 +744,7 @@ else if(trophyDistance < trophyRange){
   interactText.setText("Press E to view achievements");
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
+    this.sounds.click.play();
 isPanelOpen = true;
   this.panelOverlay.setVisible(true);
 
@@ -767,7 +782,7 @@ else if(projectDistance < projectRange){
   interactText.setText("Press E to view projects");
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
-
+this.sounds.click.play();
   this.panelOverlay.setVisible(true);
 
   this.tweens.add({
@@ -791,6 +806,7 @@ else if(skillsDistance < skillsRange){
   interactText.setText("Press E to view skills");
 
  if(Phaser.Input.Keyboard.JustDown(interactKey)){
+  this.sounds.click.play();
   isPanelOpen = true;
   this.panelOverlay.setVisible(true);
 
@@ -828,6 +844,7 @@ else if(mailDistance < mailRange){
   interactText.setText("Press E to contact");
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
+    this.sounds.click.play();
     isPanelOpen = true;
   this.panelOverlay.setVisible(true);
 
@@ -866,7 +883,7 @@ else if(doorDistance < doorRange){
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
 
-    
+    this.sounds.click.play();
     this.panelOverlay.setVisible(true);
 
     this.tweens.add({
