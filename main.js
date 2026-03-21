@@ -206,12 +206,9 @@ door = {
   keys = this.input.keyboard.addKeys("W,A,S,D");
   interactKey = this.input.keyboard.addKey("E");
   closeKey = this.input.keyboard.addKey("ESC");
-  this.key1 = this.input.keyboard.addKey("ONE");
-this.key2 = this.input.keyboard.addKey("TWO");
-this.key3 = this.input.keyboard.addKey("THREE");
-this.key4 = this.input.keyboard.addKey("FOUR");
-this.key5 = this.input.keyboard.addKey("FIVE");
-this.key6 = this.input.keyboard.addKey("SIX");
+  this.key1 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
+this.key2 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO);
+ 
 interactText = this.add.text(desk.x, desk.y - 80, "", {
   fontSize: "32px",
   fill: "#ffffff",   
@@ -630,12 +627,15 @@ if(isPanelOpen){
 
 
 if(doorPanel.visible){
+
+
   interactText.setVisible(false);
 
   if(Phaser.Input.Keyboard.JustDown(closeKey)){
     doorPanel.setVisible(false);
     doorText.setVisible(false);
     closeHint.setVisible(false);
+    this.panelOverlay.setVisible(false);
   }
 if(Phaser.Input.Keyboard.JustDown(this.key1)){
   this.transitionTo("StartScene");
@@ -865,7 +865,8 @@ else if(doorDistance < doorRange){
   interactText.setText("Press E to use door");
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
-    isPanelOpen = true;
+
+    
     this.panelOverlay.setVisible(true);
 
     this.tweens.add({
