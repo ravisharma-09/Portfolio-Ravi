@@ -922,9 +922,8 @@ this.scrollSpeed = 5;
     this.cursors = this.input.keyboard.createCursorKeys();
     this.enterKey = this.input.keyboard.addKey("ENTER");
     this.escKey = this.input.keyboard.addKey("ESC");
-
-this.add.rectangle(640, 360, 1280, 720, 0x0d0d0d, 1)
-.setDepth(0);
+this.bg = this.add.rectangle(640, 360, 1280, 720, 0x0d0d0d, 1);
+this.bg.setDepth(0);
 
     this.title = this.add.text(40, 50, "PROJECTS", {
   fontSize: "40px",
@@ -932,8 +931,18 @@ this.add.rectangle(640, 360, 1280, 720, 0x0d0d0d, 1)
 })
 .setOrigin(0,0)
 .setDepth(10);
+
+this.openHint = this.add.text(40, 95, "ENTER → Open Project", {
+  fontSize:"18px",
+  fill:"#aaaaaa"
+}
+).setOrigin(0, 0).setDepth(10).setScrollFactor(0);
+
+
+
 this.gridContainer = this.add.container(0, 0);
 this.gridContainer.setDepth(1);
+
 
 this.cards = [];
 let cols = 2;
@@ -942,8 +951,7 @@ let spacingY = 320;
       let totalWidth = cols * spacingX;
 let startX = this.scale.width / 2 - totalWidth / 2 + spacingX / 2;
           let startY = 320 ;
-   this.gridContainer = this.add.container(0, 0);
-this.gridContainer.setDepth(1);
+
 
 
 for(let i = 0; i < projects.length; i++){
@@ -973,6 +981,11 @@ container.add([bg, img, text]);
   this.cards.push(container);
 }
 
+let rows = Math.ceil(projects.length / 2);
+let totalHeight = rows*320 ;
+
+this.maxScroll = Math.max(0, totalHeight - this.scale.height + 200) ;
+
 
    this.detailImage = this.add.image(
   this.scale.width / 2,
@@ -984,40 +997,42 @@ container.add([bg, img, text]);
 .setScrollFactor(0)
 .setVisible(false);
 
-    this.detailText = this.add.text(640, 420, "", {
-      fontSize: "28px",
-      fill: "#ffffff",
-      align: "center"
-    }).setOrigin(0.5).setVisible(false);
+    this.detailText = this.add.text(
+      this.scale.width /2,
+      this.scale.height /2 + 100,
+      "",
+      {
+        fontSize:"18px",
+        fill:"#ffffff",
+        align:"center",
+        wordWrap:{width:700}
+      }
+    ).setOrigin(0.5).setDepth(10).setScrollFactor(0).setVisible(false);
 
     this.infoText = this.add.text(640, 650,
       "ENTER = Open Demo | R = Repo | ESC = Back",
       {
-        fontSize: "20px",
-        fill: "#aaaaaa"
+        fontSize: "23px",
+        fill: "#F0F8FF"
       }
     ).setOrigin(0.5).setVisible(false);
 
     this.repoKey = this.input.keyboard.addKey("R");
-
-    this.updateSelection();
-    this.add.text(this.scale.width - 40, 40, "ESC", {
+ this.updateSelection();
+    this.add.text(this.scale.width - 40, 40, "Exit", {
       fontSize: "20px",
-      fill:"#aaaaaa"
+      fill:"#F0F8FF"
     }).setOrigin(1,0);
-    this.add.text(this.scale.width - 40, 65, "Exit", {
+    this.add.text(this.scale.width - 40, 70, "Press -> ESC", {
       fontSize: "16px",
       fill:"#666666"
     }).setOrigin(1,0);
-
-    let topFade = this.add.rectangle(
+ let topFade = this.add.rectangle(
       this.scale.width / 2,
       0,
-      this.scale.width,
-      120,
+      this.scale.width,  120,
       0x0d0d0d,
-      1
-    ).setOrigin(0.5, 0).setAlpha(0.08).setDepth(5);
+      1 ).setOrigin(0.5, 0).setAlpha(0.08).setDepth(5);
 
 
     topFade.setDepth(5);
@@ -1037,14 +1052,14 @@ bottomFade.setScrollFactor(0);
 topFade.setAlpha(0.08);
 bottomFade.setAlpha(0.08);
 
-  this.detailOverlay = this.add.rectangle(
+this.detailOverlay = this.add.rectangle(
   this.scale.width / 2,
   this.scale.height / 2,
   this.scale.width,
   this.scale.height,
   0x000000,
   0.7
-).setDepth(8).setScrollFactor(0).setVisible(false);
+).setDepth(3).setScrollFactor(0).setVisible(false);
 
 this.detailBox = this.add.rectangle(
   this.scale.width / 2,
@@ -1058,6 +1073,11 @@ this.detailBox = this.add.rectangle(
 .setDepth(9)
 .setScrollFactor(0)
 .setVisible(false);
+   this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
+  this.targetScrollY += deltaY * 0.5;
+  this.targetScrollY = Phaser.Math.Clamp(this.targetScrollY, 0, this.maxScroll);
+});
+
 
   }
 
@@ -1079,6 +1099,7 @@ this.detailBox = this.add.rectangle(
 }
 
   openDetail(){
+    this.detailOverlay.setVisible(true);
 
     let project = projects[this.selectedProject];
 
@@ -1100,7 +1121,7 @@ this.detailBox = this.add.rectangle(
   }
 
   closeDetail(){
-
+    this.detailOverlay.setVisible(false);
     this.mode = "grid";
     this.cards.forEach(c => c.setVisible(true));
 
@@ -1114,43 +1135,39 @@ this.detailBox = this.add.rectangle(
  update(){
 
   if(this.mode === "grid"){
-
-
-    if(Phaser.Input.Keyboard.JustDown(this.cursors.right)) this.selectedProject++;
-    if(Phaser.Input.Keyboard.JustDown(this.cursors.left)) this.selectedProject--;
-    if(Phaser.Input.Keyboard.JustDown(this.cursors.down)) this.selectedProject += 2;
-    if(Phaser.Input.Keyboard.JustDown(this.cursors.up)) this.selectedProject -= 2;
-
-    this.selectedProject = Phaser.Math.Wrap(this.selectedProject, 0, projects.length);
-    this.updateSelection();
-
-
+if(Phaser.Input.Keyboard.JustDown(this.escKey)){
+  this.scene.start("GameScene");
+}
     if(Phaser.Input.Keyboard.JustDown(this.enterKey)){
       this.openDetail();
     }
+if(Phaser.Input.Keyboard.JustDown(this.cursors.right)) this.selectedProject++;
+if(Phaser.Input.Keyboard.JustDown(this.cursors.left)) this.selectedProject--;
+if(Phaser.Input.Keyboard.JustDown(this.cursors.down)) this.selectedProject += 2;
+if(Phaser.Input.Keyboard.JustDown(this.cursors.up)) this.selectedProject -= 2;
 
-    if(Phaser.Input.Keyboard.JustDown(this.escKey)){
-      this.scene.start("GameScene");
-    }
-    if (this.cursors.down.isDown) {
-      this.scrollY -= this.scrollSpeed;
-    }
-
+this.selectedProject = Phaser.Math.Clamp(this.selectedProject, 0, projects.length - 1);
+this.updateSelection();
+if (this.cursors.down.isDown) {
+  this.targetScrollY += 10;
+}
 if (this.cursors.up.isDown) {
-      this.scrollY += this.scrollSpeed;
-    }
+  this.targetScrollY -= 10;
+}
+if (
+  Phaser.Input.Keyboard.JustDown(this.cursors.down) ||
+  Phaser.Input.Keyboard.JustDown(this.cursors.up)
+) {
+  let row = Math.floor(this.selectedProject / 2);
+  this.targetScrollY = row * 320;
+}
+this.targetScrollY = Phaser.Math.Clamp(this.targetScrollY, 0, this.maxScroll);
+this.scrollY += (this.targetScrollY - this.scrollY) * 0.12;
+this.gridContainer.y = -this.scrollY;
+ } 
 
 
-let totalRows = Math.ceil(projects.length / 2);
-let contentHeight = totalRows * 320 ;
-let visibleHeight = this.scale.height - 200;
-let maxScroll = -(contentHeight-visibleHeight);
-
-this.scrollY = Phaser.Math.Clamp(this.scrollY, maxScroll, 0);
-this.gridContainer.y += (this.scrollY - this.gridContainer.y) * 0.1;
-  }
-
-  else if(this.mode === "detail"){
+ else if(this.mode === "detail"){
 
     let project = projects[this.selectedProject];
 
