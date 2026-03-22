@@ -154,12 +154,12 @@ preload() {
       "assets/projects/" + project.image
     );
   }
-  this.load.audio("click", ["assets/sounds/click.mp3", "assets/sounds/click.ogg"] );
-  this.load.audio("hover", ["assets/sounds/hover.mp3", "assets/sounds/hover.ogg"]);
-  this.load.audio("close", ["assets/sounds/close.mp3", "assets/sounds/close.ogg"]);
-  this.load.audio("notify", ["assets/sounds/notify.mp3", "assets/sounds/notify.ogg"]);
-  this.load.audio("bg", ["assets/sounds/bg.mp3", "assets/sounds/bg.ogg"]);
-  this.load.audio("type", ["assets/sounds/type.mp3", "assets/sounds/type.ogg"]);
+  this.load.audio("click", ["assets/sounds/click.ogg", "assets/sounds/click.ogg"] );
+  this.load.audio("hover", ["assets/sounds/hover.ogg", "assets/sounds/hover.ogg"]);
+  this.load.audio("close", ["assets/sounds/close.ogg", "assets/sounds/close.ogg"]);
+  this.load.audio("notify", ["assets/sounds/notify.ogg", "assets/sounds/notify.ogg"]);
+  this.load.audio("bg", ["assets/sounds/bg.ogg", "assets/sounds/bg.ogg"]);
+  this.load.audio("type", ["assets/sounds/type.ogg", "assets/sounds/type.ogg"]);
   this.load.image("icon_github", "assets/icons/github.png");
   this.load.image("icon_linkedin", "assets/icons/linkedin.png");
   this.load.image("icon_instagram", "assets/icons/instagram.png");
@@ -1229,9 +1229,9 @@ class ProjectScene extends Phaser.Scene {
   for (let project of projects){
     this.load.image(project.title, "assets/projects/" + project.image);
   }
-  this.load.audio("click",["assets/sounds/click.mp3", "assets/sounds/click.ogg"]);
-  this.load.audio("close", ["assets/sounds/close.mp3", "assets/sounds/close.ogg"]);
-  this.load.audio("notify",["assets/sounds/notify.mp3", "assets/sounds/notify.ogg"]);
+  this.load.audio("click",["assets/sounds/click.ogg", "assets/sounds/click.ogg"]);
+  this.load.audio("close", ["assets/sounds/close.ogg", "assets/sounds/close.ogg"]);
+  this.load.audio("notify",["assets/sounds/notify.ogg", "assets/sounds/notify.ogg"]);
 
 }
 
@@ -1535,8 +1535,8 @@ class MiniGameScene extends Phaser.Scene {
 
   }
 preload(){
-  this.load.audio("coin",     ["assets/sounds/coin.mp3",     "assets/sounds/coin.ogg"]);
-  this.load.audio("gameover", ["assets/sounds/gameover.mp3", "assets/sounds/gameover.ogg"]);
+  this.load.audio("coin",     ["assets/sounds/coin.ogg",     "assets/sounds/coin.ogg"]);
+  this.load.audio("gameover", ["assets/sounds/gameover.ogg", "assets/sounds/gameover.ogg"]);
 }
 
   create(){
