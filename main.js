@@ -182,6 +182,7 @@ this.tweens.add({
   this.cameras.main.centerOn(room.width / 2, room.height / 2);
 
 //soundsss
+this.moveSoundCooldown = 0;
 this.sounds ={
   click: this.sound.add("click", { volume: 0.4}),
   hover: this.sound.add("hover", { volume: 0.2}),
@@ -680,6 +681,18 @@ if(cursors.down.isDown || keys.S.isDown){
   player.y += speed * delta;
 }
 
+if(
+  cursors.left.isDown || cursors.right.isDown ||
+  cursors.up.isDown || cursors.down.isDown ||
+  keys.A.isDown || keys.D.isDown ||
+  keys.W.isDown || keys.S.isDown
+)
+{
+  if(this.time.now > this.moveSoundCooldown){
+    this.sounds.hover.play();
+    this.moveSoundCooldown = this.time.now + 120; 
+  }
+}
 player.x = Phaser.Math.Clamp(player.x, marginX, room.width - marginX);
 player.y = Phaser.Math.Clamp(player.y, marginTop, room.height - marginBottom);
 
@@ -1037,6 +1050,14 @@ this.maxScroll = Math.max(0, totalHeight - this.scale.height + 200) ;
 
     this.repoKey = this.input.keyboard.addKey("R");
  this.updateSelection();
+    if (
+  Phaser.Input.Keyboard.JustDown(this.cursors.left) ||
+  Phaser.Input.Keyboard.JustDown(this.cursors.right) ||
+  Phaser.Input.Keyboard.JustDown(this.cursors.up) ||
+  Phaser.Input.Keyboard.JustDown(this.cursors.down)
+) {
+  this.sound.play("hover", { volume: 0.2 });
+}
     this.add.text(this.scale.width - 40, 40, "Exit", {
       fontSize: "20px",
       fill:"#F0F8FF"
@@ -1526,5 +1547,4 @@ scene: [StartScene, GameScene, ProjectScene, MiniGameScene],  scale: {
   autoCenter: Phaser.Scale.CENTER_BOTH
 }
 }
-
 const game = new Phaser.Game(config);
