@@ -163,7 +163,7 @@ preload() {
   this.load.image("icon_linkedin", "assets/icons/linkedin.png");
   this.load.image("icon_instagram", "assets/icons/instagram.png");
   this.load.image("icon_globe", "assets/icons/globe.png");
-
+  this.load.image("bubble", "assets/speech-bubble.png");
 }
 
 // hi---------------------------------------------------------------------------------
@@ -184,7 +184,55 @@ this.tweens.add({
 
   player = this.add.sprite(480,400,"player");
   player.setScale(0.1);
+this.bubble = this.add.image(0, 0, "bubble")
+.setDisplaySize(220,130)
+.setDepth(15)
+.setVisible(false);
 
+this.bubbleText = this.add.text(0, 0, "",{
+  fontSize: "14px",
+  fill:"#000000",
+  align: "center",
+  wordWrap:{ width: 180 }
+}).setOrigin(0.5).setDepth(16).setVisible(false);
+
+this.bubbleTimer = null ;
+
+this.showBubble = (msg, duration = 4000) => {
+  this.bubble.setVisible(true);
+  this.bubbleText.setText("").setVisible(true);
+  if(this.bubbleTimer) this.bubbleTimer.remove();
+
+  let index = 0;
+  const typeEvent = this.time.addEvent({
+    delay: 40,
+    repeat: msg.length - 1,
+    callback: () => {
+      index++;
+      this.bubbleText.setText(msg.slice(0, index));
+    }
+  });
+
+
+  const totalDuration = duration + msg.length * 40;
+  this.bubbleTimer = this.time.delayedCall(totalDuration, () => {
+    this.bubble.setVisible(false);
+    this.bubbleText.setVisible(false);
+    typeEvent.remove();
+  });
+};
+this.bubbleFrozen = true;
+this.cameras.main.once("camerafadeincomplete", () => {
+  this.showBubble("Hi! I'm Angel\nExplore this room to\nknow more about my Master'Ravi' 👋", 2000);
+  this.time.delayedCall(4300, () => {
+    this.bubbleFrozen = false;
+  });
+});
+
+this.stillTimer = 0;
+this.spamCount = 0;
+this.lastSpamKey =0 ;
+this.panelOpenCount ={};
   this.cameras.main.startFollow(player, true, 0.08, 0.08);
   this.cameras.main.centerOn(room.width / 2, room.height / 2);
 
@@ -734,8 +782,12 @@ if(isPanelOpen){
   });
  }interactText.setVisible(false);
  return;
-}
-
+}const bubbleOffsetX = player.x > room.width - 300 ? -130 : 130;
+const bubbleOffsetY = player.y < 200 ? 120 : -120;
+this.bubble.setFlipX(player.x > room.width - 300);
+this.bubble.setFlipY(player.y < 200);
+this.bubble.setPosition(player.x + bubbleOffsetX, player.y + bubbleOffsetY);
+this.bubbleText.setPosition(player.x + bubbleOffsetX, player.y + bubbleOffsetY - 5);
 
 if(doorPanel.visible){
 
@@ -762,6 +814,7 @@ if(Phaser.Input.Keyboard.JustDown(this.key2)){
 }
 let speed = 400;
 let delta = this.game.loop.delta / 1000;
+if(this.bubbleFrozen) return;
 
 if(cursors.left.isDown || keys.A.isDown){
   player.x -= speed * delta;
@@ -786,6 +839,29 @@ if(cursors.down.isDown || keys.S.isDown){
 
 player.x = Phaser.Math.Clamp(player.x, marginX, room.width - marginX);
 player.y = Phaser.Math.Clamp(player.y, marginTop, room.height - marginBottom);
+
+const atWall = player.x <= marginX +5 || player.x >= room.width - marginX - 5;
+const atceiling = player.y<=marginTop+5 ;
+if(atWall || atceiling){
+  
+    const msg = atceiling ? "that's the ceiling 💀" : "that's a wall bro 🧱";
+    if(!this.wallBubbleShown){
+    this.wallBubbleShown = true ;
+    this.showBubble(msg, 9999999);
+  }else{
+    this.bubbleText.setText(msg);
+  }
+}else{
+  if(this.wallBubbleShown){
+    this.wallBubbleShown = false ;
+    this.bubble.setVisible(false);
+    this.bubbleText.setVisible(false);
+    if(this.bubbleTimer) this.bubbleTimer.remove()
+  }
+}
+
+
+
 
 let distance = Phaser.Math.Distance.Between(player.x,player.y,desk.x,desk.y);
 let projectDistance = Phaser.Math.Distance.Between(player.x,player.y,photoFrame.x,photoFrame.y);
