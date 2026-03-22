@@ -26,7 +26,7 @@ let contactText;
 let terminalContainer;
 let terminalLogs = [];
 let terminalMaxLogs = 6;
-let typingSpeed = 60 ;
+let typingSpeed = 40 ;
 let typingEvent = null;
 let terminalQueue = [];
 let isTyping = false;
@@ -164,7 +164,7 @@ preload() {
 // hi---------------------------------------------------------------------------------
 
  create() {
-  
+
  room = this.add.image(0, 0, "room");
 room.setOrigin(0);
 this.cameras.main.fadeIn(600, 0, 0, 0);
@@ -186,13 +186,13 @@ this.tweens.add({
 //soundsss
 this.moveSoundCooldown = 0;
 this.sounds ={
-  click: this.sound.add("click", { volume: 0.5}),
-  hover: this.sound.add("hover", { volume: 0.2 }),
-  close: this.sound.add("close", { volume: 0.4 }),
-  notify: this.sound.add("notify", { volume:0.2}),
-  type: this.sound.add("type", { volume: 0.08 }),
+  click: this.sound.add("click", { volume: 0.2}),
+  hover: this.sound.add("hover", { volume: 0.03 }),
+  close: this.sound.add("close", { volume: 0.09 }),
+  notify: this.sound.add("notify", { volume:0.03}),
+  type: this.sound.add("type", { volume: 0.01 }),
 };
-this.bgMusic = this.sound.add("bg", { volume: 0.03, loop: true });
+this.bgMusic = this.sound.add("bg", { volume: 0.06, loop: true });
 if(!this.bgMusic.isPlaying){
   this.bgMusic.play();
 }
@@ -574,9 +574,9 @@ processTerminalQueue(){
     delay: typingSpeed,
     repeat: message.length - 1,
     callback: () => {
-      this.sounds.type.play();
-    log.text = message.slice(0, index) + "_";
-      index++;
+      if(index % 3 === 0) this.sounds.type.play();
+  log.text = message.slice(0, index) + "_";
+  index++;
 
       if(index === message.length){
          log.text =  message;
@@ -632,16 +632,15 @@ update(){
   
 if(isPanelOpen){
 
-  interactText.setVisible(false);
-  if(Phaser.Input.Keyboard.JustDown(closeKey)){
-    this.sounds.close.play();
-    isPanelOpen = false;
+ if(Phaser.Input.Keyboard.JustDown(closeKey)){
+  this.sounds.close.play();
+  isPanelOpen = false;
+  closeHint.setVisible(false);
+  this.time.delayedCall(80, () => {
     aboutPanel.setVisible(false);
     aboutText.setVisible(false);
     achievementPanel.setVisible(false);
     achievementText.setVisible(false);
-   
-
     skillsPanel.setVisible(false);
     skillsText.setVisible(false);
     contactPanel.setVisible(false);
@@ -651,19 +650,20 @@ if(isPanelOpen){
     closeHint.setVisible(false);
     this.profileImage.setVisible(false);
     terminalContainer.setVisible(true);
+    interacted = false;
     this.tweens.add({
       targets: this.panelOverlay,
       alpha: 0,
       duration: 150,
-    onComplete: () => {
-  this.panelOverlay.setVisible(false);}
-});
-    
-    interacted = false;
-  }
-
-  return;
+      onComplete: () => {
+        this.panelOverlay.setVisible(false);
+      }
+    });
+  });
+ }interactText.setVisible(false);
+ return;
 }
+
 
 
 if(doorPanel.visible){
@@ -975,8 +975,10 @@ class ProjectScene extends Phaser.Scene {
   preload() {
   for (let project of projects){
     this.load.image(project.title, "assets/projects/" + project.image);
-
   }
+  this.load.audio("click", "assets/sounds/click.mp3");
+  this.load.audio("close", "assets/sounds/close.mp3");
+  this.load.audio("notify", "assets/sounds/notify.mp3");
 
 }
 
@@ -985,6 +987,12 @@ create(){
   this.scrollY = 0;
 this.scrollSpeed = 5;
     this.mode = "grid"; 
+
+    this.sounds = {
+      click: this.sound.add("click", { volume: 0.5}),
+      close: this.sound.add("close", {volume: 0.4 }),
+      notify: this.sound.add("notify", { volume: 0.3}),
+    }
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.enterKey = this.input.keyboard.addKey("ENTER");
@@ -1174,6 +1182,7 @@ this.detailBox = this.add.rectangle(
 }
 
   openDetail(){
+    this.sounds.click.play();
     this.detailOverlay.setVisible(true);
 
     let project = projects[this.selectedProject];
@@ -1196,6 +1205,7 @@ this.detailBox = this.add.rectangle(
   }
 
   closeDetail(){
+    this.sounds.close.play();
     this.detailOverlay.setVisible(false);
     this.mode = "grid";
     this.cards.forEach(c => c.setVisible(true));
@@ -1211,15 +1221,16 @@ this.detailBox = this.add.rectangle(
 
   if(this.mode === "grid"){
 if(Phaser.Input.Keyboard.JustDown(this.escKey)){
+  this.sounds.close.play();
   this.scene.start("GameScene");
 }
     if(Phaser.Input.Keyboard.JustDown(this.enterKey)){
       this.openDetail();
     }
-if(Phaser.Input.Keyboard.JustDown(this.cursors.right)) this.selectedProject++;
-if(Phaser.Input.Keyboard.JustDown(this.cursors.left)) this.selectedProject--;
-if(Phaser.Input.Keyboard.JustDown(this.cursors.down)) this.selectedProject += 2;
-if(Phaser.Input.Keyboard.JustDown(this.cursors.up)) this.selectedProject -= 2;
+if(Phaser.Input.Keyboard.JustDown(this.cursors.right)){this.selectedProject++ ; this.sounds.notify.play() ;} 
+if(Phaser.Input.Keyboard.JustDown(this.cursors.left)) {this.selectedProject-- ; this.sounds.notify.play() ;} 
+if(Phaser.Input.Keyboard.JustDown(this.cursors.down)) {this.selectedProject += 2 ; this.sounds.notify.play() ;} 
+if(Phaser.Input.Keyboard.JustDown(this.cursors.up)) {this.selectedProject -= 2 ; this.sounds.notify.play() ;} 
 
 this.selectedProject = Phaser.Math.Clamp(this.selectedProject, 0, projects.length - 1);
 this.updateSelection();
