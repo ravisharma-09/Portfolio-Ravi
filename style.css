@@ -101,7 +101,7 @@ a {
         display: none !important
     }
 }
-@media (max-width: 768px) {
+@media (max-width: 500px) {
     #mobile { display: flex; }
     #game-container { display: none; }
     body { display: block; }

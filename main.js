@@ -99,7 +99,7 @@ class StartScene extends Phaser.Scene {
   }
 
   create(){
-
+this.cameras.main.fadeIn(400, 0, 0, 0);
     this.add.text(
       this.scale.width / 2,
       this.scale.height / 2 - 40,
@@ -185,16 +185,21 @@ this.tweens.add({
   player = this.add.sprite(480,400,"player");
   player.setScale(0.1);
 this.bubble = this.add.image(0, 0, "bubble")
-.setDisplaySize(220,130)
+.setDisplaySize(260,150)
 .setDepth(15)
-.setVisible(false);
+.setVisible(false)
+.setScrollFactor(0);
 
-this.bubbleText = this.add.text(0, 0, "",{
-  fontSize: "14px",
-  fill:"#000000",
+
+  this.bubbleText = this.add.text(0, 0, "",{
+  fontSize: "17px",
+  fill:"#1a1a1a",
   align: "center",
-  wordWrap:{ width: 180 }
-}).setOrigin(0.5).setDepth(16).setVisible(false);
+  fontFamily: "Georgia, serif",
+  fontStyle: "italic",
+  wordWrap:{ width: 210 },
+  lineSpacing: 6
+}).setOrigin(0.5).setDepth(16).setVisible(false).setScrollFactor(0);
 
 this.bubbleTimer = null ;
 
@@ -628,16 +633,7 @@ const startupLogs = [
 startupLogs.forEach(msg => this.addTerminalMessage(msg));
 
 
-this.cameras.main.setZoom(1.05);
 
-this.cameras.main.fadeIn(500);
-
-this.tweens.add({
-  targets: this.cameras.main,
-  zoom: 1,
-  duration: 600,
-  ease: "Sine.easeOut"
-});
 aboutPanel.setVisible(false);
 achievementPanel.setVisible(false);
 skillsPanel.setVisible(false);
@@ -782,13 +778,19 @@ if(isPanelOpen){
   });
  }interactText.setVisible(false);
  return;
-}const bubbleOffsetX = player.x > room.width - 300 ? -130 : 130;
-const bubbleOffsetY = player.y < 200 ? 120 : -120;
-this.bubble.setFlipX(player.x > room.width - 300);
-this.bubble.setFlipY(player.y < 200);
-this.bubble.setPosition(player.x + bubbleOffsetX, player.y + bubbleOffsetY);
-this.bubbleText.setPosition(player.x + bubbleOffsetX, player.y + bubbleOffsetY - 5);
-
+}
+const cam = this.cameras.main;
+const screenX = player.x - cam.scrollX;
+const screenY = player.y - cam.scrollY;
+const bubbleOffsetX = screenX > this.scale.width - 300 ? -130 : 130;
+const bubbleOffsetY = screenY < 200 ? 120 : -120;
+this.bubble.setFlipX(screenX > this.scale.width - 300);
+this.bubble.setFlipY(screenY < 200);
+const bx = screenX + bubbleOffsetX;
+const by = screenY + bubbleOffsetY;
+const textOffsetY = bubbleOffsetY > 0 ? 15 : -15;
+this.bubble.setPosition(bx, by);
+this.bubbleText.setPosition(bx, by + textOffsetY);
 if(doorPanel.visible){
 
 
@@ -860,6 +862,20 @@ if(atWall || atceiling){
   }
 }
 
+const isMoving = cursors.left.isDown || cursors.right.isDown || cursors.up.isDown || cursors.down.isDown ||
+  keys.A.isDown || keys.D.isDown || keys.W.isDown || keys.S.isDown ;
+
+  if(!isMoving && !isPanelOpen){
+    this.stillTimer += delta ;
+    if(this.stillTimer > 7 && !this.stillBubbleShown){
+  this.stillBubbleShown = true;
+  this.showBubble("you gonna move or what? 🤨", 2500);
+}
+  }else{
+    this.stillTimer = 0;
+    this.stillBubbleShown = false ;
+  }
+
 
 
 
@@ -891,8 +907,20 @@ if(!wasNear) this.sounds.notify.play();
   interactText.setText("Press E to Interact");
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
-    this.sounds.click.play();
 
+    this.sounds.click.play();
+     this.spamCount++;
+    if(this.spamCount >= 5){
+      this.spamCount = 0;
+      this.bubbleFrozen = true;
+      this.spamBlocked = true;
+      this.showBubble("bro chill 💀\nstop spamming E", 2500);
+      this.time.delayedCall(2500, () => {
+        this.bubbleFrozen = false;
+        this.spamBlocked = false;
+      });
+      return;
+    }
     isPanelOpen = true;
    this.panelOverlay.setVisible(true);
 
@@ -928,11 +956,21 @@ if(!wasNear) this.sounds.notify.play();
   interactText.setVisible(true);
   interactText.setPosition(trophyShelf.x, trophyShelf.y - 90);
   interactText.setText("Press E to view achievements");
-
-  if(Phaser.Input.Keyboard.JustDown(interactKey)){
+if(Phaser.Input.Keyboard.JustDown(interactKey)){
     this.sounds.click.play();
-
-isPanelOpen = true;
+    this.spamCount++;
+    if(this.spamCount >= 5){
+      this.spamCount = 0;
+      this.bubbleFrozen = true;
+      this.spamBlocked = true;
+      this.showBubble("bro chill 💀\nstop spamming E", 2500);
+      this.time.delayedCall(2500, () => {
+        this.bubbleFrozen = false;
+        this.spamBlocked = false;
+      });
+      return;
+    }
+    isPanelOpen = true;
   this.panelOverlay.setVisible(true);
 
   this.tweens.add({
@@ -969,7 +1007,7 @@ isPanelOpen = true;
   this.addTerminalMessage("System:Opening achievements");
 
 }
-
+     
 }
 else if(projectDistance < projectRange){
   nearObject = true;
@@ -978,9 +1016,22 @@ if(!wasNear) this.sounds.notify.play();
   interactText.setPosition(photoFrame.x + 60, photoFrame.y - 120);
   interactText.setText("Press E to view projects");
 
-  if(Phaser.Input.Keyboard.JustDown(interactKey)){
-this.sounds.click.play();
-  this.panelOverlay.setVisible(true);
+
+ if(Phaser.Input.Keyboard.JustDown(interactKey)){
+    this.sounds.click.play();
+    this.spamCount++;
+    if(this.spamCount >= 5){
+      this.spamCount = 0;
+      this.bubbleFrozen = true;
+      this.spamBlocked = true;
+      this.showBubble("bro chill 💀\nstop spamming E", 2500);
+      this.time.delayedCall(2500, () => {
+        this.bubbleFrozen = false;
+        this.spamBlocked = false;
+      });
+      return;
+    }
+    this.panelOverlay.setVisible(true);
 
   this.tweens.add({
     targets: this.panelOverlay,
@@ -1004,10 +1055,21 @@ if(!wasNear) this.sounds.notify.play();
   interactText.setPosition(bookshelf.x - 130, bookshelf.y - 220);
   interactText.setText("Press E to view skills");
 
- if(Phaser.Input.Keyboard.JustDown(interactKey)){
-  this.sounds.click.play();
-
-  isPanelOpen = true;
+  if(Phaser.Input.Keyboard.JustDown(interactKey)){
+    this.sounds.click.play();
+    this.spamCount++;
+    if(this.spamCount >= 5){
+      this.spamCount = 0;
+      this.bubbleFrozen = true;
+      this.spamBlocked = true;
+      this.showBubble("bro chill 💀\nstop spamming E", 2500);
+      this.time.delayedCall(2500, () => {
+        this.bubbleFrozen = false;
+        this.spamBlocked = false;
+      });
+      return;
+    }
+    isPanelOpen = true;
   this.panelOverlay.setVisible(true);
 
   this.tweens.add({
@@ -1045,9 +1107,20 @@ if(!wasNear) this.sounds.notify.play();
   interactText.setPosition(mailbox.x, mailbox.y - 140);
   interactText.setText("Press E to contact");
 
-  if(Phaser.Input.Keyboard.JustDown(interactKey)){
+    if(Phaser.Input.Keyboard.JustDown(interactKey)){
     this.sounds.click.play();
-
+    this.spamCount++;
+    if(this.spamCount >= 5){
+      this.spamCount = 0;
+      this.bubbleFrozen = true;
+      this.spamBlocked = true;
+      this.showBubble("bro chill 💀\nstop spamming E", 2500);
+      this.time.delayedCall(2500, () => {
+        this.bubbleFrozen = false;
+        this.spamBlocked = false;
+      });
+      return;
+    }
     isPanelOpen = true;
   this.panelOverlay.setVisible(true);
 
@@ -1083,7 +1156,7 @@ this.tweens.add({
   closeHint.setVisible(true);
 
   this.addTerminalMessage("System:Opening contact Info");
-
+    
 }
 }
 else if(doorDistance < doorRange){
@@ -1123,7 +1196,8 @@ if(!wasNear) this.sounds.notify.play();
   }
 
 }
-}}
+}
+}
 
 class ProjectScene extends Phaser.Scene {
   constructor(){
