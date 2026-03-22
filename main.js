@@ -227,11 +227,17 @@ this.showBubble = (msg, duration = 4000) => {
   });
 };
 this.bubbleFrozen = true;
-this.cameras.main.once("camerafadeincomplete", () => {
+const startBubble = () => {
   this.showBubble("Hi! I'm Angel\nExplore this room to\nknow more about my Master'Ravi' 👋", 2000);
   this.time.delayedCall(4300, () => {
     this.bubbleFrozen = false;
   });
+};
+this.cameras.main.once("camerafadeincomplete", startBubble);
+this.time.delayedCall(700, () => {
+  if(this.bubbleFrozen && !this.bubble.visible){
+    startBubble();
+  }
 });
 
 this.stillTimer = 0;
