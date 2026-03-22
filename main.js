@@ -324,8 +324,8 @@ this.profileImage.setDepth(8);
 achievementPanel = this.add.rectangle(
   this.scale.width / 2,
   this.scale.height / 2,
-  500,
-  300,
+  540,
+  350,
   0x000000,
   0.8
 );
@@ -335,18 +335,38 @@ achievementPanel.setScrollFactor(0);
 
 achievementText = this.add.text(
   this.scale.width / 2,
-  this.scale.height / 2,
-  "Achievements\n\n🏆 Hack Club Builder\n🏆 Portfolio Game Created\n🏆 Community Contributor",
+  this.scale.height / 2 -100,
+  "Achievements",
   {
-    fontSize: "28px",
+    fontSize: "30px",
     fill: "#ffffff",
-    align: "center"
+    align: "center",
+    fontStyle:"bold"
   }
 );
 
 achievementText.setOrigin(0.5);
 achievementText.setVisible(false);
 achievementText.setScrollFactor(0);
+
+this.icpcText = this.add.text(
+  this.scale.width / 2,
+  this.scale.height / 2 +20,
+ "\n🏆  ICPC Regional Qualifier\n" +
+  "Qualified for ICPC Regional Round\n" +
+  "━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+  "🎮  Organised Campfire Bengaluru\n" +
+  "Organizing Member of one of\n" +
+  "Bengaluru's biggest Gamedev Hackathons",
+  {
+    fontSize: "20px",
+    fill: "#ffffff",
+    align: "center",
+    lineSpacing: 6
+  }
+).setOrigin(0.5).setVisible(false).setScrollFactor(0).setDepth(7);
+
+
 
 skillsPanel = this.add.rectangle(
   this.scale.width / 2,
@@ -381,8 +401,8 @@ skillsText.setScrollFactor(0);
 contactPanel = this.add.rectangle(
   this.scale.width / 2,
   this.scale.height / 2,
-  700,
-  300,
+  600,
+  250,
   0x0a0a0a,
   0.95
 );
@@ -392,7 +412,7 @@ contactPanel.setScrollFactor(0);
 
 contactText = this.add.text(
   this.scale.width / 2,
-  this.scale.height / 2 - 100,
+  this.scale.height / 2 - 80,
   "Ravi Sharma",
   {
     fontSize: "34px",
@@ -406,7 +426,7 @@ contactText = this.add.text(
 
 this.contactEmail = this.add.text(
   this.scale.width / 2 ,
-  this.scale.height / 2 - 60,
+  this.scale.height / 2 - 20,
   "📩 rravisharma817@gmail.com",
   {
     fontSize: "20px",fill:"#aaaaaa",align:"center"
@@ -424,7 +444,7 @@ this.contactButtons = [];
 const btnW =130, btnH = 48, gap = 18 ;
 const totalW = links.length*btnW + (links.length - 1)*gap;
 const startX = this.scale.width / 2 - totalW / 2 + btnW / 2;
-const btnY = this.scale.height / 2 + 10 ;
+const btnY = this.scale.height / 2 + 50 ;
 
 links.forEach((link, i) =>{
   const x =startX + i * (btnW + gap);
@@ -686,6 +706,7 @@ if(isPanelOpen){
   isPanelOpen = false;
   closeHint.setVisible(false);
   this.time.delayedCall(80, () => {
+    this.icpcText.setVisible(false);
     aboutPanel.setVisible(false);
     aboutText.setVisible(false);
     achievementPanel.setVisible(false);
@@ -850,13 +871,21 @@ isPanelOpen = true;
 
   achievementText.setAlpha(0);
   achievementText.setVisible(true);
-
+  this.icpcText.setAlpha(0);
+  this.icpcText.setVisible(true);
   this.tweens.add({
     targets: [achievementPanel, achievementText],
     scale: 1,
     alpha: 1,
     duration: 600,
     ease: "Back.out"
+  });
+  this.tweens.add({
+    targets: this.icpcText ,
+    alpha:1,
+    duration:600,
+    ease:"Back.out"
+
   });
 
   closeHint.setVisible(true);
