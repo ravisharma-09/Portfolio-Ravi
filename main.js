@@ -12,6 +12,7 @@ let closeKey;
 let closeHint;  // closing with esc
 let photoFrame;
 let isPanelOpen = false;
+let nearObject = false ;
 let projectText; // for photo frame interaction
 let trophyShelf ; // for trophy 
 let achievementPanel; // trophy interaction panel
@@ -154,9 +155,9 @@ preload() {
   }
   this.load.audio("click", "assets/sounds/click.mp3");
   this.load.audio("hover", "assets/sounds/hover.mp3");
-  this.load.audio("open", "assets/sounds/open.mp3");
   this.load.audio("close", "assets/sounds/close.mp3");
-
+  this.load.audio("notify", "assets/sounds/notify.mp3");
+  this.load.audio("bg", "assets/sounds/bg.mp3");
 }
 
 // hi---------------------------------------------------------------------------------
@@ -184,11 +185,34 @@ this.tweens.add({
 //soundsss
 this.moveSoundCooldown = 0;
 this.sounds ={
-  click: this.sound.add("click", { volume: 0.4}),
-  hover: this.sound.add("hover", { volume: 0.2}),
-  open: this.sound.add("open", { volume: 0.4}),
-  close: this.sound.add("close", { volume: 0.4}),
+  click: this.sound.add("click", { volume: 0.5}),
+  hover: this.sound.add("hover", { volume: 0.2 }),
+  close: this.sound.add("close", { volume: 0.4 }),
+  notify: this.sound.add("notify", { volume:0.2}),
+  
 };
+this.bgMusic = this.sound.add("bg", { volume: 0.03, loop: true });
+if(!this.bgMusic.isPlaying){
+  this.bgMusic.play();
+}
+this.musicOn = true ;
+this.speakerBtn = this.add.text(
+  this.scale.width-30,
+  30,
+  "🔊",
+  {fontSize: "50px"}
+).setOrigin(1,0).setScrollFactor(0).setDepth(10).setInteractive({useHandCursor : true})
+.on("pointerdown", () => {
+  this.musicOn = !this.musicOn;
+  if(this.musicOn){
+    this.bgMusic.resume();
+    this.speakerBtn.setText("🔊")
+  }
+  else{
+    this.bgMusic.pause();
+    this.speakerBtn.setText("🔇");
+  }
+});
 
 desk = {
   x: 180,
@@ -609,6 +633,7 @@ if(isPanelOpen){
 
   interactText.setVisible(false);
   if(Phaser.Input.Keyboard.JustDown(closeKey)){
+    this.sounds.close.play();
     isPanelOpen = false;
     aboutPanel.setVisible(false);
     aboutText.setVisible(false);
@@ -643,9 +668,11 @@ if(isPanelOpen){
 if(doorPanel.visible){
 
 
-  interactText.setVisible(false);
+interactText.setVisible(false);
+
 
   if(Phaser.Input.Keyboard.JustDown(closeKey)){
+    this.sounds.close.play();
     doorPanel.setVisible(false);
     doorText.setVisible(false);
     closeHint.setVisible(false);
@@ -666,11 +693,14 @@ let delta = this.game.loop.delta / 1000;
 
 if(cursors.left.isDown || keys.A.isDown){
   player.x -= speed * delta;
+  player.setFlipX(true);
 }
 
 if(cursors.right.isDown || keys.D.isDown){
 
   player.x += speed * delta;
+    player.setFlipX(false);
+
 }
 
 if(cursors.up.isDown || keys.W.isDown){
@@ -681,18 +711,7 @@ if(cursors.down.isDown || keys.S.isDown){
   player.y += speed * delta;
 }
 
-if(
-  cursors.left.isDown || cursors.right.isDown ||
-  cursors.up.isDown || cursors.down.isDown ||
-  keys.A.isDown || keys.D.isDown ||
-  keys.W.isDown || keys.S.isDown
-)
-{
-  if(this.time.now > this.moveSoundCooldown){
-    this.sounds.hover.play();
-    this.moveSoundCooldown = this.time.now + 120; 
-  }
-}
+
 player.x = Phaser.Math.Clamp(player.x, marginX, room.width - marginX);
 player.y = Phaser.Math.Clamp(player.y, marginTop, room.height - marginBottom);
 
@@ -714,14 +733,18 @@ let doorDistance = Phaser.Math.Distance.Between(
   door.y
 );
 interactText.setVisible(false);
-
+let wasNear = nearObject;
+nearObject = false;
 if(distance < deskRange){
+  nearObject = true ;
+if(!wasNear) this.sounds.notify.play();
   interactText.setVisible(true);
   interactText.setPosition(desk.x+30, desk.y - 80);
   interactText.setText("Press E to Interact");
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
     this.sounds.click.play();
+
     isPanelOpen = true;
    this.panelOverlay.setVisible(true);
 
@@ -752,12 +775,15 @@ closeHint.setVisible(true);
 
 }
 else if(trophyDistance < trophyRange){
+  nearObject = true;
+if(!wasNear) this.sounds.notify.play();
   interactText.setVisible(true);
   interactText.setPosition(trophyShelf.x, trophyShelf.y - 90);
   interactText.setText("Press E to view achievements");
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
     this.sounds.click.play();
+
 isPanelOpen = true;
   this.panelOverlay.setVisible(true);
 
@@ -790,6 +816,8 @@ isPanelOpen = true;
 
 }
 else if(projectDistance < projectRange){
+  nearObject = true;
+if(!wasNear) this.sounds.notify.play();
   interactText.setVisible(true);
   interactText.setPosition(photoFrame.x + 60, photoFrame.y - 120);
   interactText.setText("Press E to view projects");
@@ -814,12 +842,15 @@ this.transitionTo("ProjectScene");
 }
 }
 else if(skillsDistance < skillsRange){
+  nearObject = true;
+if(!wasNear) this.sounds.notify.play();
   interactText.setVisible(true);
   interactText.setPosition(bookshelf.x - 70, bookshelf.y - 220);
   interactText.setText("Press E to view skills");
 
  if(Phaser.Input.Keyboard.JustDown(interactKey)){
   this.sounds.click.play();
+
   isPanelOpen = true;
   this.panelOverlay.setVisible(true);
 
@@ -852,12 +883,15 @@ else if(skillsDistance < skillsRange){
 
 }
 else if(mailDistance < mailRange){
+  nearObject = true;
+if(!wasNear) this.sounds.notify.play();
   interactText.setVisible(true);
   interactText.setPosition(mailbox.x, mailbox.y - 140);
   interactText.setText("Press E to contact");
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
     this.sounds.click.play();
+
     isPanelOpen = true;
   this.panelOverlay.setVisible(true);
 
@@ -889,7 +923,8 @@ else if(mailDistance < mailRange){
 }
 }
 else if(doorDistance < doorRange){
-
+  nearObject = true;
+if(!wasNear) this.sounds.notify.play();
   interactText.setVisible(true);
   interactText.setPosition(door.x, door.y - 200);
   interactText.setText("Press E to use door");
