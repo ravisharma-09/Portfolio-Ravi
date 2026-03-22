@@ -252,7 +252,16 @@ this.sounds ={
 };
 this.sound.stopAll();
 this.bgMusic = this.sound.add("bg", { volume: 0.06, loop: true});
-this.bgMusic.play();
+this.input.once("pointerdown", () => {
+  if(this.musicOn && !this.bgMusic.isPlaying){
+    this.bgMusic.play();
+  }
+});
+this.input.keyboard.once("keydown", () => {
+  if(this.musicOn && !this.bgMusic.isPlaying){
+    this.bgMusic.play();
+}
+});
 this.musicOn = true ;
 this.speakerBtn = this.add.text(
   this.scale.width-30,
@@ -1843,7 +1852,7 @@ this.player.y = Phaser.Math.Clamp(this.player.y, 20, 700);
  
 
 const config = {
-  type: Phaser.AUTO,
+  type: Phaser.CANVAS,
   width: 1280,
   height: 720,
   parent: "game-container",
