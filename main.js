@@ -158,6 +158,7 @@ preload() {
   this.load.audio("close", "assets/sounds/close.mp3");
   this.load.audio("notify", "assets/sounds/notify.mp3");
   this.load.audio("bg", "assets/sounds/bg.mp3");
+  this.load.audio("type", "assets/sounds/type.mp3");
 }
 
 // hi---------------------------------------------------------------------------------
@@ -189,7 +190,7 @@ this.sounds ={
   hover: this.sound.add("hover", { volume: 0.2 }),
   close: this.sound.add("close", { volume: 0.4 }),
   notify: this.sound.add("notify", { volume:0.2}),
-  
+  type: this.sound.add("type", { volume: 0.08 }),
 };
 this.bgMusic = this.sound.add("bg", { volume: 0.03, loop: true });
 if(!this.bgMusic.isPlaying){
@@ -573,7 +574,7 @@ processTerminalQueue(){
     delay: typingSpeed,
     repeat: message.length - 1,
     callback: () => {
-
+      this.sounds.type.play();
     log.text = message.slice(0, index) + "_";
       index++;
 
@@ -1263,8 +1264,15 @@ this.gridContainer.y = -this.scrollY;
 class MiniGameScene extends Phaser.Scene {
   constructor(){
     super("MiniGameScene");
+
   }
+preload(){
+  this.load.audio("coin", "assets/sounds/coin.mp3");
+  this.load.audio("gameover", "assets/sounds/gameover.mp3");
+}
+
   create(){
+    
     this.difficultySelected = false;
     this.realCoinsCount = 0;
     this.fakeCoinsCount = 0;
@@ -1317,6 +1325,12 @@ fill: "#ffffff",
 backgroundColor: "rgba(0, 0, 0, 1)"
 });
 this.gameOver = false;
+this.coins = [];
+this.fakeCoins = [];
+
+this.coinSound = this.sound.add("coin", {volume:0.5});
+this.gameOverSound = this.sound.add("gameover", { volume: 0.5});
+this.clickSound = this.sound.add("click", { volume: 0.5 });
 
 this.scoreText.setShadow(0, 0, "#00ffff", 12, true, true);
 
@@ -1377,23 +1391,27 @@ for(let i = 0; i < this.fakeCoinsCount; i++){
 
 }
 
-
  update(){ /////////////////////////////////////////////////////////////////////
   if(!this.difficultySelected){
 
   if(Phaser.Input.Keyboard.JustDown(this.key1)){
+    this.clickSound.play();
     this.realCoinsCount = 8;
     this.fakeCoinsCount = 2;
     this.startGame();
   }
 
   if(Phaser.Input.Keyboard.JustDown(this.key2)){
+
+    this.clickSound.play();
     this.realCoinsCount = 6;
     this.fakeCoinsCount = 4;
     this.startGame();
   }
 
   if(Phaser.Input.Keyboard.JustDown(this.key3)){
+
+    this.clickSound.play();
     this.realCoinsCount = 4;
     this.fakeCoinsCount = 6;
     this.startGame();
@@ -1445,7 +1463,7 @@ for(let coin of this.coins){
     duration: 80,
     yoyo: true,
     onComplete: () => {
-
+      this.coinSound.play();
       this.score += 1;
       this.scoreText.setText("Score: " + this.score);
 
@@ -1527,6 +1545,7 @@ let fakeDistance = Phaser.Math.Distance.Between(
 if(fakeDistance < 30 && !this.gameOver){
 
   this.gameOver = true;
+  this.gameOverSound.play();
   for(let coin of this.coins){
   coin.setVisible(false);
 }
