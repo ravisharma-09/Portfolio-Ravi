@@ -370,7 +370,7 @@ this.icpcText = this.add.text(
 
 skillsPanel = this.add.rectangle(
   this.scale.width / 2,
-  this.scale.height / 2-40,
+  this.scale.height / 2 - 40,
   400,
   350,
   0x000000,
@@ -925,7 +925,7 @@ else if(skillsDistance < skillsRange){
   nearObject = true;
 if(!wasNear) this.sounds.notify.play();
   interactText.setVisible(true);
-  interactText.setPosition(bookshelf.x - 70, bookshelf.y - 220);
+  interactText.setPosition(bookshelf.x - 130, bookshelf.y - 220);
   interactText.setText("Press E to view skills");
 
  if(Phaser.Input.Keyboard.JustDown(interactKey)){

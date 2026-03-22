@@ -76,9 +76,33 @@ a {
     scrollbar-width: none;
     
 }
+#mobile {
+    width: 100%;
+    height: 100%;
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+     background: url("assets/bg-dot.svg") black;
+    animation: bg-anim 15s linear infinite;
+    color: #00ff88;
+    font-family: monospace;
+    z-index: 999999;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    padding: 30px;
+    box-sizing: border-box;
+}
 
 @media print {
     * {
         display: none !important
     }
+}
+@media (max-width: 768px) {
+    #mobile { display: flex; }
+    #game-container { display: none; }
+    body { display: block; }
 }
