@@ -159,6 +159,11 @@ preload() {
   this.load.audio("notify", "assets/sounds/notify.mp3");
   this.load.audio("bg", "assets/sounds/bg.mp3");
   this.load.audio("type", "assets/sounds/type.mp3");
+  this.load.image("icon_github", "assets/icons/github.png");
+  this.load.image("icon_linkedin", "assets/icons/linkedin.png");
+  this.load.image("icon_instagram", "assets/icons/instagram.png");
+  this.load.image("icon_globe", "assets/icons/globe.png");
+
 }
 
 // hi---------------------------------------------------------------------------------
@@ -192,10 +197,9 @@ this.sounds ={
   notify: this.sound.add("notify", { volume:0.03}),
   type: this.sound.add("type", { volume: 0.01 }),
 };
-this.bgMusic = this.sound.add("bg", { volume: 0.06, loop: true });
-if(!this.bgMusic.isPlaying){
-  this.bgMusic.play();
-}
+this.sound.stopAll();
+this.bgMusic = this.sound.add("bg", { volume: 0.06, loop: true});
+this.bgMusic.play();
 this.musicOn = true ;
 this.speakerBtn = this.add.text(
   this.scale.width-30,
@@ -377,30 +381,72 @@ skillsText.setScrollFactor(0);
 contactPanel = this.add.rectangle(
   this.scale.width / 2,
   this.scale.height / 2,
-  500,
+  700,
   300,
-  0x000000,
-  0.8
+  0x0a0a0a,
+  0.95
 );
-
+ 
 contactPanel.setVisible(false);
 contactPanel.setScrollFactor(0);
 
 contactText = this.add.text(
   this.scale.width / 2,
-  this.scale.height / 2,
-  "Contact\n\n📧 rravisharma817@gmail.com",
+  this.scale.height / 2 - 100,
+  "Ravi Sharma",
   {
-    fontSize: "28px",
+    fontSize: "34px",
     fill: "#ffffff",
+    fontStyle: "bold",
     align: "center"
   }
-);
+).setOrigin(0.5)
+.setVisible(false)
+.setScrollFactor(0);
 
+this.contactEmail = this.add.text(
+  this.scale.width / 2 ,
+  this.scale.height / 2 - 60,
+  "📩 rravisharma817@gmail.com",
+  {
+    fontSize: "20px",fill:"#aaaaaa",align:"center"
+  }
+).setOrigin(0.5).setVisible(false).setScrollFactor(0).setDepth(7);
 
-contactText.setOrigin(0.5);
-contactText.setVisible(false);
-contactText.setScrollFactor(0);
+const links =[
+  { label: "GitHub",  icon:"icon_github", color: 0x333333, url:"https://github.com/ravisharma-09" },
+  {label: "LinkedIn", icon:"icon_linkedin", color: 0x0077b5, url:"https://www.linkedin.com/in/ravi-sharma-10b1a1384/"},
+  {label: "Instagram", icon:"icon_instagram", color:0xe1306c, url:"https://www.instagram.com/_ravi.xo/"},
+  {label:"Portfolio", icon:"icon_globe", color: 0x6c3483, url: "https://sharmaravi.in"},
+
+]; 
+this.contactButtons = [];
+const btnW =130, btnH = 48, gap = 18 ;
+const totalW = links.length*btnW + (links.length - 1)*gap;
+const startX = this.scale.width / 2 - totalW / 2 + btnW / 2;
+const btnY = this.scale.height / 2 + 10 ;
+
+links.forEach((link, i) =>{
+  const x =startX + i * (btnW + gap);
+
+  const box = this.add.rectangle(x , btnY, btnW, btnH, link.color, 1)
+  .setScrollFactor(0).setDepth(7).setVisible(false).setInteractive({ useHandCursor: true})
+  .on("pointerover", () => { box.setAlpha(0.7);})
+  .on("pointerout", () => {box.setAlpha(1);})
+  .on("pointerdown", () => {
+    this.sounds.click.play();
+    window.open(link.url, "_blank");
+  });
+
+  const icon = this.add.image(x -50 ,btnY, link.icon)
+  .setDisplaySize(22, 22)
+  .setScrollFactor(0).setDepth(8).setVisible(false);
+
+  const label = this.add.text(x+10, btnY, link.label,{
+    fontSize:"16px", fill:"#ffffff" , fontStyle:"bold"
+  }).setOrigin(0.5).setScrollFactor(0).setDepth(8).setVisible(false);
+this.contactButtons.push(box, icon, label);
+});
 
 
 doorPanel = this.add.rectangle(
@@ -430,6 +476,9 @@ doorText = this.add.text(
 achievementPanel.setDepth(6);
 skillsPanel.setDepth(6);
 contactPanel.setDepth(6);
+contactText.setDepth(7);
+this.contactEmail.setDepth(7);
+this.contactButtons.forEach(b => b.setDepth(8));
 doorPanel.setDepth(6);
 
 aboutText.setDepth(7);
@@ -629,7 +678,7 @@ transitionTo(sceneKey){
 // hi ---------------------------------------------------------------------------------
 
 update(){
-  
+
 if(isPanelOpen){
 
  if(Phaser.Input.Keyboard.JustDown(closeKey)){
@@ -645,6 +694,8 @@ if(isPanelOpen){
     skillsText.setVisible(false);
     contactPanel.setVisible(false);
     contactText.setVisible(false);
+    this.contactEmail.setVisible(false);
+        this.contactButtons.forEach(b => b.setVisible(false));
     doorPanel.setVisible(false);
     doorText.setVisible(false);
     closeHint.setVisible(false);
@@ -663,7 +714,6 @@ if(isPanelOpen){
  }interactText.setVisible(false);
  return;
 }
-
 
 
 if(doorPanel.visible){
@@ -905,18 +955,26 @@ if(!wasNear) this.sounds.notify.play();
   contactPanel.setScale(0.85);
   contactPanel.setAlpha(0);
   contactPanel.setVisible(true);
+contactText.setAlpha(0);
+contactText.setVisible(true);
+this.contactEmail.setAlpha(0);
+this.contactEmail.setVisible(true);
+this.contactButtons.forEach(b => { b.setAlpha(0); b.setVisible(true); });
 
-  contactText.setAlpha(0);
-  contactText.setVisible(true);
+this.tweens.add({
+  targets: [contactPanel, contactText],
+  scale: 1,
+  alpha: 1,
+  duration: 600,
+  ease: "Back.out"
+});
 
-  this.tweens.add({
-    targets: [contactPanel, contactText],
-    scale: 1,
-    alpha: 1,
-    duration: 600,
-    ease: "Back.out"
-  });
-
+this.tweens.add({
+  targets: [this.contactEmail, ...this.contactButtons],
+  alpha: 1,
+  duration: 600,
+  ease: "Back.out"
+});
   closeHint.setVisible(true);
 
   this.addTerminalMessage("System:Opening contact Info");
@@ -988,11 +1046,11 @@ create(){
 this.scrollSpeed = 5;
     this.mode = "grid"; 
 
-    this.sounds = {
-      click: this.sound.add("click", { volume: 0.5}),
-      close: this.sound.add("close", {volume: 0.4 }),
-      notify: this.sound.add("notify", { volume: 0.3}),
-    }
+   this.sounds = {
+  click: this.sound.add("click", { volume: 0.2}),
+  close: this.sound.add("close", { volume: 0.09}),
+  notify: this.sound.add("notify", { volume: 0.03}),
+}
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.enterKey = this.input.keyboard.addKey("ENTER");
@@ -1222,17 +1280,21 @@ this.detailBox = this.add.rectangle(
   if(this.mode === "grid"){
 if(Phaser.Input.Keyboard.JustDown(this.escKey)){
   this.sounds.close.play();
-  this.scene.start("GameScene");
+  this.time.delayedCall(150, () => {
+    this.scene.start("GameScene");
+  })
 }
     if(Phaser.Input.Keyboard.JustDown(this.enterKey)){
       this.openDetail();
     }
-if(Phaser.Input.Keyboard.JustDown(this.cursors.right)){this.selectedProject++ ; this.sounds.notify.play() ;} 
-if(Phaser.Input.Keyboard.JustDown(this.cursors.left)) {this.selectedProject-- ; this.sounds.notify.play() ;} 
-if(Phaser.Input.Keyboard.JustDown(this.cursors.down)) {this.selectedProject += 2 ; this.sounds.notify.play() ;} 
-if(Phaser.Input.Keyboard.JustDown(this.cursors.up)) {this.selectedProject -= 2 ; this.sounds.notify.play() ;} 
+  let prevProject = this.selectedProject ;
+if(Phaser.Input.Keyboard.JustDown(this.cursors.right)){this.selectedProject++ ;} 
+if(Phaser.Input.Keyboard.JustDown(this.cursors.left)) {this.selectedProject-- ;} 
+if(Phaser.Input.Keyboard.JustDown(this.cursors.down)) {this.selectedProject += 2 ;} 
+if(Phaser.Input.Keyboard.JustDown(this.cursors.up)) {this.selectedProject -= 2 ;} 
 
 this.selectedProject = Phaser.Math.Clamp(this.selectedProject, 0, projects.length - 1);
+if(this.selectedProject !== prevProject) this.sounds.notify.play() ;
 this.updateSelection();
 if (this.cursors.down.isDown) {
   this.targetScrollY += 10;
