@@ -441,10 +441,10 @@ this.icpcText = this.add.text(
 skillsPanel = this.add.rectangle(
   this.scale.width / 2,
   this.scale.height / 2 - 40,
-  400,
-  350,
-  0x000000,
-  0.8
+  620,
+  380,
+  0x0a0a0a,
+  0.95
 );
 
 skillsPanel.setVisible(false);
@@ -452,21 +452,52 @@ skillsPanel.setScrollFactor(0);
 
 skillsText = this.add.text(
   this.scale.width / 2,
-  this.scale.height / 2.3
-  ,
-  "Skills:\n\nJavaScript\n\nHTML,CSS\n\nPhaser.js\n\nPython,c++",
-  {
-    fontSize: "28px",
-    fill: "#ffffff",
+  this.scale.height / 2 - 160,
+"⚡ Skills",  {
+    fontSize: "30px",
+    fill: "#FFD700",
     align: "center",
-    
-
+    fontStyle:"bold"
   }
 );
 
 skillsText.setOrigin(0.5);
 skillsText.setVisible(false);
 skillsText.setScrollFactor(0);
+
+const skillsList =[
+  {name: "HTML/CSS", level: 8, color : 0xe34c26},
+   {name: "Python", level: 7, color : 0xe3572A5},
+    {name: "JavaScript", level: 5, color : 0xf1e05a},
+     {name: "Phaser.js", level: 5, color : 0xf1e05a},
+      {name: "C++", level: 4, color : 0x6e4c13},
+];
+this.skillBars = [] ;
+const barW =300 ;
+const startY = this.scale.height / 2 - 100 ;
+
+skillsList.forEach((skill , i) => {
+  const y = startY + i *52 ;
+  const cx = this.scale.width / 2 - 65;
+
+  const label = this.add.text(cx - 180, y, skill.name, {
+    fontSize: "17px", fill:"#ffffff"
+  }).setOrigin(0,0.5).setScrollFactor(0).setDepth(7).setVisible(false);
+
+const bgBar = this.add.rectangle(cx + 30, y, barW, 18, 0x333333)
+    .setOrigin(0, 0.5).setScrollFactor(0).setDepth(7).setVisible(false);
+
+  const fillBar = this.add.rectangle(cx + 30, y, 0, 18, skill.color)
+    .setOrigin(0, 0.5).setScrollFactor(0).setDepth(8).setVisible(false);
+
+const pct = this.add.text(cx + 30 + barW + 10, y, `${skill.level * 10}%`, {
+    fontSize: "15px", fill: "#aaaaaa"
+  }).setOrigin(0, 0.5).setScrollFactor(0).setDepth(8).setVisible(false);
+
+    this.skillBars.push({ label, bgBar, fillBar, pct, targetW: barW * skill.level / 10 });
+
+
+});
 
 contactPanel = this.add.rectangle(
   this.scale.width / 2,
@@ -774,6 +805,7 @@ if(isPanelOpen){
     achievementText.setVisible(false);
     skillsPanel.setVisible(false);
     skillsText.setVisible(false);
+    
     contactPanel.setVisible(false);
     contactText.setVisible(false);
     this.contactEmail.setVisible(false);
@@ -995,6 +1027,7 @@ if(Phaser.Input.Keyboard.JustDown(interactKey)){
     duration: 200
   });
 
+
   achievementPanel.setScale(0.85);
   achievementPanel.setAlpha(0);
   achievementPanel.setVisible(true);
@@ -1093,21 +1126,34 @@ if(!wasNear) this.sounds.notify.play();
     alpha: 0.75,
     duration: 200
   });
+skillsPanel.setScale(0.85);
+skillsPanel.setAlpha(0);
+skillsPanel.setVisible(true);
+skillsText.setAlpha(0);
+skillsText.setVisible(true);
 
-  skillsPanel.setScale(0.85);
-  skillsPanel.setAlpha(0);
-  skillsPanel.setVisible(true);
+this.skillBars.forEach(b => {
+  b.label.setVisible(true).setAlpha(0);
+  b.bgBar.setVisible(true).setAlpha(0);
+  b.fillBar.setVisible(true).setAlpha(0).setSize(0, 18);
+  b.pct.setVisible(true).setAlpha(0);
+});
 
-  skillsText.setAlpha(0);
-  skillsText.setVisible(true);
+this.tweens.add({
+  targets: [skillsPanel, skillsText],
+  scale: 1, alpha: 1,
+  duration: 600, ease: "Back.out"
+});
 
-  this.tweens.add({
-    targets: [skillsPanel, skillsText],
-    scale: 1,
-    alpha: 1,
-    duration: 600,
-    ease: "Back.out"
+this.time.delayedCall(300, () => {
+  this.skillBars.forEach((b, i) => {
+    this.time.delayedCall(i * 100, () => {
+      this.tweens.add({ targets: [b.label, b.bgBar, b.pct], alpha: 1, duration: 300 });
+      this.tweens.add({ targets: b.fillBar, alpha: 1, duration: 300 });
+      this.tweens.add({ targets: b.fillBar, width: b.targetW, duration: 600, ease: "Sine.out" });
+    });
   });
+});
 
   closeHint.setVisible(true);
 
@@ -1537,6 +1583,7 @@ class MiniGameScene extends Phaser.Scene {
 preload(){
   this.load.audio("coin",     ["assets/sounds/coin.ogg",     "assets/sounds/coin.ogg"]);
   this.load.audio("gameover", ["assets/sounds/gameover.ogg", "assets/sounds/gameover.ogg"]);
+  this.load.image("player","assets/player.png");
 }
 
   create(){
@@ -1581,7 +1628,8 @@ this.time.delayedCall(400, () => {
 });    });
  this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys("W,A,S,D");
-    this.player = this.add.rectangle(640, 360, 40, 40, 0x00ff00);
+    this.player = this.add.sprite(640,360, "player");
+    this.player.setScale(0.08);
     this.player.setVisible(false);
    this.restartKey = this.input.keyboard.addKey("R");
 
@@ -1699,10 +1747,12 @@ let delta = this.game.loop.delta / 1000;
 
 if(this.cursors.left.isDown || this.keys.A.isDown){
   this.player.x -= speed * delta;
+  this.player.setFlipX(true);
 }
 
 if(this.cursors.right.isDown || this.keys.D.isDown){
   this.player.x += speed * delta;
+  this.player.setFlipX(false);
 }
 
 if(this.cursors.up.isDown || this.keys.W.isDown){
@@ -1812,6 +1862,11 @@ let fakeDistance = Phaser.Math.Distance.Between(
 if(fakeDistance < 30 && !this.gameOver){
 
   this.gameOver = true;
+  let scores = JSON.parse(localStorage.getItem("miniScores") || "[]");
+  scores.push(this.score);
+  scores.sort((a,b) => b - a);
+  scores = scores.slice(0,5);
+  localStorage.setItem("miniScores", JSON.stringify(scores));
   this.gameOverSound.play();
   for(let coin of this.coins){
   coin.setVisible(false);
@@ -1830,6 +1885,16 @@ for(let fake of this.fakeCoins){
       fill: "#ff0000"
     }
   ).setOrigin(0.5);
+ const boardScores = JSON.parse(localStorage.getItem("miniScores") || "[]");
+let boardText = "🏆 Best Scores \n\n" + boardScores.map((s, i) => `${i+1}. ${s}`).join("\n");
+  this.add.text(
+    this.scale.width / 2,
+    this.scale.height/2+200,
+  boardText,
+ {
+  fontSize :"22px", fill: "#FFD700", align:"center"
+ }   
+).setOrigin(0.5);
   this.add.text(
   this.scale.width / 2,
   this.scale.height / 2 + 80,
