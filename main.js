@@ -805,7 +805,13 @@ if(isPanelOpen){
     achievementText.setVisible(false);
     skillsPanel.setVisible(false);
     skillsText.setVisible(false);
-    
+    this.skillBars.forEach(b => {
+      b.label.setVisible(false);
+       b.bgBar.setVisible(false);
+        b.fillBar.setVisible(false);
+         b.pct.setVisible(false);
+    });
+
     contactPanel.setVisible(false);
     contactText.setVisible(false);
     this.contactEmail.setVisible(false);
