@@ -1919,7 +1919,7 @@ let boardText = "🏆 Best Scores \n\n" + boardScores.map((s, i) => `${i+1}. ${s
 ).setOrigin(0.5);
   this.add.text(
   this.scale.width / 2,
-  this.scale.height / 2 + 370,
+  this.scale.height / 2 - 200,
   "Press R to Restart",
   {
     fontSize: "24px",
