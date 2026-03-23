@@ -13,6 +13,7 @@ let closeHint;  // closing with esc
 let photoFrame;
 let isPanelOpen = false;
 let nearObject = false ;
+let introBubbleDone = false ;
 let projectText; // for photo frame interaction
 let trophyShelf ; // for trophy 
 let achievementPanel; // trophy interaction panel
@@ -228,19 +229,24 @@ this.showBubble = (msg, duration = 4000) => {
     typeEvent.remove();
   });
 };
-this.bubbleFrozen = true;
-const startBubble = () => {
-  this.showBubble("Hi! I'm Angel\nExplore this room to\nknow more about my Master'Ravi' 👋", 2000);
-  this.time.delayedCall(4300, () => {
-    this.bubbleFrozen = false;
+if(!introBubbleDone){
+  this.bubbleFrozen = true;
+  const startBubble = () => {
+    introBubbleDone = true;
+    this.showBubble("Hi! I'm Angel\nExplore this room to\nknow more about my Master'Ravi' 👋", 2000);
+    this.time.delayedCall(4300, () => {
+      this.bubbleFrozen = false;
+    });
+  };
+  this.cameras.main.once("camerafadeincomplete", startBubble);
+  this.time.delayedCall(700, () => {
+    if(this.bubbleFrozen && !this.bubble.visible){
+      startBubble();
+    }
   });
-};
-this.cameras.main.once("camerafadeincomplete", startBubble);
-this.time.delayedCall(700, () => {
-  if(this.bubbleFrozen && !this.bubble.visible){
-    startBubble();
-  }
-});
+} else {
+  this.bubbleFrozen = false;
+}
 
 this.stillTimer = 0;
 this.spamCount = 0;
@@ -1892,10 +1898,20 @@ for(let fake of this.fakeCoins){
     }
   ).setOrigin(0.5);
  const boardScores = JSON.parse(localStorage.getItem("miniScores") || "[]");
+ const isNewHigh = boardScores[0] === this.score && this.score > 0 ;
+ const scoreLabel = isNewHigh ? `🎉 New High Score: ${this.score}!` : `Score: ${this.score}`;
+
+ this.add.text(
+  this.scale.width / 2,
+  this.scale.height / 2 + 70,
+  scoreLabel,
+  { fontSize: "28px", fill: isNewHigh ? "#00ff88" : "#ffffff", align: "center" }
+).setOrigin(0.5);
+
 let boardText = "🏆 Best Scores \n\n" + boardScores.map((s, i) => `${i+1}. ${s}`).join("\n");
   this.add.text(
     this.scale.width / 2,
-    this.scale.height/2+200,
+    this.scale.height/2+180,
   boardText,
  {
   fontSize :"22px", fill: "#FFD700", align:"center"
@@ -1903,7 +1919,7 @@ let boardText = "🏆 Best Scores \n\n" + boardScores.map((s, i) => `${i+1}. ${s
 ).setOrigin(0.5);
   this.add.text(
   this.scale.width / 2,
-  this.scale.height / 2 + 80,
+  this.scale.height / 2 + 370,
   "Press R to Restart",
   {
     fontSize: "24px",
