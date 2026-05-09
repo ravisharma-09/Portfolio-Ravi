@@ -81,12 +81,68 @@ let projects = [
     repo: "https://github.com/ravisharma-09/height-converter",
     desc: "Height Converter is a simple web app that converts height from feet and inches into centimeters. It is built using HTML, CSS and JavaScript and helps users quickly calculate their height in different units."
   },
+  // {
+  //   title: "Linkipin",
+  //   image: "linkipin.png",
+  //   demo: "https://linkipin.vercel.app/",
+  //   repo: "https://github.com/ravisharma-09/linkipin",
+  //   desc: "only ui based connection social media ui made to show how interactive social media shoul look"
+  // },
   {
-    title: "Linkipin",
-    image: "linkipin.png",
-    demo: "https://linkipin.vercel.app/",
-    repo: "https://github.com/ravisharma-09/linkipin",
-    desc: "only ui based connection social media ui made to show how interactive social media shoul look"
+    title: "Calculator",
+    image: "calculator.png",
+    demo: "https://calculator-mauve-ten-45.vercel.app/",
+    repo: "https://github.com/ravisharma-09/Calculator",
+    desc: "A clean, working calculator that handles your everyday math without the clutter. Buttons, screen, vibes."
+  },
+  {
+    title: "Counter",
+    image: "counter.png",
+    demo: "https://counter-eta-murex.vercel.app/",
+    repo: "https://github.com/ravisharma-09/counter",
+    desc: "Click up, click down, reset. The hello-world of state — but I made it look good."
+  },
+  {
+    title: "Tic Tac Toe",
+    image: "tictactoe.png",
+    demo: "https://tic-tac-toe-liart-five.vercel.app/",
+    repo: "https://github.com/ravisharma-09/tic-tac-toe",
+    desc: "Classic 2-player Xs and Os. Keeps score, picks winners, refuses to let you cheat."
+  },
+  {
+    title: "Live Clock",
+    image: "clock.png",
+    demo: "https://clocfk.vercel.app/",
+    repo: "https://github.com/ravisharma-09/clock",
+    desc: "A real-time clock ticking right in your browser. Hours, minutes, seconds — synced and smooth."
+  },
+  {
+    title: "Guess It",
+    image: "guess.png",
+    demo: "https://guess-it-phi.vercel.app/",
+    repo: "https://github.com/ravisharma-09/guess_it",
+    desc: "Guess the secret number. The game tells you higher or lower until you nail it."
+  },
+  {
+    title: "Color Suggestion",
+    image: "color.png",
+    demo: "https://color-suggestion.vercel.app/",
+    repo: "https://github.com/ravisharma-09/color-suggestion",
+    desc: "Random color palettes on demand. Hit the button, get hex codes, copy and ship."
+  },
+  {
+    title: "Feedback Form",
+    image: "feedback.png",
+    demo: "https://feedback-nu-henna.vercel.app/",
+    repo: "https://github.com/ravisharma-09/feedback",
+    desc: "A clean feedback form with input validation. Send thoughts, get a confirmation, simple as that."
+  },
+  {
+    title: "Password Generator",
+    image: "password.png",
+    demo: "https://password-genrator-murex.vercel.app/",
+    repo: "https://github.com/ravisharma-09/password-genrator",
+    desc: "Generate strong, random passwords instantly. Pick your length, mix in symbols, numbers, and cases — copy and go."
   }
 ];
 
