@@ -55,7 +55,7 @@ class WorldScene extends Phaser.Scene {
     this.leaving = false;
 
     this.prompt = this.add.text(0, 0, "", {
-      fontSize: "26px", fill: "#ffffff", backgroundColor: "#6e6a6a", padding: { x: 8, y: 4 }
+      fontSize: "24px", fill: "#ffe9b8", backgroundColor: "rgba(60,36,18,0.9)", padding: { x: 10, y: 5 }
     }).setOrigin(0.5).setDepth(5000).setVisible(false);
     this.tweens.add({ targets: this.prompt, y: "+=6", duration: 700, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
 
@@ -90,12 +90,16 @@ class WorldScene extends Phaser.Scene {
     return Phaser.Math.Distance.Between(this.hero.x, this.hero.y, obj.x, obj.y) < range;
   }
 
-  // Prompt floats above the player and is kept inside the visible screen
-  showPrompt(text) {
-    this.prompt.setText(text).setVisible(true);
-    const cam = this.cameras.main, view = cam.worldView, half = this.prompt.width / 2 + 10;
-    const x = Phaser.Math.Clamp(this.hero.x, view.x + half, view.right - half);
-    const y = Phaser.Math.Clamp(this.hero.y - 95, view.y + 30, view.bottom - 30);
+  // Prompt sits on the object (door, copier...) when an anchor is given, else above the player.
+  // It shrinks to fit narrow phone screens and always stays inside the visible area.
+  showPrompt(text, anchor) {
+    const view = this.cameras.main.worldView;
+    this.prompt.setText(text).setVisible(true).setScale(1);
+    const maxW = view.width - 20;
+    if (this.prompt.width > maxW) this.prompt.setScale(maxW / this.prompt.width);
+    const half = this.prompt.displayWidth / 2 + 10;
+    const x = Phaser.Math.Clamp(anchor ? anchor.x : this.hero.x, view.x + half, view.right - half);
+    const y = Phaser.Math.Clamp(anchor ? anchor.y : this.hero.y - 95, view.y + 30, view.bottom - 30);
     this.prompt.setPosition(x, y);
   }
 
@@ -150,10 +154,10 @@ class HallwayScene extends WorldScene {
     }).setOrigin(0.5).setDepth(-10);
 
     this.spots = [
-      { x: 300, y: 380, label: "Press E to go back to my room", go: () => this.goTo("GameScene", "GameScene", 1130, 330) },
-      { x: 720, y: 380, label: "Press E: my resume is in here", go: () => this.goTo("ArchiveScene") },
-      { x: 1140, y: 380, label: "Press E: walk through my journey", go: () => this.goTo("JourneyScene") },
-      { x: 1500, y: 500, label: "Press E to play the coin game", go: () => this.goTo("MiniGameScene", "HallwayScene", 1500, 560) },
+      { x: 300, y: 380, at: { x: 300, y: 245 }, label: "Press E to enter", go: () => this.goTo("GameScene", "GameScene", 1130, 330) },
+      { x: 720, y: 380, at: { x: 720, y: 245 }, label: "Press E to enter", go: () => this.goTo("ArchiveScene") },
+      { x: 1140, y: 380, at: { x: 1140, y: 245 }, label: "Press E to enter", go: () => this.goTo("JourneyScene") },
+      { x: 1500, y: 500, at: { x: 1500, y: 330 }, label: "Press E to play", go: () => this.goTo("MiniGameScene", "HallwayScene", 1500, 560) },
     ];
 
     if (!this.registry.get("hallwayHintShown")) {
@@ -168,7 +172,7 @@ class HallwayScene extends WorldScene {
     this.prompt.setVisible(false);
     for (const s of this.spots) {
       if (this.near(s, 110)) {
-        this.showPrompt(s.label);
+        this.showPrompt(s.label, s.at);
         if (Phaser.Input.Keyboard.JustDown(this.keyE)) s.go();
         break;
       }
@@ -326,16 +330,17 @@ class ArchiveScene extends WorldScene {
     }
 
     if (this.near(this.printer, 140)) {
-      if (this.printed) this.showPrompt("Press E to get the resume again");
-      else if (this.found < 3) this.showPrompt(`Copier needs 3 pages (${this.found}/3)`);
-      else this.showPrompt("Press E to print my resume");
+      const onCopier = { x: this.printer.x, y: this.printer.y - 150 };
+      if (this.printed) this.showPrompt("Press E: resume again", onCopier);
+      else if (this.found < 3) this.showPrompt(`Needs 3 pages (${this.found}/3)`, onCopier);
+      else this.showPrompt("Press E to print", onCopier);
       if (Phaser.Input.Keyboard.JustDown(this.keyE) && !this.frozen) {
         if (this.printed) this.openDownload(false);
         else if (this.found === 3) this.printResume();
         else this.toast(`Still missing ${3 - this.found} page${3 - this.found === 1 ? "" : "s"}. Look behind the clutter 👀`);
       }
     } else if (this.near(this.exitDoor, 110)) {
-      this.showPrompt("Press E to go back to the hallway");
+      this.showPrompt("Press E to exit", { x: 1145, y: 230 });
       if (Phaser.Input.Keyboard.JustDown(this.keyE)) this.goTo("HallwayScene", "HallwayScene", 720, 410);
     }
   }
@@ -554,7 +559,7 @@ class JourneyScene extends WorldScene {
         this.openCard(s);
         return;
       }
-      this.showPrompt("Press E to read the postcard");
+      this.showPrompt("Press E to read", { x: s.x + 10, y: s.y - 105 });
       if (Phaser.Input.Keyboard.JustDown(this.keyE)) this.openCard(s);
       break;
     }
