@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pathglass: Graph Query Engine &amp; Visualizer | by Ravi Sharma</title>
+  <meta name="description" content="Pathglass by Ravi Sharma (July 2026). Pathglass is a graph query engine built from scratch, with a visual app that shows how each query runs step by step.">
+  <meta name="author" content="Ravi Sharma">
+  <link rel="canonical" href="https://www.sharmaravi.in/projects/pathglass/">
+  <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Ravi Sharma">
+  <meta property="og:title" content="Pathglass: Graph Query Engine &amp; Visualizer | by Ravi Sharma">
+  <meta property="og:description" content="Pathglass by Ravi Sharma (July 2026). Pathglass is a graph query engine built from scratch, with a visual app that shows how each query runs step by step.">
+  <meta property="og:url" content="https://www.sharmaravi.in/projects/pathglass/">
+  <meta property="og:image" content="https://www.sharmaravi.in/assets/og-image.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CreativeWork",
+  "name": "Pathglass: Graph Query Engine & Visualizer",
+  "url": "https://www.sharmaravi.in/projects/pathglass/",
+  "image": "https://www.sharmaravi.in/assets/projects/pathglass.webp",
+  "dateCreated": "July 2026",
+  "description": "Pathglass is a graph query engine built from scratch, with a visual app that shows how each query runs step by step.",
+  "creator": {
+    "@type": "Person",
+    "@id": "https://www.sharmaravi.in/#ravi",
+    "name": "Ravi Sharma",
+    "url": "https://www.sharmaravi.in/"
+  },
+  "author": {
+    "@type": "Person",
+    "@id": "https://www.sharmaravi.in/#ravi",
+    "name": "Ravi Sharma",
+    "url": "https://www.sharmaravi.in/"
+  },
+  "keywords": "TypeScript, Node.js, Ravi Sharma"
+}
+  </script>
+<style>
+    :root {
+      --cream: #fbe7c4; --paper: #fff6e3; --brown: #5a3a22; --wood: #b0703a;
+      --ink: #2e2116; --muted: #7a5a3a; --accent: #c2410c; --bg: #f3dcb4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--ink);
+      font: 17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    a { color: var(--accent); }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 24px 16px 64px; }
+    header.top { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+    header.top img { width: 120px; height: 120px; object-fit: cover; object-position: top; border-radius: 50%; border: 5px solid var(--brown); background: var(--cream); }
+    h1 { font-family: "Courier New", monospace; font-size: 2.2rem; margin: 0; line-height: 1.15; }
+    .tag { color: var(--muted); margin: 6px 0 0; }
+    .links { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+    .btn {
+      display: inline-block; padding: 8px 14px; border: 3px solid var(--brown); border-radius: 10px;
+      background: var(--cream); color: var(--ink); text-decoration: none; font-weight: 600;
+    }
+    .btn.primary { background: var(--brown); color: var(--cream); }
+    section { background: var(--paper); border: 4px solid var(--brown); border-radius: 14px; padding: 18px 20px; margin-top: 22px; }
+    h2 { font-family: "Courier New", monospace; margin: 0 0 10px; font-size: 1.35rem; }
+    h3 { margin: 0; font-size: 1.1rem; }
+    .project { display: grid; grid-template-columns: 200px 1fr; gap: 16px; padding: 14px 0; border-top: 2px dashed #d9bf94; }
+    .project:first-of-type { border-top: 0; padding-top: 0; }
+    .project img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border: 3px solid var(--brown); border-radius: 8px; }
+    .meta { color: var(--muted); font-size: 0.92rem; }
+    ul { margin: 6px 0 0; padding-left: 20px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; }
+    .chips li { background: var(--cream); border: 2px solid var(--brown); border-radius: 999px; padding: 2px 12px; font-size: 0.95rem; }
+    .timeline { list-style: none; padding: 0; margin: 0; }
+    .timeline li { display: grid; grid-template-columns: 120px 1fr; gap: 12px; padding: 6px 0; }
+    .timeline b { color: var(--brown); }
+    footer { margin-top: 28px; text-align: center; color: var(--muted); font-size: 0.95rem; }
+    @media (max-width: 600px) {
+      h1 { font-size: 1.7rem; }
+      .project { grid-template-columns: 1fr; }
+      .timeline li { grid-template-columns: 1fr; gap: 0; }
+    }
+      .crumbs { font-size: .95rem; color: var(--muted); margin-bottom: 14px; }
+    .hero { width: 100%; aspect-ratio: 16/9; object-fit: cover; border: 4px solid var(--brown); border-radius: 12px; margin-top: 16px; }
+    .by { margin: 6px 0 0; color: var(--muted); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .card { background: var(--paper); border: 4px solid var(--brown); border-radius: 14px; padding: 12px; text-decoration: none; color: var(--ink); }
+    .card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 8px; border: 3px solid var(--brown); }
+    .card h3 { margin: 10px 0 4px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <p class="crumbs"><a href="/about/">Ravi Sharma</a> › <a href="/projects/">Projects</a> › Pathglass</p>
+  <h1>Pathglass</h1>
+  <p class="tag">Graph Query Engine &amp; Visualizer</p>
+  <p class="by">by <a href="/about/">Ravi Sharma</a> · Solo project · July 2026</p>
+  <img class="hero" src="/assets/projects/pathglass.webp" alt="Pathglass by Ravi Sharma: screenshot">
+  <section>
+    <h2>What it is</h2>
+    <p>Pathglass is a graph query engine built from scratch, with a visual app that shows how each query runs step by step.</p>
+  </section>
+  <section>
+    <h2>What Ravi Sharma built</h2>
+    <ul><li>Built the query engine with lazy iterators for traversal, filter, take and unique queries.</li><li>Added a visual app with a graph canvas, query builder, query-plan panel and step-by-step result replay.</li></ul>
+  </section>
+  <section>
+    <h2>Tech</h2>
+    <ul class="chips"><li>TypeScript</li><li>Node.js</li></ul>
+  </section>
+  <section>
+    <h2>Links</h2>
+    <p><a href="https://github.com/ravisharma-09/Pathglass">GitHub repository</a> · <a href="https://pathglass-ten.vercel.app/">Live demo</a></p>
+  </section>
+  <footer>
+    <p><a href="/about/">About Ravi Sharma</a> · <a href="/projects/">All projects</a> · <a href="/">Play the portfolio game</a></p>
+    <p>© 2026 Ravi Sharma · sharmaravi.in</p>
+  </footer>
+</div>
+</body>
+</html>

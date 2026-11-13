@@ -18,24 +18,77 @@
   <meta property="og:image" content="https://www.sharmaravi.in/assets/og-image.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "ProfilePage",
-    "url": "https://www.sharmaravi.in/about/",
-    "mainEntity": {
-      "@type": "Person",
-      "@id": "https://www.sharmaravi.in/#ravi",
-      "name": "Ravi Sharma",
-      "url": "https://www.sharmaravi.in/",
-      "jobTitle": "Software Developer",
-      "affiliation": { "@type": "CollegeOrUniversity", "name": "Newton School of Technology" },
-      "sameAs": [
-        "https://github.com/ravisharma-09",
-        "https://www.linkedin.com/in/ravi-sharma-10b1a1384/",
-        "https://www.instagram.com/ravi._who_/"
-      ]
-    }
+{
+  "@context": "https://schema.org",
+  "@type": "ProfilePage",
+  "url": "https://www.sharmaravi.in/about/",
+  "name": "About Ravi Sharma",
+  "mainEntity": {
+    "@type": "Person",
+    "@id": "https://www.sharmaravi.in/#ravi",
+    "name": "Ravi Sharma",
+    "givenName": "Ravi",
+    "familyName": "Sharma",
+    "alternateName": [
+      "sharmaravi",
+      "ravisharma-09"
+    ],
+    "url": "https://www.sharmaravi.in/",
+    "image": "https://www.sharmaravi.in/assets/ravi-sharma.webp",
+    "jobTitle": "Software Developer",
+    "description": "Ravi Sharma is a Computer Science student at Newton School of Technology, developer of LessonLingo, Setu (Smart India Hackathon 2026) and Pathglass, and All India Rank 17 in Turing Cup 2k26.",
+    "affiliation": {
+      "@type": "CollegeOrUniversity",
+      "name": "Newton School of Technology"
+    },
+    "alumniOf": [
+      {
+        "@type": "HighSchool",
+        "name": "Shri Guru Harkrishan Senior Secondary School, Chandigarh"
+      },
+      {
+        "@type": "HighSchool",
+        "name": "Army Public School, Chandimandir"
+      }
+    ],
+    "memberOf": [
+      {
+        "@type": "Organization",
+        "name": "DevForge, Newton School of Technology"
+      },
+      {
+        "@type": "Organization",
+        "name": "openSUSE Project"
+      },
+      {
+        "@type": "Organization",
+        "name": "Hack Club"
+      }
+    ],
+    "award": [
+      "All India Rank 17, Turing Cup 2k26",
+      "ICPC Asia Amritapuri Regional 2025 participant"
+    ],
+    "knowsAbout": [
+      "JavaScript",
+      "TypeScript",
+      "Python",
+      "C++",
+      "React",
+      "Next.js",
+      "Node.js",
+      "FastAPI",
+      "Phaser.js",
+      "MediaPipe",
+      "Competitive Programming"
+    ],
+    "sameAs": [
+      "https://github.com/ravisharma-09",
+      "https://www.linkedin.com/in/ravi-sharma-10b1a1384/",
+      "https://www.instagram.com/ravi._who_/"
+    ]
   }
+}
   </script>
   <style>
     :root {
@@ -83,7 +136,7 @@
 <body>
 <div class="wrap">
   <header class="top">
-    <img src="/assets/profile.webp" alt="Photo of Ravi Sharma" width="120" height="120">
+    <img src="/assets/ravi-sharma.webp" alt="Ravi Sharma, developer and CS student at Newton School of Technology" width="120" height="120">
     <div>
       <h1>Ravi Sharma</h1>
       <p class="tag">Computer Science student at Newton School of Technology · developer · competitive programmer</p>
@@ -103,11 +156,11 @@
   </section>
 
   <section>
-    <h2>Projects</h2>
+    <h2>Projects <a href="/projects/" style="font-size:.8rem">(all projects →)</a></h2>
     <article class="project">
       <img src="/assets/projects/lessonlingo.webp" alt="LessonLingo offline lecture translator" loading="lazy">
       <div>
-        <h3>LessonLingo: Offline Lecture Translator</h3>
+        <h3><a href="/projects/lessonlingo/">LessonLingo: Offline Lecture Translator</a></h3>
         <p class="meta">Team project · Oct 2026 · Python, pytest</p>
         <p>Turns English lectures into Hindi and Kannada subtitles and dubbed audio, fully offline after the first model download. Built the step-by-step web interface, added automated tests, and kept headings, tables and code blocks intact when translating Markdown notes.</p>
         <a href="https://github.com/ravisharma-09/lessonlingo">GitHub</a> · <a href="https://drive.google.com/file/d/19TnHx-6KQ2JV6Vs3LsIcdvp8Ti9OcrRN/view?usp=sharing">Demo video</a>
@@ -116,7 +169,7 @@
     <article class="project">
       <img src="/assets/projects/setu.webp" alt="Setu sign language bridge" loading="lazy">
       <div>
-        <h3>Setu: Sign Language Bridge (Smart India Hackathon 2026)</h3>
+        <h3><a href="/projects/setu/">Setu: Sign Language Bridge (Smart India Hackathon 2026)</a></h3>
         <p class="meta">Team project · Sep 2026 · TypeScript, React, Python, MediaPipe</p>
         <p>Fixed camera recognition of face-adjacent signs by capturing full body, hand and 48-point face trajectories; bundled MediaPipe Holistic for offline use with GPU-to-CPU fallback; rebuilt sign playback as a 2D signer with a resumable dataset pipeline (4,384 clips).</p>
         <a href="https://github.com/geetxnshgoyal/sih/pulls?q=is:pr+author:ravisharma-09+is:merged">My merged PRs</a> · <a href="https://sih.geetanshgoyal.in/">Live demo</a>
@@ -125,7 +178,7 @@
     <article class="project">
       <img src="/assets/projects/pathglass.webp" alt="Pathglass graph query engine visualizer" loading="lazy">
       <div>
-        <h3>Pathglass: Graph Query Engine &amp; Visualizer</h3>
+        <h3><a href="/projects/pathglass/">Pathglass: Graph Query Engine &amp; Visualizer</a></h3>
         <p class="meta">Jul 2026 · TypeScript, Node.js</p>
         <p>A graph query engine built from scratch with lazy iterators for traversal, filter, take and unique queries, plus a visual app with a graph canvas, query builder, query-plan panel and step-by-step result replay.</p>
         <a href="https://github.com/ravisharma-09/Pathglass">GitHub</a> · <a href="https://pathglass-ten.vercel.app/">Live demo</a>
@@ -134,7 +187,7 @@
     <article class="project">
       <img src="/assets/projects/portfolio.webp" alt="Ravi Sharma's game-style portfolio" loading="lazy">
       <div>
-        <h3>Interactive Game-Style Portfolio</h3>
+        <h3><a href="/projects/game-portfolio/">Interactive Game-Style Portfolio</a></h3>
         <p class="meta">Jan 2026 · JavaScript, Phaser.js, HTML5 Canvas, CSS</p>
         <p>This website: a 2D room you walk around in, with a hallway, an archive where you print my resume, a journey map and an arcade game.</p>
         <a href="https://github.com/ravisharma-09/Portfolio-Ravi">GitHub</a> · <a href="/">Play it</a>
