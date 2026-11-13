@@ -19,7 +19,7 @@ class MiniGameScene extends Phaser.Scene {
   constructor() { super("MiniGameScene"); }
 
   preload() {
-    if (!this.textures.exists("player")) this.load.image("player", "assets/player.png");
+    if (!this.textures.exists("player")) this.load.image("player", "assets/player.webp");
     if (!this.cache.audio.exists("coin")) this.load.audio("coin", ["assets/sounds/coin.ogg", "assets/sounds/coin.mp3"]);
     if (!this.cache.audio.exists("gameover")) this.load.audio("gameover", ["assets/sounds/gameover.ogg", "assets/sounds/gameover.mp3"]);
     if (!this.cache.audio.exists("click")) this.load.audio("click", ["assets/sounds/click.ogg", "assets/sounds/click.mp3"]);
@@ -293,7 +293,7 @@ class MiniGameScene extends Phaser.Scene {
   leave() {
     if (this.leaving) return;
     this.leaving = true;
-    if (typeof setSpawn === "function") setSpawn("HallwayScene", 1592, 560);
+    if (typeof setSpawn === "function") setSpawn("HallwayScene", 1592, 580);
     this.cameras.main.fadeOut(300, 0, 0, 0);
     this.cameras.main.once("camerafadeoutcomplete", () => this.scene.start("HallwayScene"));
   }

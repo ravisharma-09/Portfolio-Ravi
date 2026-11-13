@@ -48,56 +48,56 @@ const doorRange = 105;
 let projects = [
   {
     title: "LessonLingo",
-    image: "lessonlingo.png",
+    image: "lessonlingo.webp",
     demo: "https://drive.google.com/file/d/19TnHx-6KQ2JV6Vs3LsIcdvp8Ti9OcrRN/view?usp=sharing",
     repo: "https://github.com/ravisharma-09/lessonlingo",
     desc: "Offline lecture translator (team project). Turns English lectures into Hindi and Kannada subtitles and dubbed audio, fully offline after the first model download. I built the step-by-step web interface, added automated tests, and made Markdown notes translate while keeping headings, tables and code blocks intact. Tech: Python, pytest."
   },
   {
     title: "Setu - Sign Language Bridge",
-    image: "setu.png",
+    image: "setu.webp",
     demo: "https://sih.geetanshgoyal.in/",
     repo: "https://github.com/geetxnshgoyal/sih/pulls?q=is:pr+author:ravisharma-09+is:merged",
     desc: "Smart India Hackathon 2026 team project. I fixed camera recognition of face-adjacent signs by capturing full body, hand and 48-point face trajectories, bundled the MediaPipe Holistic model for offline use with GPU-to-CPU fallback, and rebuilt sign playback as a 2D signer with a resumable dataset pipeline (4,384 clips). Tech: TypeScript, React, Python, MediaPipe."
   },
   {
     title: "Pathglass",
-    image: "pathglass.png",
+    image: "pathglass.webp",
     demo: "https://pathglass-ten.vercel.app/",
     repo: "https://github.com/ravisharma-09/Pathglass",
     desc: "A graph query engine built from scratch with lazy iterators for traversal, filter, take and unique queries, plus a visual app with a graph canvas, query builder, query-plan panel and step-by-step result replay. Tech: TypeScript, Node.js."
   },
   {
     title: "Portfolio Ravi",
-    image: "portfolio.png",
+    image: "portfolio.webp",
     demo: "https://sharmaravi.in",
     repo: "https://github.com/ravisharma-09/Portfolio-Ravi",
     desc: "This room! A 2D game portfolio: walk around a virtual room and interact with objects to discover my work. Custom animations, keyboard controls and optimised assets for fast loads, about 35 hours of work from scratch. Tech: JavaScript, Phaser.js, HTML5 Canvas, CSS."
   },
   {
     title: "Tic Tac Toe",
-    image: "tictactoe.png",
+    image: "tictactoe.webp",
     demo: "https://tic-tac-toe-liart-five.vercel.app/",
     repo: "https://github.com/ravisharma-09/tic-tac-toe",
     desc: "Classic 2-player Xs and Os. Keeps score, picks winners, refuses to let you cheat."
   },
   {
     title: "Password Generator",
-    image: "password.png",
+    image: "password.webp",
     demo: "https://password-genrator-murex.vercel.app/",
     repo: "https://github.com/ravisharma-09/password-genrator",
     desc: "Generate strong, random passwords instantly. Pick your length, mix in symbols, numbers, and cases — copy and go."
   },
   {
     title: "Calculator",
-    image: "calculator.png",
+    image: "calculator.webp",
     demo: "https://calculator-mauve-ten-45.vercel.app/",
     repo: "https://github.com/ravisharma-09/Calculator",
     desc: "A clean, working calculator that handles your everyday math without the clutter. Buttons, screen, vibes."
   },
   {
     title: "Stone Paper Scissor",
-    image: "stone.png",
+    image: "stone.webp",
     demo: "https://stone-paper-nine.vercel.app/",
     repo: "https://github.com/ravisharma-09/stone-paper",
     desc: "Stone-Paper Scissor is a fun beginner-level web game built with HTML, CSS, and JavaScript. It lets you play Rock-Paper-Scissors against the computer, showing emoji animations and the win/tie/lose result instantly. This project is great for learning DOM interaction and basic game logic in JavaScript"
@@ -160,9 +160,9 @@ constructor(){
 // hi---------------------------------------------------------------------------------
 
 preload() {
-  this.load.image("player", "assets/player.png");
-  this.load.image("room", "assets/room.png");
-  this.load.image("profile", "assets/profile.png");
+  this.load.image("player", "assets/player.webp");
+  this.load.image("room", "assets/room.webp");
+  this.load.image("profile", "assets/profile.webp");
   for (let project of projects){
     this.load.image(
       project.title,
@@ -179,7 +179,7 @@ preload() {
   this.load.image("icon_linkedin", "assets/icons/linkedin.png");
   this.load.image("icon_instagram", "assets/icons/instagram.png");
   this.load.image("icon_globe", "assets/icons/globe.png");
-  this.load.image("bubble", "assets/speech-bubble.png");
+  this.load.image("bubble", "assets/speech-bubble.webp");
 
 }
 
@@ -404,7 +404,7 @@ this.profileImage = this.add.image(
 );
 
 
-this.profileImage.setScale(0.17);
+this.profileImage.setScale(0.34); // profile.webp is half the old size
 this.profileImage.setVisible(false);
 this.profileImage.setScrollFactor(0);
 this.profileImage.setDepth(8);
@@ -1247,7 +1247,7 @@ this.tweens.add({
     
 }
 }
-else if(doorDistance < doorRange){
+else if(Math.abs(player.x - door.x) < 70 && player.y < 380){ // standing in the doorway
   nearObject = true;
 if(!wasNear) this.sounds.notify.play();
   interactText.setVisible(true);
@@ -1311,7 +1311,7 @@ this.bg.setDepth(0);
 .setOrigin(0,0)
 .setDepth(10);
 
-this.openHint = this.add.text(40, 95, "ENTER → Open Project", {
+this.openHint = this.add.text(40, 95, document.body.classList.contains("touch") ? "Tap a project to open it" : "ENTER or click → Open Project", {
   fontSize:"18px",
   fill:"#aaaaaa"
 }
@@ -1356,6 +1356,13 @@ let text = this.add.text(0, 120, projects[i].title, {
 }).setOrigin(0.5);
 
 container.add([bg, img, text]);
+  // touch/click: first tap selects a card, tapping the selected card opens it
+  bg.setInteractive({ useHandCursor: true });
+  bg.on("pointerup", (pointer) => {
+    if (this.mode !== "grid" || this.dragMoved) return;
+    if (this.selectedProject === i) this.openDetail();
+    else { this.selectedProject = i; this.sounds.notify.play(); this.updateSelection(); }
+  });
   this.gridContainer.add(container);
   this.cards.push(container);
 }
@@ -1388,8 +1395,8 @@ this.maxScroll = Math.max(0, totalHeight - this.scale.height + 200) ;
       }
     ).setOrigin(0.5).setDepth(10).setScrollFactor(0).setVisible(false);
 
-    this.infoText = this.add.text(640, 650,
-      "ENTER = Open Demo | R = Repo | ESC = Back",
+    this.infoText = this.add.text(this.scale.width / 2, 120,
+      document.body.classList.contains("touch") ? "Tap a button below · ESC = Back" : "ENTER = Open Demo | R = Repo | ESC = Back",
       {
         fontSize: "23px",
         fill: "#F0F8FF"
@@ -1409,7 +1416,8 @@ this.maxScroll = Math.max(0, totalHeight - this.scale.height + 200) ;
     this.add.text(this.scale.width - 40, 40, "Exit", {
       fontSize: "20px",
       fill:"#F0F8FF"
-    }).setOrigin(1,0);
+    }).setOrigin(1,0).setInteractive({ useHandCursor: true })
+      .on("pointerdown", () => { if (this.mode === "grid") this.exitToRoom(); else this.closeDetail(); });
     this.add.text(this.scale.width - 40, 70, "Press -> ESC", {
       fontSize: "16px",
       fill:"#666666"
@@ -1460,6 +1468,38 @@ this.detailBox = this.add.rectangle(
 .setDepth(9)
 .setScrollFactor(0)
 .setVisible(false);
+   // swipe / drag to scroll the grid on touch screens
+   this.input.on("pointerdown", (p) => { this.dragStartY = p.y; this.dragStartScroll = this.targetScrollY; this.dragMoved = false; });
+   this.input.on("pointermove", (p) => {
+     if (!p.isDown || this.mode !== "grid") return;
+     const dy = p.y - this.dragStartY;
+     if (Math.abs(dy) > 12) this.dragMoved = true;
+     if (this.dragMoved) this.targetScrollY = Phaser.Math.Clamp(this.dragStartScroll - dy, 0, this.maxScroll);
+   });
+
+   // Detail view buttons. Links open from the tap/keypress itself, because mobile
+   // browsers block window.open() when it runs later from the game loop.
+   const linkBtn = (x, label, color) => {
+     const b = this.add.rectangle(x, 0, 230, 54, color).setStrokeStyle(2, 0xffffff, 0.4)
+       .setDepth(11).setScrollFactor(0).setVisible(false).setInteractive({ useHandCursor: true });
+     const t = this.add.text(x, 0, label, { fontSize: "20px", fill: "#ffffff", fontStyle: "bold" })
+       .setOrigin(0.5).setDepth(12).setScrollFactor(0).setVisible(false);
+     return { b, t };
+   };
+   const cx = this.scale.width / 2, by = this.scale.height / 2 + 215;
+   this.demoBtn = linkBtn(cx - 125, "▶ Live demo", 0x1f6f4a);
+   this.repoBtn = linkBtn(cx + 125, "</> Code", 0x333a55);
+   [this.demoBtn, this.repoBtn].forEach(o => { o.b.y = by; o.t.y = by; });
+   this.demoBtn.b.on("pointerdown", () => this.openLink("demo"));
+   this.repoBtn.b.on("pointerdown", () => this.openLink("repo"));
+   this.onNativeKey = (e) => {
+     if (this.mode !== "detail") return;
+     if (e.keyCode === 13) this.openLink("demo");
+     if (e.keyCode === 82) this.openLink("repo");
+   };
+   window.addEventListener("keydown", this.onNativeKey);
+   this.events.once("shutdown", () => window.removeEventListener("keydown", this.onNativeKey));
+
    this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
   this.targetScrollY += deltaY * 0.5;
   this.targetScrollY = Phaser.Math.Clamp(this.targetScrollY, 0, this.maxScroll);
@@ -1502,6 +1542,7 @@ this.detailBox = this.add.rectangle(
     this.detailText.setVisible(true);
 
     this.infoText.setVisible(true);
+    [this.demoBtn, this.repoBtn].forEach(o => { o.b.setVisible(true); o.t.setVisible(true); });
 
     this.detailText.setText(
       project.title +'\n\n'+project.desc
@@ -1518,6 +1559,20 @@ this.detailBox = this.add.rectangle(
     this.detailImage.setVisible(false);
     this.detailText.setVisible(false);
     this.infoText.setVisible(false);
+    [this.demoBtn, this.repoBtn].forEach(o => { o.b.setVisible(false); o.t.setVisible(false); });
+  }
+
+  openLink(which) {
+    const project = projects[this.selectedProject];
+    const url = which === "demo" ? project.demo : project.repo;
+    if (url) window.open(url, "_blank", "noopener");
+  }
+
+  exitToRoom() {
+    if (this.exiting) return;
+    this.exiting = true;
+    this.sounds.close.play();
+    this.time.delayedCall(150, () => this.scene.start("GameScene"));
   }
 
 
@@ -1525,10 +1580,7 @@ this.detailBox = this.add.rectangle(
 
   if(this.mode === "grid"){
 if(Phaser.Input.Keyboard.JustDown(this.escKey)){
-  this.sounds.close.play();
-  this.time.delayedCall(150, () => {
-    this.scene.start("GameScene");
-  })
+  this.exitToRoom();
 }
     if(Phaser.Input.Keyboard.JustDown(this.enterKey)){
       this.openDetail();
@@ -1563,15 +1615,9 @@ this.gridContainer.y = -this.scrollY;
 
  else if(this.mode === "detail"){
 
-    let project = projects[this.selectedProject];
-
-    if(Phaser.Input.Keyboard.JustDown(this.enterKey)){
-      window.open(project.demo, "_blank");
-    }
-
-    if(Phaser.Input.Keyboard.JustDown(this.repoKey)){
-      window.open(project.repo, "_blank");
-    }
+    // ENTER / R are handled by onNativeKey so the browser treats the link as user-initiated
+    Phaser.Input.Keyboard.JustDown(this.enterKey);
+    Phaser.Input.Keyboard.JustDown(this.repoKey);
 
     if(Phaser.Input.Keyboard.JustDown(this.escKey)){
       this.closeDetail();
@@ -1594,3 +1640,8 @@ scene: [StartScene, GameScene, ProjectScene, MiniGameScene, HallwayScene, Archiv
 }
 }
 const game = new Phaser.Game(config);
+// give the canvas a name for screen readers / Lighthouse
+game.events.once("ready", () => {
+  game.canvas.setAttribute("role", "img");
+  game.canvas.setAttribute("aria-label", "Ravi Sharma's portfolio: a 2D room you explore with the arrow keys or WASD and E to interact. A text version is at /about/.");
+});

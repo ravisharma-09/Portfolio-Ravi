@@ -21,14 +21,14 @@ const OUTLINE = 0x5a3a22; // dark brown used for outlines in the room art
 // Shared movement, prompts, toasts and transitions for the walkable scenes.
 class WorldScene extends Phaser.Scene {
   preload() {
-    if (!this.textures.exists("player")) this.load.image("player", "assets/player.png");
+    if (!this.textures.exists("player")) this.load.image("player", "assets/player.webp");
     if (!this.cache.audio.exists("click")) this.load.audio("click", "assets/sounds/click.ogg");
     if (!this.cache.audio.exists("notify")) this.load.audio("notify", "assets/sounds/notify.ogg");
     if (!this.cache.audio.exists("coin")) this.load.audio("coin", ["assets/sounds/coin.ogg", "assets/sounds/coin.mp3"]);
     if (!this.cache.audio.exists("type")) this.load.audio("type", ["assets/sounds/type.ogg", "assets/sounds/type.mp3"]);
     // painted backgrounds (generated with room.png as the style reference) + the copier sprite
-    if (!this.textures.exists("w_hallway")) this.load.image("w_hallway", "assets/world/hallway_bg.jpg");
-    if (!this.textures.exists("w_archive")) this.load.image("w_archive", "assets/world/archive_bg.jpg");
+    if (!this.textures.exists("w_hallway")) this.load.image("w_hallway", "assets/world/hallway_bg.webp");
+    if (!this.textures.exists("w_archive")) this.load.image("w_archive", "assets/world/archive_bg.webp");
     if (!this.textures.exists("w_copier")) this.load.image("w_copier", "assets/world/copier.png");
   }
 
@@ -98,6 +98,11 @@ class WorldScene extends Phaser.Scene {
     this.pressQ = Phaser.Input.Keyboard.JustDown(this.keyQ);
   }
 
+  // Standing in a doorway: horizontally within the door, and flown up close to the wall
+  atDoor(door) {
+    return Math.abs(this.hero.x - door.x) < door.halfW && this.hero.y < door.maxY;
+  }
+
   near(obj, range) {
     return Phaser.Math.Distance.Between(this.hero.x, this.hero.y, obj.x, obj.y) < range;
   }
@@ -150,8 +155,8 @@ class HallwayScene extends WorldScene {
   create() {
     // hallway_bg.jpg is 1776x896: doors at x 295 / 745 / 1204, arcade at x 1592, floor y 455..770
     this.add.image(0, 0, "w_hallway").setOrigin(0).setDepth(-20);
-    this.setupWorld(1776, 896, { x1: 40, y1: 480, x2: 1736, y2: 760 },
-      takeSpawn("HallwayScene", { x: 295, y: 520 }));
+    this.setupWorld(1776, 896, { x1: 40, y1: 415, x2: 1736, y2: 760 },
+      takeSpawn("HallwayScene", { x: 295, y: 540 }));
 
     // names on the blank wooden plates above each door
     const plate = (x, text) => this.add.text(x, 179, text, {
@@ -165,10 +170,11 @@ class HallwayScene extends WorldScene {
     }).setOrigin(0.5).setDepth(-10);
 
     this.spots = [
-      { x: 295, y: 500, at: { x: 295, y: 330 }, label: "Press E to enter", go: () => this.goTo("GameScene", "GameScene", 1130, 330) },
-      { x: 745, y: 500, at: { x: 745, y: 330 }, label: "Press E to enter", go: () => this.goTo("ArchiveScene") },
-      { x: 1204, y: 500, at: { x: 1204, y: 330 }, label: "Press E to enter", go: () => this.goTo("JourneyScene") },
-      { x: 1592, y: 520, at: { x: 1592, y: 360 }, label: "Press E to play", go: () => this.goTo("MiniGameScene", "HallwayScene", 1592, 560) },
+      // halfW/maxY: the doorway zone. Fly up to the door to get the prompt.
+      { x: 295, halfW: 70, maxY: 490, at: { x: 295, y: 330 }, label: "Press E to enter", go: () => this.goTo("GameScene", "GameScene", 1130, 400) },
+      { x: 745, halfW: 70, maxY: 490, at: { x: 745, y: 330 }, label: "Press E to enter", go: () => this.goTo("ArchiveScene") },
+      { x: 1204, halfW: 70, maxY: 490, at: { x: 1204, y: 330 }, label: "Press E to enter", go: () => this.goTo("JourneyScene") },
+      { x: 1592, halfW: 80, maxY: 530, at: { x: 1592, y: 360 }, label: "Press E to play", go: () => this.goTo("MiniGameScene", "HallwayScene", 1592, 580) },
     ];
 
     if (!this.registry.get("hallwayHintShown")) {
@@ -183,7 +189,7 @@ class HallwayScene extends WorldScene {
     this.moveHero(380);
     this.prompt.setVisible(false);
     for (const s of this.spots) {
-      if (this.near(s, 110)) {
+      if (this.atDoor(s)) {
         this.showPrompt(s.label, s.at);
         if (this.pressE) s.go();
         break;
@@ -199,8 +205,8 @@ class ArchiveScene extends WorldScene {
   create() {
     // archive_bg.jpg is 1536x1024, same room shape as room.png: door at x 1160, cabinets left, box stacks right
     this.add.image(0, 0, "w_archive").setOrigin(0).setDepth(-20);
-    this.setupWorld(1536, 1024, { x1: 110, y1: 380, x2: 1430, y2: 850 },
-      takeSpawn("ArchiveScene", { x: 1160, y: 420 }));
+    this.setupWorld(1536, 1024, { x1: 110, y1: 330, x2: 1430, y2: 850 },
+      takeSpawn("ArchiveScene", { x: 1160, y: 440 }));
 
     this.hud(this.sw / 2, 16, "🗄️ THE ARCHIVE", 0.5);
 
@@ -211,7 +217,7 @@ class ArchiveScene extends WorldScene {
       fontSize: "13px", fill: "#32201a", align: "center"
     }).setOrigin(0.5).setDepth(-9);
 
-    this.exitDoor = { x: 1160, y: 390 };
+    this.exitDoor = { x: 1160, halfW: 65, maxY: 385 };
 
     // the copier is the "printer", in the middle of the room
     this.copier = this.prop("w_copier", 760, 560);
@@ -506,9 +512,9 @@ class ArchiveScene extends WorldScene {
         if (this.printed || this.found === 3) this.printResume();
         else this.toast(`Still missing ${3 - this.found} page${3 - this.found === 1 ? "" : "s"}. Look behind the clutter 👀`);
       }
-    } else if (this.near(this.exitDoor, 110)) {
+    } else if (this.atDoor(this.exitDoor)) {
       this.showPrompt("Press E to exit", { x: 1160, y: 230 });
-      if (this.pressE) this.goTo("HallwayScene", "HallwayScene", 745, 520);
+      if (this.pressE) this.goTo("HallwayScene", "HallwayScene", 745, 540);
     }
   }
 }
@@ -705,7 +711,7 @@ class JourneyScene extends WorldScene {
       if (this.pressEsc || this.pressE) this.closeCard();
       return;
     }
-    if (this.pressEsc) { this.goTo("HallwayScene", "HallwayScene", 1204, 520); return; }
+    if (this.pressEsc) { this.goTo("HallwayScene", "HallwayScene", 1204, 540); return; }
 
     this.moveHero(420);
     this.prompt.setVisible(false);
