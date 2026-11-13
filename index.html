@@ -61,12 +61,8 @@
 
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="style.css">
-  <script defer src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
-  <script defer src="mobile-view.js"></script>
-  <script defer src="world.js"></script>
-  <script defer src="arcade.js"></script>
-  <script defer src="main.js"></script>
-  <script defer src="touch.js"></script>
+  <!-- boot.js loads Phaser and the game scripts (in order), but waits for landscape on phones -->
+  <script defer src="boot.js"></script>
 </head>
 
 <body>
