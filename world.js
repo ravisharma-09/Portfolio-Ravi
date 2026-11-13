@@ -314,9 +314,52 @@ class ArchiveScene extends WorldScene {
   }
 
   // Synthesised "brrrt-brrrt" printer noise (Web Audio), no extra sound file needed
-  printerNoise(ms) {
+  audioCtx() {
     const ctx = this.sound.context;
-    if (!ctx || this.sound.mute) return;
+    if (!ctx || this.sound.mute) return null;
+    if (ctx.state === "suspended") ctx.resume();
+    return ctx;
+  }
+
+  // Stepper-motor "tk-tk-tk-zzzt" while the page feeds out
+  feedSound(ms) {
+    const ctx = this.audioCtx();
+    if (!ctx) return;
+    const rate = ctx.sampleRate, len = Math.floor(rate * ms / 1000);
+    const buf = ctx.createBuffer(1, len, rate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) {
+      const t = i / rate;
+      const step = (t * 22) % 1;                                   // 22 ticks per second
+      const tick = step < 0.18 ? (Math.random() * 2 - 1) * (1 - step / 0.18) : 0;
+      const whine = Math.sign(Math.sin(2 * Math.PI * (420 + 260 * (t / (ms / 1000))) * t)) * 0.18;
+      d[i] = tick * 0.8 + whine * (0.6 + 0.4 * Math.sin(t * 40));
+    }
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const filter = ctx.createBiquadFilter(); filter.type = "lowpass"; filter.frequency.value = 2600;
+    const gain = ctx.createGain(); gain.gain.value = 0.13;
+    src.connect(filter); filter.connect(gain); gain.connect(this.sound.masterVolumeNode || ctx.destination);
+    src.start();
+  }
+
+  // Little "ding!" when the page is done
+  ding() {
+    const ctx = this.audioCtx();
+    if (!ctx) return;
+    [1320, 1760].forEach((f, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = "sine"; o.frequency.value = f;
+      const t0 = ctx.currentTime + i * 0.12;
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(0.25, t0 + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.6);
+      o.connect(g); g.connect(this.sound.masterVolumeNode || ctx.destination);
+      o.start(t0); o.stop(t0 + 0.65);
+    });
+  }
+
+  printerNoise(ms) {
+    const ctx = this.audioCtx();
+    if (!ctx) return;
     const rate = ctx.sampleRate, len = Math.floor(rate * ms / 1000);
     const buf = ctx.createBuffer(1, len, rate), d = buf.getChannelData(0);
     for (let i = 0; i < len; i++) {
@@ -387,21 +430,42 @@ class ArchiveScene extends WorldScene {
         }
       });
 
-      // 3. stop, settle, and shoot the finished resume out
+      // 3. shaking stops, then the printed resume slowly feeds out of the paper slot
       this.time.delayedCall(SHAKE_MS, () => {
         [jitter, blink, clatter, shout].forEach(e => e.remove());
         this.copier.clearTint().setPosition(cx, cy).setAngle(0).setScale(1);
-        this.tweens.add({ targets: this.copier, scaleY: 0.92, duration: 90, yoyo: true });
-        this.sfx.coin.play();
-        const out = this.add.image(mouth.x, mouth.y + 20, "resume_page").setDepth(3000).setScale(1.2);
+        this.tweens.add({ targets: this.copier, scaleY: 0.94, duration: 90, yoyo: true });
+
+        const FEED_MS = 1700;
+        const slotY = cy - 92;                    // output slot on the copier's front
+        const page = this.add.image(cx, slotY, "resume_page").setOrigin(0.5, 0).setScale(1.8).setDepth(cy + 1);
+        page.setCrop(0, 0, 36, 0);
+        const feed = { h: 0 };
+        this.feedSound(FEED_MS);
+        const ticks = this.time.addEvent({ delay: 140, loop: true, callback: () => this.sfx.type.play({ rate: 1.4, volume: 0.15 }) });
+        const hum = this.time.addEvent({
+          delay: 45, loop: true, callback: () => this.copier.setPosition(cx + Phaser.Math.Between(-1, 1), cy)
+        });
         this.tweens.add({
-          targets: out, y: mouth.y - 160, angle: 720, scale: 2.4, duration: 650, ease: "Back.out",
+          targets: feed, h: 46, duration: FEED_MS, ease: "Linear",
+          onUpdate: () => page.setCrop(0, 0, 36, Math.round(feed.h)),
           onComplete: () => {
-            out.destroy();
-            this.state.printed = true;
-            this.printing = false;
-            this.updateCounter();
-            this.openDownload(false);
+            ticks.remove(); hum.remove();
+            this.copier.setPosition(cx, cy);
+            this.ding();
+            // 4. pull the page out and show it
+            this.tweens.add({
+              targets: page, y: slotY - 150, scale: 2.6, duration: 500, ease: "Back.out",
+              onComplete: () => {
+                this.time.delayedCall(350, () => {
+                  page.destroy();
+                  this.state.printed = true;
+                  this.printing = false;
+                  this.updateCounter();
+                  this.openDownload(false);
+                });
+              }
+            });
           }
         });
       });
