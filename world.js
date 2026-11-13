@@ -356,13 +356,13 @@ const JOURNEY = [
   { emoji: "💻", title: "ICPC Asia Amritapuri Regional", place: "Amritapuri, Kerala", date: "Dec 2025",
     text: "Competed in the ICPC Asia Amritapuri regional contest.", at: geo(76.49, 9.09) },
   { emoji: "🏆", title: "Turing Cup 2k26", place: "Online · by Turing Hut", date: "Mar 2026",
-    text: "Secured All India Rank 17 in this competitive programming contest.", at: geo(77.59, 12.97), off: [30, -150] },
+    text: "Secured All India Rank 17 in this competitive programming contest.", at: geo(79.5, 4.5), island: true },
   { emoji: "🔍", title: "Pathglass", place: "Built at Newton", date: "Jul 2026",
-    text: "Built a graph query engine from scratch, plus a visual app with a query-plan panel and step-by-step replay.", at: geo(77.59, 12.97), off: [110, -50] },
+    text: "Built a graph query engine from scratch, plus a visual app with a query-plan panel and step-by-step replay.", at: geo(84.5, 2.5), island: true },
   { emoji: "🛠️", title: "DevForge Lead", place: "Newton School of Technology", date: "Jul – Oct 2026",
-    text: "Led the college developer club: coordinated club leads and organised technical events.", at: geo(77.59, 12.97), off: [-110, -80] },
+    text: "Led the college developer club: coordinated club leads and organised technical events.", at: geo(89.5, 0.5), island: true },
   { emoji: "🤟", title: "Setu · Smart India Hackathon 2026", place: "Team project", date: "Sep 2026",
-    text: "Sign language bridge: full-body + face sign recognition, offline MediaPipe, and a 2D signer.", at: geo(77.59, 12.97), off: [80, 90] },
+    text: "Sign language bridge: full-body + face sign recognition, offline MediaPipe, and a 2D signer.", at: geo(94.5, -1.5), island: true },
   { emoji: "🌏", title: "openSUSE.Asia Summit 2026", place: "Yogyakarta, Indonesia", date: "Oct 2026",
     text: "Attended at Universitas Gadjah Mada. Part of the openSUSE community since Oct 2026.", at: geo(110.36, -7.8) },
 ];
@@ -434,6 +434,17 @@ class JourneyScene extends WorldScene {
     poly([[105.2,-6.6],[106.8,-6.1],[108.5,-6.7],[110.4,-6.9],[112.7,-6.9],[114.4,-7.8],[114.6,-8.6],[112,-8.4],[110.4,-8.1],[108.2,-7.8],[106,-7.5],[105.3,-6.9]], INDIA);
     poly([[109,1.5],[109.6,-1],[110.5,-3],[114.5,-3.8],[116.5,-3],[117.5,0],[117.8,4],[116,6.9],[113,3.2],[111,1.6]], LAND);
 
+    // the 2026 milestones happened online / on campus, so they sit on a chain of small islands
+    for (const m of JOURNEY.filter(j => j.island)) {
+      g.fillStyle(0xf7d9a0).fillEllipse(m.at.x + 10, m.at.y - 4, 150, 70);
+      g.lineStyle(5, OUTLINE, 1).strokeEllipse(m.at.x + 10, m.at.y - 4, 150, 70);
+    }
+    const chain = JOURNEY.filter(j => j.island);
+    const mid = chain[Math.floor(chain.length / 2) - 1].at;
+    this.add.text(mid.x + 120, mid.y - 120, "~ 2026: the building year ~", {
+      fontSize: "26px", fill: "#ffffff", fontStyle: "italic"
+    }).setOrigin(0.5).setDepth(-15).setAlpha(0.9);
+
     const label = (t, lon, lat, size, color, style = "bold") => {
       const p = geo(lon, lat);
       this.add.text(p.x, p.y, t, { fontSize: size, fill: color, fontStyle: style }).setOrigin(0.5).setDepth(-15).setAlpha(0.85);
@@ -441,7 +452,7 @@ class JourneyScene extends WorldScene {
     label("I N D I A", 79, 22.5, "56px", "#a0652e");
     label("Arabian Sea", 68, 14, "30px", "#ffffff", "italic");
     label("Bay of Bengal", 88, 14.5, "30px", "#ffffff", "italic");
-    label("Indian Ocean", 85, -2, "34px", "#ffffff", "italic");
+    label("Indian Ocean", 82, -7, "34px", "#ffffff", "italic");
     label("INDONESIA", 109, -10, "34px", "#a0652e");
     label("Chandigarh", 75.2, 31.8, "18px", "#5a3a22");
     label("Bengaluru", 76.3, 13.6, "18px", "#5a3a22");
