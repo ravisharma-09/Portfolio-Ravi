@@ -498,12 +498,12 @@ class ArchiveScene extends WorldScene {
 
     if (this.near(this.printer, 140)) {
       const onCopier = { x: this.printer.x, y: this.printer.y - 150 };
-      if (this.printed) this.showPrompt("Press E: resume again", onCopier);
+      if (this.printed) this.showPrompt("Press E to print again", onCopier);
       else if (this.found < 3) this.showPrompt(`Needs 3 pages (${this.found}/3)`, onCopier);
       else this.showPrompt("Press E to print", onCopier);
       if (this.pressE && !this.frozen) {
-        if (this.printed) this.openDownload(false);
-        else if (this.found === 3) this.printResume();
+        // every print runs the full shake + feed, not just the first one
+        if (this.printed || this.found === 3) this.printResume();
         else this.toast(`Still missing ${3 - this.found} page${3 - this.found === 1 ? "" : "s"}. Look behind the clutter 👀`);
       }
     } else if (this.near(this.exitDoor, 110)) {
