@@ -1,25 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>Portfolio-Ravi</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body><div id="mobile">
-  <div style="font-size: 58px; margin-bottom:20px;">🖥️</div>
-  <div style="font-size: 32px; color: #FFD700; font-weight: bold; margin-bottom: 16px;">Desktop Only</div>
-  <div style="font-size: 25px; color:orange; background: transparent; line-height: 1.8;">
-    this portfolio is interactive game<br> and doesn't support mobile or touch<br><br>
-    <span style="color: #00ff88;">
-        please open it on a desktop or laptop
-    </span><br>
-    for full experience
+  <div class="rotate-icon">📱</div>
+  <div style="font-size: 28px; color: #FFD700; font-weight: bold; margin-bottom: 16px;">Rotate your phone</div>
+  <div style="font-size: 18px; color: orange; line-height: 1.8;">
+    this portfolio is a game you can walk around in<br>
+    <span style="color: #00ff88;">turn your phone sideways to play</span>
   </div>
-  <div style="margin-top: 30px; font-size: 22px; color: white;">
+  <div style="margin-top: 30px; font-size: 18px; color: white;">
     [ sharmaravi.in ]
   </div>
 </div>
@@ -27,6 +25,7 @@
 <div id="game-container" ></div>
 
 <script src="main.js"></script>
+<script src="touch.js"></script>
 
 </body>
 </html>

@@ -47,60 +47,32 @@ let door;
 const doorRange = 105;
 let projects = [
   {
-    title: "Tip Calculator",
-    image: "tip.png",
-    demo: "https://tip-calculator-omega-two.vercel.app/",
-    repo: "https://github.com/ravisharma-09/tip-calculator",
-    desc: "A simple and responsive Tip Calculator built using HTML, CSS, and JavaScript Enter your bill amount and tip percentage, and get the tip value and total amount instantly. Designed for easy use on both desktop and mobile screens. Perfect for learning DOM manipulation and basic UI with frontend technologies."
+    title: "LessonLingo",
+    image: "lessonlingo.png",
+    demo: "https://drive.google.com/file/d/19TnHx-6KQ2JV6Vs3LsIcdvp8Ti9OcrRN/view?usp=sharing",
+    repo: "https://github.com/ravisharma-09/lessonlingo",
+    desc: "Offline lecture translator (team project). Turns English lectures into Hindi and Kannada subtitles and dubbed audio, fully offline after the first model download. I built the step-by-step web interface, added automated tests, and made Markdown notes translate while keeping headings, tables and code blocks intact. Tech: Python, pytest."
   },
   {
-    title: "Stone Paper Scissor",
-    image: "stone.png",
-    demo: "https://stone-paper-nine.vercel.app/",
-    repo: "https://github.com/ravisharma-09/stone-paper",
-    desc: "Stone-Paper Scissor is a fun beginner-level web game built with HTML, CSS, and JavaScript. It lets you play Rock-Paper-Scissors against the computer, showing emoji animations and the win/tie/lose result instantly. This project is great for learning DOM interaction and basic game logic in JavaScript"
+    title: "Setu - Sign Language Bridge",
+    image: "setu.png",
+    demo: "https://sih.geetanshgoyal.in/",
+    repo: "https://github.com/geetxnshgoyal/sih/pulls?q=is:pr+author:ravisharma-09+is:merged",
+    desc: "Smart India Hackathon 2026 team project. I fixed camera recognition of face-adjacent signs by capturing full body, hand and 48-point face trajectories, bundled the MediaPipe Holistic model for offline use with GPU-to-CPU fallback, and rebuilt sign playback as a 2D signer with a resumable dataset pipeline (4,384 clips). Tech: TypeScript, React, Python, MediaPipe."
+  },
+  {
+    title: "Pathglass",
+    image: "pathglass.png",
+    demo: "https://pathglass-ten.vercel.app/",
+    repo: "https://github.com/ravisharma-09/Pathglass",
+    desc: "A graph query engine built from scratch with lazy iterators for traversal, filter, take and unique queries, plus a visual app with a graph canvas, query builder, query-plan panel and step-by-step result replay. Tech: TypeScript, Node.js."
   },
   {
     title: "Portfolio Ravi",
     image: "portfolio.png",
     demo: "https://sharmaravi.in",
     repo: "https://github.com/ravisharma-09/Portfolio-Ravi",
-    desc: "Portfolio web game based you see this here only"
-  },
-  {
-    title: "Weight Converter",
-    image: "weight.png",
-    demo: "https://weight-converter-nine.vercel.app/",
-    repo: "https://github.com/ravisharma-09/weight-converter",
-    desc: "This is a simple web project that converts pounds to kilograms. The user enters weight in pounds and the result in kilograms appears instantly."
-  },
-  {
-    title: "Height Converter",
-    image: "height.png",
-    demo: "https://height-converter.vercel.app",
-    repo: "https://github.com/ravisharma-09/height-converter",
-    desc: "Height Converter is a simple web app that converts height from feet and inches into centimeters. It is built using HTML, CSS and JavaScript and helps users quickly calculate their height in different units."
-  },
-  // {
-  //   title: "Linkipin",
-  //   image: "linkipin.png",
-  //   demo: "https://linkipin.vercel.app/",
-  //   repo: "https://github.com/ravisharma-09/linkipin",
-  //   desc: "only ui based connection social media ui made to show how interactive social media shoul look"
-  // },
-  {
-    title: "Calculator",
-    image: "calculator.png",
-    demo: "https://calculator-mauve-ten-45.vercel.app/",
-    repo: "https://github.com/ravisharma-09/Calculator",
-    desc: "A clean, working calculator that handles your everyday math without the clutter. Buttons, screen, vibes."
-  },
-  {
-    title: "Counter",
-    image: "counter.png",
-    demo: "https://counter-eta-murex.vercel.app/",
-    repo: "https://github.com/ravisharma-09/counter",
-    desc: "Click up, click down, reset. The hello-world of state — but I made it look good."
+    desc: "This room! A 2D game portfolio: walk around a virtual room and interact with objects to discover my work. Custom animations, keyboard controls and optimised assets for fast loads, about 35 hours of work from scratch. Tech: JavaScript, Phaser.js, HTML5 Canvas, CSS."
   },
   {
     title: "Tic Tac Toe",
@@ -110,39 +82,25 @@ let projects = [
     desc: "Classic 2-player Xs and Os. Keeps score, picks winners, refuses to let you cheat."
   },
   {
-    title: "Live Clock",
-    image: "clock.png",
-    demo: "https://clocfk.vercel.app/",
-    repo: "https://github.com/ravisharma-09/clock",
-    desc: "A real-time clock ticking right in your browser. Hours, minutes, seconds — synced and smooth."
-  },
-  {
-    title: "Guess It",
-    image: "guess.png",
-    demo: "https://guess-it-phi.vercel.app/",
-    repo: "https://github.com/ravisharma-09/guess_it",
-    desc: "Guess the secret number. The game tells you higher or lower until you nail it."
-  },
-  {
-    title: "Color Suggestion",
-    image: "color.png",
-    demo: "https://color-suggestion.vercel.app/",
-    repo: "https://github.com/ravisharma-09/color-suggestion",
-    desc: "Random color palettes on demand. Hit the button, get hex codes, copy and ship."
-  },
-  {
-    title: "Feedback Form",
-    image: "feedback.png",
-    demo: "https://feedback-nu-henna.vercel.app/",
-    repo: "https://github.com/ravisharma-09/feedback",
-    desc: "A clean feedback form with input validation. Send thoughts, get a confirmation, simple as that."
-  },
-  {
     title: "Password Generator",
     image: "password.png",
     demo: "https://password-genrator-murex.vercel.app/",
     repo: "https://github.com/ravisharma-09/password-genrator",
     desc: "Generate strong, random passwords instantly. Pick your length, mix in symbols, numbers, and cases — copy and go."
+  },
+  {
+    title: "Calculator",
+    image: "calculator.png",
+    demo: "https://calculator-mauve-ten-45.vercel.app/",
+    repo: "https://github.com/ravisharma-09/Calculator",
+    desc: "A clean, working calculator that handles your everyday math without the clutter. Buttons, screen, vibes."
+  },
+  {
+    title: "Stone Paper Scissor",
+    image: "stone.png",
+    demo: "https://stone-paper-nine.vercel.app/",
+    repo: "https://github.com/ravisharma-09/stone-paper",
+    desc: "Stone-Paper Scissor is a fun beginner-level web game built with HTML, CSS, and JavaScript. It lets you play Rock-Paper-Scissors against the computer, showing emoji animations and the win/tie/lose result instantly. This project is great for learning DOM interaction and basic game logic in JavaScript"
   }
 ];
 
@@ -403,44 +361,44 @@ interactText.setOrigin(0.5);
 aboutPanel = this.add.rectangle(
   this.scale.width / 2,
   this.scale.height / 2,
-  550,
-  500,
+  680,
+  520,
   0x000000,
   0.65
 );
 
 aboutPanel.setVisible(false);
 aboutText = this.add.text(
-  this.scale.width / 2 - 80,
-  this.scale.height / 2 - 10
-  ,
+  this.scale.width / 2 - 320,
+  this.scale.height / 2,
   "👋 Hi, I'm Ravi Sharma\n\n" +
-  "18-year-old developer\n\n" +
+  "CS student @ Newton School\n" +
+  "of Technology (2025 - 2029)\n\n" +
   "ABOUT\n" +
-  "I enjoy building interactive projects\n" +
-  "and experimenting with JavaScript.\n\n" +
-  "INTERESTS\n" +
-  "• Coding\n" +
-  "• Game Development\n" +
-  "• Sleeping (professional level 😴)\n\n" +
-  "HOBBIES\n" +
-  "• Swimming 🏊\n" +
-  "• Gaming\n" +
-  "• Learning new tech",
+  "I turn ideas into working\n" +
+  "products: from a sign-language\n" +
+  "translator to a graph query\n" +
+  "engine built from scratch.\n\n" +
+  "CURRENTLY\n" +
+  "• Lead @ DevForge dev club\n" +
+  "• openSUSE community member\n\n" +
+  "OFF THE KEYBOARD\n" +
+  "• Swimming 🏊 • Gaming 🎮\n" +
+  "• Sleeping (pro level 😴)",
   {
-    fontSize: "22px",
+    fontSize: "18px",
     fill: "#ffffff",
     align: "left",
-    wordWrap: { width: 380 }
+    lineSpacing: 2
   }
 );
 
-aboutText.setOrigin(0.5);
+aboutText.setOrigin(0, 0.5);
 aboutText.setVisible(false);
 
 this.profileImage = this.add.image(
-   this.scale.width / 2 + 170,
-  this.scale.height / 2 - 60,
+   this.scale.width / 2 + 180,
+  this.scale.height / 2 - 40,
   "profile"
 );
 
@@ -456,8 +414,8 @@ this.profileImage.setDepth(8);
 achievementPanel = this.add.rectangle(
   this.scale.width / 2,
   this.scale.height / 2,
-  540,
-  350,
+  720,
+  580,
   0x000000,
   0.8
 );
@@ -467,7 +425,7 @@ achievementPanel.setScrollFactor(0);
 
 achievementText = this.add.text(
   this.scale.width / 2,
-  this.scale.height / 2 -100,
+  this.scale.height / 2 - 245,
   "Achievements",
   {
     fontSize: "30px",
@@ -483,18 +441,26 @@ achievementText.setScrollFactor(0);
 
 this.icpcText = this.add.text(
   this.scale.width / 2,
-  this.scale.height / 2 +20,
- "\n🏆  ICPC Regional Qualifier\n" +
-  "Qualified for ICPC Regional Round\n" +
+  this.scale.height / 2 + 25,
+  "🏆  All India Rank 17 · Turing Cup 2k26\n" +
+  "Competitive programming contest by Turing Hut (Mar 2026)\n" +
   "━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
-  "🎮  Organised Campfire Bengaluru\n" +
-  "Organizing Member of one of\n" +
-  "Bengaluru's biggest Gamedev Hackathons",
+  "💻  ICPC Asia Amritapuri Regional 2025\n" +
+  "Regional contest participant\n" +
+  "━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+  "🌏  openSUSE.Asia Summit 2026\n" +
+  "Attended at Universitas Gadjah Mada, Indonesia (Oct 2026)\n" +
+  "━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+  "🎮  Organised Campfire Bengaluru (Hack Club)\n" +
+  "Event coordination and community engagement\n" +
+  "━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+  "🛠️  Lead · DevForge, the college developer club\n" +
+  "Coordinated club leads and organised technical events",
   {
-    fontSize: "20px",
+    fontSize: "18px",
     fill: "#ffffff",
     align: "center",
-    lineSpacing: 6
+    lineSpacing: 4
   }
 ).setOrigin(0.5).setVisible(false).setScrollFactor(0).setDepth(7);
 
@@ -503,8 +469,8 @@ this.icpcText = this.add.text(
 skillsPanel = this.add.rectangle(
   this.scale.width / 2,
   this.scale.height / 2 - 40,
-  620,
-  380,
+  880,
+  420,
   0x0a0a0a,
   0.95
 );
@@ -514,7 +480,7 @@ skillsPanel.setScrollFactor(0);
 
 skillsText = this.add.text(
   this.scale.width / 2,
-  this.scale.height / 2 - 160,
+  this.scale.height / 2 - 225,
 "⚡ Skills",  {
     fontSize: "30px",
     fill: "#FFD700",
@@ -527,39 +493,42 @@ skillsText.setOrigin(0.5);
 skillsText.setVisible(false);
 skillsText.setScrollFactor(0);
 
-const skillsList =[
-  {name: "HTML/CSS", level: 8, color : 0xe34c26},
-   {name: "Python", level: 7, color : 0xe3572A5},
-    {name: "JavaScript", level: 5, color : 0xf1e05a},
-     {name: "Phaser.js", level: 5, color : 0xf1e05a},
-      {name: "C++", level: 4, color : 0x6e4c13},
+const skillGroups = [
+  { name: "Languages", color: "#e34c26", items: ["C++", "Python", "JavaScript", "TypeScript", "HTML", "CSS"] },
+  { name: "Frameworks & Libraries", color: "#3178c6", items: ["React", "Next.js", "Tailwind CSS", "Node.js", "Express", "FastAPI", "Phaser.js"] },
+  { name: "Tools", color: "#2e8b57", items: ["Git & GitHub", "Linux", "Bash", "Playwright", "pytest", "MediaPipe"] },
+  { name: "Databases & Automation", color: "#8a5cf6", items: ["MySQL", "DBMS", "n8n"] },
 ];
-this.skillBars = [] ;
-const barW =300 ;
-const startY = this.scale.height / 2 - 100 ;
+// grouped skill chips (replaces the old % bars)
+this.skillTags = [];
+const tagLeft = this.scale.width / 2 - 400;
+const tagRight = this.scale.width / 2 + 400;
+let tagY = this.scale.height / 2 - 165;
 
-skillsList.forEach((skill , i) => {
-  const y = startY + i *52 ;
-  const cx = this.scale.width / 2 - 65;
+skillGroups.forEach(group => {
+  const heading = this.add.text(tagLeft, tagY, group.name, {
+    fontSize: "18px", fill: "#aaaaaa", fontStyle: "bold"
+  }).setOrigin(0, 0.5).setScrollFactor(0).setDepth(7).setVisible(false);
+  this.skillTags.push(heading);
+  tagY += 34;
 
-  const label = this.add.text(cx - 180, y, skill.name, {
-    fontSize: "17px", fill:"#ffffff"
-  }).setOrigin(0,0.5).setScrollFactor(0).setDepth(7).setVisible(false);
-
-const bgBar = this.add.rectangle(cx + 30, y, barW, 18, 0x333333)
-    .setOrigin(0, 0.5).setScrollFactor(0).setDepth(7).setVisible(false);
-
-  const fillBar = this.add.rectangle(cx + 30, y, 0, 18, skill.color)
-    .setOrigin(0, 0.5).setScrollFactor(0).setDepth(8).setVisible(false);
-
-const pct = this.add.text(cx + 30 + barW + 10, y, `${skill.level * 10}%`, {
-    fontSize: "15px", fill: "#aaaaaa"
-  }).setOrigin(0, 0.5).setScrollFactor(0).setDepth(8).setVisible(false);
-
-    this.skillBars.push({ label, bgBar, fillBar, pct, targetW: barW * skill.level / 10 });
-
-
+  let tagX = tagLeft;
+  group.items.forEach(item => {
+    const chip = this.add.text(tagX, tagY, item, {
+      fontSize: "17px", fill: "#ffffff", backgroundColor: group.color,
+      padding: { x: 12, y: 6 }
+    }).setOrigin(0, 0.5).setScrollFactor(0).setDepth(8).setVisible(false);
+    if (tagX + chip.width > tagRight) {
+      tagX = tagLeft;
+      tagY += 40;
+      chip.setPosition(tagX, tagY);
+    }
+    tagX += chip.width + 10;
+    this.skillTags.push(chip);
+  });
+  tagY += 52;
 });
+
 
 contactPanel = this.add.rectangle(
   this.scale.width / 2,
@@ -599,7 +568,7 @@ this.contactEmail = this.add.text(
 const links =[
   { label: "GitHub",  icon:"icon_github", color: 0x333333, url:"https://github.com/ravisharma-09" },
   {label: "LinkedIn", icon:"icon_linkedin", color: 0x0077b5, url:"https://www.linkedin.com/in/ravi-sharma-10b1a1384/"},
-  {label: "Instagram", icon:"icon_instagram", color:0xe1306c, url:"https://www.instagram.com/_ravi.xo/"},
+  {label: "Instagram", icon:"icon_instagram", color:0xe1306c, url:"https://www.instagram.com/ravi._who_/"},
   {label:"Portfolio", icon:"icon_globe", color: 0x6c3483, url: "https://sharmaravi.in"},
 
 ]; 
@@ -704,7 +673,7 @@ closeHint.setOrigin(0.5);
 closeHint.setVisible(false);
 closeHint.setScrollFactor(0);
 
-aboutText.setOrigin(0.5);
+aboutText.setOrigin(0, 0.5);
 aboutText.setVisible(false);
 aboutPanel.setScrollFactor(0);
 aboutText.setScrollFactor(0);
@@ -867,12 +836,7 @@ if(isPanelOpen){
     achievementText.setVisible(false);
     skillsPanel.setVisible(false);
     skillsText.setVisible(false);
-    this.skillBars.forEach(b => {
-      b.label.setVisible(false);
-       b.bgBar.setVisible(false);
-        b.fillBar.setVisible(false);
-         b.pct.setVisible(false);
-    });
+    this.skillTags.forEach(t => t.setVisible(false));
 
     contactPanel.setVisible(false);
     contactText.setVisible(false);
@@ -1200,12 +1164,7 @@ skillsPanel.setVisible(true);
 skillsText.setAlpha(0);
 skillsText.setVisible(true);
 
-this.skillBars.forEach(b => {
-  b.label.setVisible(true).setAlpha(0);
-  b.bgBar.setVisible(true).setAlpha(0);
-  b.fillBar.setVisible(true).setAlpha(0).setSize(0, 18);
-  b.pct.setVisible(true).setAlpha(0);
-});
+this.skillTags.forEach(t => t.setVisible(true).setAlpha(0));
 
 this.tweens.add({
   targets: [skillsPanel, skillsText],
@@ -1214,11 +1173,9 @@ this.tweens.add({
 });
 
 this.time.delayedCall(300, () => {
-  this.skillBars.forEach((b, i) => {
-    this.time.delayedCall(i * 100, () => {
-      this.tweens.add({ targets: [b.label, b.bgBar, b.pct], alpha: 1, duration: 300 });
-      this.tweens.add({ targets: b.fillBar, alpha: 1, duration: 300 });
-      this.tweens.add({ targets: b.fillBar, width: b.targetW, duration: 600, ease: "Sine.out" });
+  this.skillTags.forEach((t, i) => {
+    this.time.delayedCall(i * 40, () => {
+      this.tweens.add({ targets: t, alpha: 1, duration: 300 });
     });
   });
 });

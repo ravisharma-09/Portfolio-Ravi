@@ -18,8 +18,8 @@ its a 2D room you can walk around in. there are objects you can interact with to
 ## what's in the room
 
 - **desk** → about me
-- **photo frame** → my projects
-- **trophy shelf** → achievements (yes i have some)
+- **photo frame** → my projects (LessonLingo, Setu, Pathglass, this portfolio + a few early builds)
+- **trophy shelf** → achievements (AIR 17 in Turing Cup 2k26, ICPC Asia Amritapuri 2025, openSUSE.Asia Summit 2026 and more)
 - **bookshelf** → skills
 - **mailbox** → contact info
 - **door** → exit or play minigame<img width="2704" height="1522" alt="image" src="https://github.com/user-attachments/assets/7fa92d09-e952-45fc-80b9-905585128bf9" />
