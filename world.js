@@ -2,7 +2,7 @@
 //   HallwayScene : hub with doors to the Archive, the Journey map, the arcade, and back to the room
 //   ArchiveScene : find 3 resume pages, print them on the copier, download the resume (Q skips)
 //   JourneyScene : walk a map of milestones from Chandigarh to Yogyakarta
-// Hallway/Archive art in assets/world/ is built from pieces of assets/room.png so it matches the room.
+// Hallway/Archive backgrounds in assets/world/ were generated using assets/room.png as the style reference.
 // Loaded before main.js because main.js lists these scenes in its game config.
 // Screen width can be wider than 1280 on phones (see mobile-view.js), so fixed UI uses this.scale.width.
 
@@ -25,9 +25,10 @@ class WorldScene extends Phaser.Scene {
     if (!this.cache.audio.exists("click")) this.load.audio("click", "assets/sounds/click.ogg");
     if (!this.cache.audio.exists("notify")) this.load.audio("notify", "assets/sounds/notify.ogg");
     if (!this.cache.audio.exists("coin")) this.load.audio("coin", ["assets/sounds/coin.ogg", "assets/sounds/coin.mp3"]);
-    for (const k of ["hallway", "archive", "arcade", "copier", "box_big", "box_small", "cabinet"]) {
-      if (!this.textures.exists("w_" + k)) this.load.image("w_" + k, `assets/world/${k}.png`);
-    }
+    // painted backgrounds (generated with room.png as the style reference) + the copier sprite
+    if (!this.textures.exists("w_hallway")) this.load.image("w_hallway", "assets/world/hallway_bg.jpg");
+    if (!this.textures.exists("w_archive")) this.load.image("w_archive", "assets/world/archive_bg.jpg");
+    if (!this.textures.exists("w_copier")) this.load.image("w_copier", "assets/world/copier.png");
   }
 
   get sw() { return this.scale.width; }
@@ -136,28 +137,27 @@ class HallwayScene extends WorldScene {
   constructor() { super("HallwayScene"); }
 
   create() {
-    // hallway.png is 1800x946: wall + doors on top, plank floor below, stone ledge at the bottom
+    // hallway_bg.jpg is 1776x896: doors at x 295 / 745 / 1204, arcade at x 1592, floor y 455..770
     this.add.image(0, 0, "w_hallway").setOrigin(0).setDepth(-20);
-    this.setupWorld(1800, 946, { x1: 60, y1: 370, x2: 1740, y2: 800 },
-      takeSpawn("HallwayScene", { x: 300, y: 410 }));
+    this.setupWorld(1776, 896, { x1: 40, y1: 480, x2: 1736, y2: 760 },
+      takeSpawn("HallwayScene", { x: 295, y: 520 }));
 
-    const plaque = (x, text) => this.add.text(x, 100, text, {
-      fontSize: "19px", fill: "#ffe9b8", fontStyle: "bold"
+    // names on the blank wooden plates above each door
+    const plate = (x, text) => this.add.text(x, 179, text, {
+      fontSize: "15px", fill: "#fff1d0", fontStyle: "bold"
     }).setOrigin(0.5).setDepth(-10);
-    plaque(300, "🏠 MY ROOM");
-    plaque(720, "🗄️ ARCHIVE");
-    plaque(1140, "🗺️ JOURNEY");
-
-    this.prop("w_arcade", 1500, 470);
-    this.add.text(1500, 140, "🕹️ ARCADE", {
-      fontSize: "18px", fill: "#ffe9b8", fontStyle: "bold", backgroundColor: "#7a4a24", padding: { x: 8, y: 4 }
+    plate(295, "MY ROOM");
+    plate(745, "ARCHIVE");
+    plate(1204, "JOURNEY");
+    this.add.text(1592, 205, "🕹️ ARCADE", {
+      fontSize: "16px", fill: "#fff1d0", fontStyle: "bold", backgroundColor: "#7a4a24", padding: { x: 6, y: 3 }
     }).setOrigin(0.5).setDepth(-10);
 
     this.spots = [
-      { x: 300, y: 380, at: { x: 300, y: 245 }, label: "Press E to enter", go: () => this.goTo("GameScene", "GameScene", 1130, 330) },
-      { x: 720, y: 380, at: { x: 720, y: 245 }, label: "Press E to enter", go: () => this.goTo("ArchiveScene") },
-      { x: 1140, y: 380, at: { x: 1140, y: 245 }, label: "Press E to enter", go: () => this.goTo("JourneyScene") },
-      { x: 1500, y: 500, at: { x: 1500, y: 330 }, label: "Press E to play", go: () => this.goTo("MiniGameScene", "HallwayScene", 1500, 560) },
+      { x: 295, y: 500, at: { x: 295, y: 330 }, label: "Press E to enter", go: () => this.goTo("GameScene", "GameScene", 1130, 330) },
+      { x: 745, y: 500, at: { x: 745, y: 330 }, label: "Press E to enter", go: () => this.goTo("ArchiveScene") },
+      { x: 1204, y: 500, at: { x: 1204, y: 330 }, label: "Press E to enter", go: () => this.goTo("JourneyScene") },
+      { x: 1592, y: 520, at: { x: 1592, y: 360 }, label: "Press E to play", go: () => this.goTo("MiniGameScene", "HallwayScene", 1592, 560) },
     ];
 
     if (!this.registry.get("hallwayHintShown")) {
@@ -185,37 +185,31 @@ class ArchiveScene extends WorldScene {
   constructor() { super("ArchiveScene"); }
 
   create() {
-    // archive.png is the room (1536x1024) cleared, dimmed and lined with shelves
+    // archive_bg.jpg is 1536x1024, same room shape as room.png: door at x 1160, cabinets left, box stacks right
     this.add.image(0, 0, "w_archive").setOrigin(0).setDepth(-20);
-    this.setupWorld(1536, 1024, { x1: 110, y1: 350, x2: 1430, y2: 850 },
-      takeSpawn("ArchiveScene", { x: 1145, y: 400 }));
+    this.setupWorld(1536, 1024, { x1: 110, y1: 380, x2: 1430, y2: 850 },
+      takeSpawn("ArchiveScene", { x: 1160, y: 420 }));
 
     this.hud(this.sw / 2, 16, "🗄️ THE ARCHIVE", 0.5);
 
-    // sticky note with the skip hint, next to the door
+    // sticky note with the skip hint, on the wall next to the door
     const note = this.add.graphics().setDepth(-10);
-    note.fillStyle(0xfff38a).fillRect(1225, 120, 92, 92).lineStyle(3, OUTLINE).strokeRect(1225, 120, 92, 92);
-    this.add.text(1271, 166, "In a hurry?\nPress Q\nto skip!", {
-      fontSize: "14px", fill: "#32201a", align: "center"
+    note.fillStyle(0xfff38a).fillRect(1236, 150, 86, 86).lineStyle(3, OUTLINE).strokeRect(1236, 150, 86, 86);
+    this.add.text(1279, 193, "In a hurry?\nPress Q\nto skip!", {
+      fontSize: "13px", fill: "#32201a", align: "center"
     }).setOrigin(0.5).setDepth(-9);
 
-    this.exitDoor = { x: 1145, y: 370 };
+    this.exitDoor = { x: 1160, y: 390 };
 
-    // the copier is the "printer"
-    this.copier = this.prop("w_copier", 760, 520);
-    this.printer = { x: 760, y: 540 };
-
-    // clutter that hides the pages
-    this.prop("w_box_big", 430, 720);
-    this.prop("w_box_small", 480, 660);
-    this.prop("w_cabinet", 1240, 600);
-    this.prop("w_box_big", 1080, 800);
+    // the copier is the "printer", in the middle of the room
+    this.copier = this.prop("w_copier", 760, 560);
+    this.printer = { x: 760, y: 580 };
 
     this.makePageTexture();
     const pageData = [
-      { x: 540, y: 700, name: "Education", tease: "B.E. CSE @ Newton School of Technology · CGPA 8.17" },
-      { x: 1310, y: 585, name: "Projects", tease: "LessonLingo, Setu, Pathglass & this very game" },
-      { x: 1160, y: 790, name: "Achievements", tease: "AIR 17 Turing Cup 2k26 · ICPC Asia Amritapuri 2025" },
+      { x: 255, y: 430, name: "Education", tease: "B.E. CSE @ Newton School of Technology · CGPA 8.17" },
+      { x: 1395, y: 440, name: "Projects", tease: "LessonLingo, Setu, Pathglass & this very game" },
+      { x: 330, y: 820, name: "Achievements", tease: "AIR 17 Turing Cup 2k26 · ICPC Asia Amritapuri 2025" },
     ];
     this.pages = pageData.map(p => {
       const sprite = this.add.image(p.x, p.y, "resume_page").setDepth(p.y - 40).setAngle(Phaser.Math.Between(-20, 20));
@@ -340,8 +334,8 @@ class ArchiveScene extends WorldScene {
         else this.toast(`Still missing ${3 - this.found} page${3 - this.found === 1 ? "" : "s"}. Look behind the clutter 👀`);
       }
     } else if (this.near(this.exitDoor, 110)) {
-      this.showPrompt("Press E to exit", { x: 1145, y: 230 });
-      if (Phaser.Input.Keyboard.JustDown(this.keyE)) this.goTo("HallwayScene", "HallwayScene", 720, 410);
+      this.showPrompt("Press E to exit", { x: 1160, y: 230 });
+      if (Phaser.Input.Keyboard.JustDown(this.keyE)) this.goTo("HallwayScene", "HallwayScene", 745, 520);
     }
   }
 }
@@ -537,7 +531,7 @@ class JourneyScene extends WorldScene {
       if (Phaser.Input.Keyboard.JustDown(this.keyEsc) || Phaser.Input.Keyboard.JustDown(this.keyE)) this.closeCard();
       return;
     }
-    if (Phaser.Input.Keyboard.JustDown(this.keyEsc)) { this.goTo("HallwayScene", "HallwayScene", 1140, 410); return; }
+    if (Phaser.Input.Keyboard.JustDown(this.keyEsc)) { this.goTo("HallwayScene", "HallwayScene", 1204, 520); return; }
 
     this.moveHero(420);
     this.prompt.setVisible(false);
