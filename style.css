@@ -101,8 +101,89 @@ a {
         display: none !important
     }
 }
-@media (max-width: 500px) {
+/* phones: ask for landscape, then show touch controls */
+@media (pointer: coarse) and (orientation: portrait) {
     #mobile { display: flex; }
-    #game-container { display: none; }
+    #game-container, #touch-controls { display: none !important; }
     body { display: block; }
+}
+.rotate-icon {
+    font-size: 58px;
+    margin-bottom: 20px;
+    animation: rotate-hint 2s ease-in-out infinite;
+}
+@keyframes rotate-hint {
+    0%, 30% { transform: rotate(0deg); }
+    60%, 100% { transform: rotate(-90deg); }
+}
+
+body.touch {
+    touch-action: none;
+    overscroll-behavior: none;
+    -webkit-touch-callout: none;
+}
+#touch-controls {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1000;
+    font-family: monospace;
+}
+#touch-controls button {
+    pointer-events: auto;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    background: rgba(0, 0, 0, 0.45);
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    font-family: inherit;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+#touch-controls button.pressed {
+    background: rgba(255, 215, 0, 0.6);
+    border-color: #FFD700;
+}
+#touch-controls .hidden { display: none !important; }
+#touch-controls .dpad {
+    position: absolute;
+    left: max(16px, env(safe-area-inset-left));
+    bottom: 16px;
+    width: 168px;
+    height: 168px;
+}
+#touch-controls .dpad button { position: absolute; border-radius: 14px; }
+#touch-controls .dpad .up    { left: 56px; top: 0; }
+#touch-controls .dpad .down  { left: 56px; bottom: 0; }
+#touch-controls .dpad .left  { left: 0; top: 56px; }
+#touch-controls .dpad .right { right: 0; top: 56px; }
+#touch-controls .actions {
+    position: absolute;
+    right: max(16px, env(safe-area-inset-right));
+    bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+#touch-controls .row { display: flex; gap: 10px; }
+#touch-controls .primary {
+    width: 72px;
+    height: 72px;
+    background: rgba(0, 120, 60, 0.6);
+    font-size: 20px;
+}
+#touch-controls .esc { font-size: 14px; }
+#touch-controls .fullscreen {
+    position: absolute;
+    top: 12px;
+    right: max(12px, env(safe-area-inset-right));
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
 }
