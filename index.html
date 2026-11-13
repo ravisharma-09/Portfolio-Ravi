@@ -30,34 +30,85 @@
 
   <!-- tells Google who this site is about and which profiles belong to the same person -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Person",
-        "@id": "https://www.sharmaravi.in/#ravi",
-        "name": "Ravi Sharma",
-        "url": "https://www.sharmaravi.in/",
-        "image": "https://www.sharmaravi.in/assets/og-image.jpg",
-        "jobTitle": "Software Developer",
-        "description": "Computer Science student at Newton School of Technology building developer tools, offline AI apps and games.",
-        "affiliation": { "@type": "CollegeOrUniversity", "name": "Newton School of Technology" },
-        "knowsAbout": ["JavaScript", "TypeScript", "Python", "C++", "React", "Next.js", "Node.js", "FastAPI", "Phaser.js", "Competitive Programming"],
-        "sameAs": [
-          "https://github.com/ravisharma-09",
-          "https://www.linkedin.com/in/ravi-sharma-10b1a1384/",
-          "https://www.instagram.com/ravi._who_/"
-        ]
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": "https://www.sharmaravi.in/#ravi",
+      "name": "Ravi Sharma",
+      "givenName": "Ravi",
+      "familyName": "Sharma",
+      "alternateName": [
+        "sharmaravi",
+        "ravisharma-09"
+      ],
+      "url": "https://www.sharmaravi.in/",
+      "image": "https://www.sharmaravi.in/assets/ravi-sharma.webp",
+      "jobTitle": "Software Developer",
+      "description": "Ravi Sharma is a Computer Science student at Newton School of Technology, developer of LessonLingo, Setu (Smart India Hackathon 2026) and Pathglass, and All India Rank 17 in Turing Cup 2k26.",
+      "affiliation": {
+        "@type": "CollegeOrUniversity",
+        "name": "Newton School of Technology"
       },
-      {
-        "@type": "WebSite",
-        "@id": "https://www.sharmaravi.in/#site",
-        "url": "https://www.sharmaravi.in/",
-        "name": "Ravi Sharma",
-        "author": { "@id": "https://www.sharmaravi.in/#ravi" }
+      "alumniOf": [
+        {
+          "@type": "HighSchool",
+          "name": "Shri Guru Harkrishan Senior Secondary School, Chandigarh"
+        },
+        {
+          "@type": "HighSchool",
+          "name": "Army Public School, Chandimandir"
+        }
+      ],
+      "memberOf": [
+        {
+          "@type": "Organization",
+          "name": "DevForge, Newton School of Technology"
+        },
+        {
+          "@type": "Organization",
+          "name": "openSUSE Project"
+        },
+        {
+          "@type": "Organization",
+          "name": "Hack Club"
+        }
+      ],
+      "award": [
+        "All India Rank 17, Turing Cup 2k26",
+        "ICPC Asia Amritapuri Regional 2025 participant"
+      ],
+      "knowsAbout": [
+        "JavaScript",
+        "TypeScript",
+        "Python",
+        "C++",
+        "React",
+        "Next.js",
+        "Node.js",
+        "FastAPI",
+        "Phaser.js",
+        "MediaPipe",
+        "Competitive Programming"
+      ],
+      "sameAs": [
+        "https://github.com/ravisharma-09",
+        "https://www.linkedin.com/in/ravi-sharma-10b1a1384/",
+        "https://www.instagram.com/ravi._who_/"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://www.sharmaravi.in/#site",
+      "url": "https://www.sharmaravi.in/",
+      "name": "Ravi Sharma",
+      "author": {
+        "@id": "https://www.sharmaravi.in/#ravi"
       }
-    ]
-  }
+    }
+  ]
+}
   </script>
 
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -84,6 +135,6 @@
 
 <main id="game-container" aria-label="Ravi Sharma's interactive portfolio game"></main>
 
-<a class="corner-link" href="/about/">About Ravi (text version)</a>
+<a class="corner-link" href="/about/">About Ravi Sharma (text version)</a>
 </body>
 </html>

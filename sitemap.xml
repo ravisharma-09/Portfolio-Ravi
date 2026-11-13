@@ -3,11 +3,29 @@
   <url>
     <loc>https://www.sharmaravi.in/</loc>
     <lastmod>2026-11-13</lastmod>
-    <priority>1.0</priority>
   </url>
   <url>
     <loc>https://www.sharmaravi.in/about/</loc>
     <lastmod>2026-11-13</lastmod>
-    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.sharmaravi.in/projects/</loc>
+    <lastmod>2026-11-13</lastmod>
+  </url>
+  <url>
+    <loc>https://www.sharmaravi.in/projects/lessonlingo/</loc>
+    <lastmod>2026-11-13</lastmod>
+  </url>
+  <url>
+    <loc>https://www.sharmaravi.in/projects/setu/</loc>
+    <lastmod>2026-11-13</lastmod>
+  </url>
+  <url>
+    <loc>https://www.sharmaravi.in/projects/pathglass/</loc>
+    <lastmod>2026-11-13</lastmod>
+  </url>
+  <url>
+    <loc>https://www.sharmaravi.in/projects/game-portfolio/</loc>
+    <lastmod>2026-11-13</lastmod>
   </url>
 </urlset>
