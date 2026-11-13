@@ -25,6 +25,7 @@ class WorldScene extends Phaser.Scene {
     if (!this.cache.audio.exists("click")) this.load.audio("click", "assets/sounds/click.ogg");
     if (!this.cache.audio.exists("notify")) this.load.audio("notify", "assets/sounds/notify.ogg");
     if (!this.cache.audio.exists("coin")) this.load.audio("coin", ["assets/sounds/coin.ogg", "assets/sounds/coin.mp3"]);
+    if (!this.cache.audio.exists("type")) this.load.audio("type", ["assets/sounds/type.ogg", "assets/sounds/type.mp3"]);
     // painted backgrounds (generated with room.png as the style reference) + the copier sprite
     if (!this.textures.exists("w_hallway")) this.load.image("w_hallway", "assets/world/hallway_bg.jpg");
     if (!this.textures.exists("w_archive")) this.load.image("w_archive", "assets/world/archive_bg.jpg");
@@ -71,6 +72,7 @@ class WorldScene extends Phaser.Scene {
       click: this.sound.add("click", { volume: 0.2 }),
       notify: this.sound.add("notify", { volume: 0.05 }),
       coin: this.sound.add("coin", { volume: 0.2 }),
+      type: this.sound.add("type", { volume: 0.25 }),
     };
   }
 
@@ -85,6 +87,15 @@ class WorldScene extends Phaser.Scene {
     h.x = Phaser.Math.Clamp(h.x, this.walk.x1, this.walk.x2);
     h.y = Phaser.Math.Clamp(h.y, this.walk.y1, this.walk.y2);
     h.setDepth(h.y);
+  }
+
+  // Call once at the top of update(): true only on the frame E was pressed.
+  // (Phaser keeps a press "fresh" until someone reads it, so reading it in only one branch
+  // let an old press fire later when the player walked up to a door or the copier.)
+  readKeys() {
+    this.pressE = Phaser.Input.Keyboard.JustDown(this.keyE);
+    this.pressEsc = Phaser.Input.Keyboard.JustDown(this.keyEsc);
+    this.pressQ = Phaser.Input.Keyboard.JustDown(this.keyQ);
   }
 
   near(obj, range) {
@@ -168,12 +179,13 @@ class HallwayScene extends WorldScene {
   }
 
   update() {
+    this.readKeys();
     this.moveHero(380);
     this.prompt.setVisible(false);
     for (const s of this.spots) {
       if (this.near(s, 110)) {
         this.showPrompt(s.label, s.at);
-        if (Phaser.Input.Keyboard.JustDown(this.keyE)) s.go();
+        if (this.pressE) s.go();
         break;
       }
     }
@@ -211,17 +223,33 @@ class ArchiveScene extends WorldScene {
       { x: 1395, y: 440, name: "Projects", tease: "LessonLingo, Setu, Pathglass & this very game" },
       { x: 330, y: 820, name: "Achievements", tease: "AIR 17 Turing Cup 2k26 · ICPC Asia Amritapuri 2025" },
     ];
+    // Progress lives in the game registry so leaving and coming back keeps it (until the page reloads)
+    this.state = this.registry.get("archive") || { found: [], printed: false };
+    this.registry.set("archive", this.state);
+
     this.pages = pageData.map(p => {
+      if (this.state.found.includes(p.name)) return { ...p, found: true };
       const sprite = this.add.image(p.x, p.y, "resume_page").setDepth(p.y - 40).setAngle(Phaser.Math.Between(-20, 20));
       const glow = this.add.circle(p.x, p.y, 34, 0xfff38a, 0.35).setDepth(p.y - 41);
       this.tweens.add({ targets: glow, scale: 1.4, alpha: 0.1, duration: 900, yoyo: true, repeat: -1 });
       return { ...p, sprite, glow, found: false };
     });
-    this.found = 0;
-    this.counter = this.hud(20, 16, "📄 Pages 0/3");
+    this.counter = this.hud(20, 16, "");
+    this.updateCounter();
 
     this.buildDownloadPanel();
-    this.time.delayedCall(450, () => this.toast("My resume pages blew everywhere! Find all 3 and bring them to the 🖨️ copier.", 4200));
+    const welcome = this.state.printed ? "Welcome back! The 🖨️ copier still has my resume."
+      : this.found === 3 ? "All pages found. Take them to the 🖨️ copier!"
+      : this.found > 0 ? `Welcome back! ${3 - this.found} page${this.found === 2 ? "" : "s"} still hiding…`
+      : "My resume pages blew everywhere! Find all 3 and bring them to the 🖨️ copier.";
+    this.time.delayedCall(450, () => this.toast(welcome, 4200));
+  }
+
+  get found() { return this.state.found.length; }
+  get printed() { return this.state.printed; }
+
+  updateCounter() {
+    this.counter.setText(this.printed ? "📄 Resume printed ✓" : `📄 Pages ${this.found}/3`);
   }
 
   makePageTexture() {
@@ -285,39 +313,120 @@ class ArchiveScene extends WorldScene {
     this.downloadLink.style.display = "none";
   }
 
+  // Synthesised "brrrt-brrrt" printer noise (Web Audio), no extra sound file needed
+  printerNoise(ms) {
+    const ctx = this.sound.context;
+    if (!ctx || this.sound.mute) return;
+    const rate = ctx.sampleRate, len = Math.floor(rate * ms / 1000);
+    const buf = ctx.createBuffer(1, len, rate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) {
+      const t = i / rate;
+      const chop = Math.floor(t * 16) % 2 ? 1 : 0.2;            // stutter
+      const motor = Math.sin(2 * Math.PI * (80 + 40 * Math.sin(t * 9)) * t);
+      d[i] = ((Math.random() * 2 - 1) * 0.6 + motor * 0.4) * chop;
+    }
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const filter = ctx.createBiquadFilter(); filter.type = "bandpass"; filter.frequency.value = 900; filter.Q.value = 0.7;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + 0.05);
+    gain.gain.setValueAtTime(0.18, ctx.currentTime + ms / 1000 - 0.15);
+    gain.gain.linearRampToValueAtTime(0.0, ctx.currentTime + ms / 1000);
+    src.connect(filter); filter.connect(gain); gain.connect(this.sound.masterVolumeNode || ctx.destination);
+    src.start();
+  }
+
   printResume() {
     this.frozen = true;
-    this.sfx.click.play();
-    this.tweens.add({
-      targets: this.copier, x: { from: 755, to: 765 }, duration: 60, yoyo: true, repeat: 8,
-      onComplete: () => {
-        this.copier.x = 760;
-        const sheet = this.add.image(this.printer.x, this.printer.y - 200, "resume_page").setDepth(2000).setScale(1.4);
+    this.printing = true;
+    this.prompt.setVisible(false);
+    const cx = this.copier.x, cy = this.copier.y;
+    const mouth = { x: cx, y: cy - 200 };
+
+    // 1. the three pages fly from the player into the copier
+    for (let i = 0; i < 3; i++) {
+      const sheet = this.add.image(this.hero.x, this.hero.y - 30, "resume_page").setDepth(3000);
+      this.tweens.add({
+        targets: sheet, x: mouth.x, y: mouth.y, angle: 360, scale: 0.6,
+        delay: i * 160, duration: 450, ease: "Quad.in",
+        onComplete: () => { sheet.destroy(); this.sfx.click.play(); }
+      });
+    }
+
+    // 2. the copier goes wild
+    const SHAKE_MS = 2400;
+    this.time.delayedCall(800, () => {
+      this.printerNoise(SHAKE_MS);
+      this.cameras.main.shake(SHAKE_MS, 0.006);
+      const words = ["BRRRT!", "KA-CHUNK!", "beep beep", "WHIRR!", "*paper noises*", "BZZZT!"];
+      const jitter = this.time.addEvent({
+        delay: 35, loop: true, callback: () => {
+          this.copier.setPosition(cx + Phaser.Math.Between(-11, 11), cy + Phaser.Math.Between(-8, 3));
+          this.copier.setAngle(Phaser.Math.FloatBetween(-5, 5));
+          this.copier.setScale(1 + Phaser.Math.FloatBetween(-0.03, 0.05));
+        }
+      });
+      const blink = this.time.addEvent({
+        delay: 110, loop: true, callback: () => {
+          if (this.copier.isTinted) this.copier.clearTint(); else this.copier.setTint(0xffb3b3);
+        }
+      });
+      const clatter = this.time.addEvent({
+        delay: 120, loop: true, callback: () => {
+          this.sfx.type.play({ rate: Phaser.Math.FloatBetween(0.7, 1.6) });
+        }
+      });
+      const shout = this.time.addEvent({
+        delay: 380, loop: true, callback: () => {
+          const side = Math.random() < 0.5 ? -1 : 1;
+          const w = this.add.text(cx + side * Phaser.Math.Between(150, 230), cy - Phaser.Math.Between(70, 210),
+            Phaser.Utils.Array.GetRandom(words), {
+              fontSize: "28px", fill: "#ffe9b8", fontStyle: "bold", stroke: "#5a3a22", strokeThickness: 6
+            }).setOrigin(0.5).setDepth(3000).setAngle(Phaser.Math.Between(-15, 15));
+          this.tweens.add({ targets: w, y: "-=70", alpha: 0, scale: 1.4, duration: 700, onComplete: () => w.destroy() });
+        }
+      });
+
+      // 3. stop, settle, and shoot the finished resume out
+      this.time.delayedCall(SHAKE_MS, () => {
+        [jitter, blink, clatter, shout].forEach(e => e.remove());
+        this.copier.clearTint().setPosition(cx, cy).setAngle(0).setScale(1);
+        this.tweens.add({ targets: this.copier, scaleY: 0.92, duration: 90, yoyo: true });
+        this.sfx.coin.play();
+        const out = this.add.image(mouth.x, mouth.y + 20, "resume_page").setDepth(3000).setScale(1.2);
         this.tweens.add({
-          targets: sheet, y: this.printer.y - 110, duration: 700, ease: "Sine.out",
-          onComplete: () => { sheet.destroy(); this.printed = true; this.openDownload(false); }
+          targets: out, y: mouth.y - 160, angle: 720, scale: 2.4, duration: 650, ease: "Back.out",
+          onComplete: () => {
+            out.destroy();
+            this.state.printed = true;
+            this.printing = false;
+            this.updateCounter();
+            this.openDownload(false);
+          }
         });
-      }
+      });
     });
   }
 
   update() {
+    this.readKeys();
     if (this.panelOpen) {
-      if (Phaser.Input.Keyboard.JustDown(this.keyEsc) || Phaser.Input.Keyboard.JustDown(this.keyE)) this.closeDownload();
+      if (this.pressEsc || this.pressE) this.closeDownload();
       return;
     }
+    if (this.printing) return;
     this.moveHero(330);
     this.prompt.setVisible(false);
 
-    if (Phaser.Input.Keyboard.JustDown(this.keyQ) && !this.frozen) { this.openDownload(true); return; }
+    if (this.pressQ && !this.frozen) { this.openDownload(true); return; }
 
     for (const p of this.pages) {
       if (!p.found && this.near(p, 55)) {
         p.found = true;
-        this.found++;
+        this.state.found.push(p.name);
         this.sfx.coin.play();
         this.tweens.add({ targets: [p.sprite, p.glow], y: "-=60", alpha: 0, duration: 400, onComplete: () => { p.sprite.destroy(); p.glow.destroy(); } });
-        this.counter.setText(`📄 Pages ${this.found}/3`);
+        this.updateCounter();
         this.toast(`📄 ${p.name} page found! (${this.found}/3)\n${p.tease}`, 3000);
         if (this.found === 3) this.time.delayedCall(3100, () => this.toast("All pages found! Take them to the 🖨️ copier.", 3000));
       }
@@ -328,14 +437,14 @@ class ArchiveScene extends WorldScene {
       if (this.printed) this.showPrompt("Press E: resume again", onCopier);
       else if (this.found < 3) this.showPrompt(`Needs 3 pages (${this.found}/3)`, onCopier);
       else this.showPrompt("Press E to print", onCopier);
-      if (Phaser.Input.Keyboard.JustDown(this.keyE) && !this.frozen) {
+      if (this.pressE && !this.frozen) {
         if (this.printed) this.openDownload(false);
         else if (this.found === 3) this.printResume();
         else this.toast(`Still missing ${3 - this.found} page${3 - this.found === 1 ? "" : "s"}. Look behind the clutter 👀`);
       }
     } else if (this.near(this.exitDoor, 110)) {
       this.showPrompt("Press E to exit", { x: 1160, y: 230 });
-      if (Phaser.Input.Keyboard.JustDown(this.keyE)) this.goTo("HallwayScene", "HallwayScene", 745, 520);
+      if (this.pressE) this.goTo("HallwayScene", "HallwayScene", 745, 520);
     }
   }
 }
@@ -527,11 +636,12 @@ class JourneyScene extends WorldScene {
   }
 
   update() {
+    this.readKeys();
     if (this.cardOpen) {
-      if (Phaser.Input.Keyboard.JustDown(this.keyEsc) || Phaser.Input.Keyboard.JustDown(this.keyE)) this.closeCard();
+      if (this.pressEsc || this.pressE) this.closeCard();
       return;
     }
-    if (Phaser.Input.Keyboard.JustDown(this.keyEsc)) { this.goTo("HallwayScene", "HallwayScene", 1204, 520); return; }
+    if (this.pressEsc) { this.goTo("HallwayScene", "HallwayScene", 1204, 520); return; }
 
     this.moveHero(420);
     this.prompt.setVisible(false);
@@ -554,7 +664,7 @@ class JourneyScene extends WorldScene {
         return;
       }
       this.showPrompt("Press E to read", { x: s.x + 10, y: s.y - 105 });
-      if (Phaser.Input.Keyboard.JustDown(this.keyE)) this.openCard(s);
+      if (this.pressE) this.openCard(s);
       break;
     }
   }
