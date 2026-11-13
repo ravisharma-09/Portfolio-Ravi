@@ -199,7 +199,8 @@ this.tweens.add({
 });
   this.cameras.main.setBounds(0, 0, room.width, room.height);
 
-  player = this.add.sprite(480,400,"player");
+  const spawn = takeSpawn("GameScene", { x: 480, y: 400 });
+  player = this.add.sprite(spawn.x, spawn.y, "player");
   player.setScale(0.1);
 this.bubble = this.add.image(0, 0, "bubble")
 .setDisplaySize(260,150)
@@ -1251,35 +1252,14 @@ else if(doorDistance < doorRange){
 if(!wasNear) this.sounds.notify.play();
   interactText.setVisible(true);
   interactText.setPosition(door.x, door.y - 200);
-  interactText.setText("Press E to use door");
+  interactText.setText("Press E to open the door");
 
   if(Phaser.Input.Keyboard.JustDown(interactKey)){
-
+    // the door now leads to the hallway (see world.js)
     this.sounds.click.play();
-    this.panelOverlay.setVisible(true);
-
-    this.tweens.add({
-      targets: this.panelOverlay,
-      alpha:0.75,
-      duration:200
-    });
-
-    doorPanel.setScale(0.85);
-    doorPanel.setAlpha(0);
-    doorPanel.setVisible(true);
-
-    doorText.setAlpha(0);
-    doorText.setVisible(true);
-
-    this.tweens.add({
-      targets: [doorPanel, doorText],
-      scale: 1,
-      alpha: 1 ,
-      duration: 600,
-      ease: "Back.out"
-    })
-    closeHint.setVisible(true);
-      this.addTerminalMessage("System:Using door...");
+    this.addTerminalMessage("System:Opening the door...");
+    this.transitionTo("HallwayScene");
+    return;
   }
 
 }
@@ -1630,7 +1610,7 @@ preload(){
 this.add.text(
   this.scale.width / 2,
   100,
-  "Press ESC to return to portfolio",
+  "Press ESC to return to the hallway",
   {
     fontSize: "20px",
     fill: "#aaaaaa"
@@ -1649,7 +1629,7 @@ this.key3 = this.input.keyboard.addKey("THREE");
 this.cameras.main.fadeOut(400);
 
 this.time.delayedCall(400, () => {
-  this.scene.start("GameScene");
+  this.scene.start("HallwayScene");
 });    });
  this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys("W,A,S,D");
@@ -1963,7 +1943,7 @@ const config = {
   height: 720,
   parent: "game-container",
   transparent: true,
-scene: [StartScene, GameScene, ProjectScene, MiniGameScene],  scale: {
+scene: [StartScene, GameScene, ProjectScene, MiniGameScene, HallwayScene, ArchiveScene, JourneyScene],  scale: {
   mode: Phaser.Scale.FIT,
   autoCenter: Phaser.Scale.CENTER_BOTH
 }

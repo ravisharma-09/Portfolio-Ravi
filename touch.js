@@ -17,6 +17,7 @@
     enter: { key: "Enter", code: "Enter", keyCode: 13 },
     esc: { key: "Escape", code: "Escape", keyCode: 27 },
     r: { key: "r", code: "KeyR", keyCode: 82 },
+    q: { key: "q", code: "KeyQ", keyCode: 81 },
     1: { key: "1", code: "Digit1", keyCode: 49 },
     2: { key: "2", code: "Digit2", keyCode: 50 },
     3: { key: "3", code: "Digit3", keyCode: 51 },
@@ -46,6 +47,7 @@
         <button data-key="2">2</button>
         <button data-key="3">3</button>
         <button data-key="r">R</button>
+        <button data-key="q" class="skip">SKIP</button>
       </div>
       <div class="row main">
         <button data-key="esc" class="esc">ESC</button>
@@ -111,12 +113,18 @@
     const doorOpen = inRoom && typeof doorPanel !== "undefined" && doorPanel && doorPanel.visible;
     const pickingLevel = inMini && s && !s.difficultySelected;
     const miniOver = inMini && s && s.gameOver;
+    const inHall = scene === "HallwayScene";
+    const inArchive = scene === "ArchiveScene";
+    const inJourney = scene === "JourneyScene";
+    const inWorld = inHall || inArchive || inJourney;
+    const popupOpen = s && (s.panelOpen || s.cardOpen);
 
-    root.querySelector(".dpad").classList.toggle("hidden", inStart || doorOpen || pickingLevel);
-    show("e", inRoom && !doorOpen);
+    root.querySelector(".dpad").classList.toggle("hidden", inStart || doorOpen || pickingLevel || popupOpen);
+    show("e", (inRoom && !doorOpen) || (inWorld && !popupOpen));
     show("enter", inStart || inProjects);
     btn("enter").textContent = inStart ? "START" : "OPEN";
-    show("esc", !inStart);
+    show("esc", !inStart && !inHall && !(inArchive && !popupOpen));
+    show("q", inArchive && !popupOpen && !(s && s.printed));
     show("1", doorOpen || pickingLevel);
     show("2", doorOpen || pickingLevel);
     show("3", pickingLevel);

@@ -187,3 +187,18 @@ body.touch {
     height: 40px;
     font-size: 18px;
 }
+/* resume download button shown by the Archive scene */
+#resume-download {
+    position: fixed;
+    transform: translate(-50%, -50%);
+    z-index: 2000;
+    padding: 14px 28px;
+    background: #ffd23f;
+    color: #1a1a1a;
+    font: bold 20px monospace;
+    border-radius: 10px;
+    box-shadow: 0 6px 0 #b8931f;
+    white-space: nowrap;
+}
+#resume-download:active { transform: translate(-50%, -46%); box-shadow: 0 3px 0 #b8931f; }
+#touch-controls .skip { font-size: 12px; }
