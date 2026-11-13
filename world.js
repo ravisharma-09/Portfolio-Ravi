@@ -1,0 +1,551 @@
+// world.js: the places behind the room's door.
+//   HallwayScene : hub with doors to the Archive, the Journey map, the arcade, and back to the room
+//   ArchiveScene : find 3 resume pages, print them on the copier, download the resume (Q skips)
+//   JourneyScene : walk a map of milestones from Chandigarh to Yogyakarta
+// Hallway/Archive art in assets/world/ is built from pieces of assets/room.png so it matches the room.
+// Loaded before main.js because main.js lists these scenes in its game config.
+// Screen width can be wider than 1280 on phones (see mobile-view.js), so fixed UI uses this.scale.width.
+
+// Where the player should appear when a scene starts, keyed by scene name.
+const WORLD_SPAWN = {};
+function setSpawn(sceneKey, x, y) { WORLD_SPAWN[sceneKey] = { x, y }; }
+function takeSpawn(sceneKey, fallback) {
+  const s = WORLD_SPAWN[sceneKey];
+  delete WORLD_SPAWN[sceneKey];
+  return s || fallback;
+}
+
+const RESUME_URL = "assets/Ravi_Sharma_Resume.pdf";
+const OUTLINE = 0x5a3a22; // dark brown used for outlines in the room art
+
+// Shared movement, prompts, toasts and transitions for the walkable scenes.
+class WorldScene extends Phaser.Scene {
+  preload() {
+    if (!this.textures.exists("player")) this.load.image("player", "assets/player.png");
+    if (!this.cache.audio.exists("click")) this.load.audio("click", "assets/sounds/click.ogg");
+    if (!this.cache.audio.exists("notify")) this.load.audio("notify", "assets/sounds/notify.ogg");
+    if (!this.cache.audio.exists("coin")) this.load.audio("coin", ["assets/sounds/coin.ogg", "assets/sounds/coin.mp3"]);
+    for (const k of ["hallway", "archive", "arcade", "copier", "box_big", "box_small", "cabinet"]) {
+      if (!this.textures.exists("w_" + k)) this.load.image("w_" + k, `assets/world/${k}.png`);
+    }
+  }
+
+  get sw() { return this.scale.width; }
+  get sh() { return this.scale.height; }
+
+  setupWorld(width, height, bounds, spawn, playerScale = 0.1) {
+    this.worldW = width;
+    this.worldH = height;
+    this.walk = bounds; // {x1,y1,x2,y2}
+    // If the screen is wider/taller than the art, centre the art instead of showing empty space on one side
+    const padX = Math.max(0, (this.sw - width) / 2);
+    const padY = Math.max(0, (this.sh - height) / 2);
+    this.cameras.main.setBounds(-padX, -padY, width + padX * 2, height + padY * 2);
+    this.cameras.main.fadeIn(400, 0, 0, 0);
+
+    this.hero = this.add.sprite(spawn.x, spawn.y, "player").setScale(playerScale);
+    this.cameras.main.startFollow(this.hero, true, 0.1, 0.1);
+
+    this.cursors = this.input.keyboard.createCursorKeys();
+    this.wasd = this.input.keyboard.addKeys("W,A,S,D");
+    this.keyE = this.input.keyboard.addKey("E");
+    this.keyEsc = this.input.keyboard.addKey("ESC");
+    this.keyQ = this.input.keyboard.addKey("Q");
+    this.frozen = false;
+    this.leaving = false;
+
+    this.prompt = this.add.text(0, 0, "", {
+      fontSize: "26px", fill: "#ffffff", backgroundColor: "#6e6a6a", padding: { x: 8, y: 4 }
+    }).setOrigin(0.5).setDepth(5000).setVisible(false);
+    this.tweens.add({ targets: this.prompt, y: "+=6", duration: 700, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+
+    // on phones the bottom corners hold the touch buttons, so messages go near the top
+    const toastY = document.body.classList.contains("touch") ? 100 : this.sh - 60;
+    this.toastBox = this.add.text(this.sw / 2, toastY, "", {
+      fontSize: "22px", fill: "#ffffff", backgroundColor: "rgba(40,24,12,0.85)",
+      padding: { x: 14, y: 8 }, align: "center"
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(9000).setVisible(false);
+
+    this.sfx = {
+      click: this.sound.add("click", { volume: 0.2 }),
+      notify: this.sound.add("notify", { volume: 0.05 }),
+      coin: this.sound.add("coin", { volume: 0.2 }),
+    };
+  }
+
+  moveHero(speed) {
+    if (this.frozen || this.leaving) return;
+    const dt = this.game.loop.delta / 1000;
+    const c = this.cursors, k = this.wasd, h = this.hero;
+    if (c.left.isDown || k.A.isDown) { h.x -= speed * dt; h.setFlipX(true); }
+    if (c.right.isDown || k.D.isDown) { h.x += speed * dt; h.setFlipX(false); }
+    if (c.up.isDown || k.W.isDown) h.y -= speed * dt;
+    if (c.down.isDown || k.S.isDown) h.y += speed * dt;
+    h.x = Phaser.Math.Clamp(h.x, this.walk.x1, this.walk.x2);
+    h.y = Phaser.Math.Clamp(h.y, this.walk.y1, this.walk.y2);
+    h.setDepth(h.y);
+  }
+
+  near(obj, range) {
+    return Phaser.Math.Distance.Between(this.hero.x, this.hero.y, obj.x, obj.y) < range;
+  }
+
+  // Prompt floats above the player and is kept inside the visible screen
+  showPrompt(text) {
+    this.prompt.setText(text).setVisible(true);
+    const cam = this.cameras.main, view = cam.worldView, half = this.prompt.width / 2 + 10;
+    const x = Phaser.Math.Clamp(this.hero.x, view.x + half, view.right - half);
+    const y = Phaser.Math.Clamp(this.hero.y - 95, view.y + 30, view.bottom - 30);
+    this.prompt.setPosition(x, y);
+  }
+
+  toast(msg, ms = 2600) {
+    this.toastBox.setText(msg).setVisible(true).setAlpha(1);
+    if (this.toastTimer) this.toastTimer.remove();
+    this.toastTimer = this.time.delayedCall(ms, () => {
+      this.tweens.add({ targets: this.toastBox, alpha: 0, duration: 300, onComplete: () => this.toastBox.setVisible(false) });
+    });
+  }
+
+  hud(x, y, text, originX = 0) {
+    return this.add.text(x, y, text, {
+      fontSize: "22px", fill: "#ffe9b8", backgroundColor: "rgba(40,24,12,0.8)", padding: { x: 10, y: 6 }
+    }).setOrigin(originX, 0).setScrollFactor(0).setDepth(9000);
+  }
+
+  prop(key, x, y) {
+    return this.add.image(x, y, key).setOrigin(0.5, 1).setDepth(y);
+  }
+
+  goTo(sceneKey, spawnScene, spawnX, spawnY) {
+    if (this.leaving) return;
+    this.leaving = true;
+    this.sfx.click.play();
+    if (spawnScene) setSpawn(spawnScene, spawnX, spawnY);
+    this.cameras.main.fadeOut(350, 0, 0, 0);
+    this.cameras.main.once("camerafadeoutcomplete", () => this.scene.start(sceneKey));
+  }
+}
+
+// ---------------------------------------------------------------------------
+class HallwayScene extends WorldScene {
+  constructor() { super("HallwayScene"); }
+
+  create() {
+    // hallway.png is 1800x946: wall + doors on top, plank floor below, stone ledge at the bottom
+    this.add.image(0, 0, "w_hallway").setOrigin(0).setDepth(-20);
+    this.setupWorld(1800, 946, { x1: 60, y1: 370, x2: 1740, y2: 800 },
+      takeSpawn("HallwayScene", { x: 300, y: 410 }));
+
+    const plaque = (x, text) => this.add.text(x, 100, text, {
+      fontSize: "19px", fill: "#ffe9b8", fontStyle: "bold"
+    }).setOrigin(0.5).setDepth(-10);
+    plaque(300, "🏠 MY ROOM");
+    plaque(720, "🗄️ ARCHIVE");
+    plaque(1140, "🗺️ JOURNEY");
+
+    this.prop("w_arcade", 1500, 470);
+    this.add.text(1500, 140, "🕹️ ARCADE", {
+      fontSize: "18px", fill: "#ffe9b8", fontStyle: "bold", backgroundColor: "#7a4a24", padding: { x: 8, y: 4 }
+    }).setOrigin(0.5).setDepth(-10);
+
+    this.spots = [
+      { x: 300, y: 380, label: "Press E to go back to my room", go: () => this.goTo("GameScene", "GameScene", 1130, 330) },
+      { x: 720, y: 380, label: "Press E: my resume is in here", go: () => this.goTo("ArchiveScene") },
+      { x: 1140, y: 380, label: "Press E: walk through my journey", go: () => this.goTo("JourneyScene") },
+      { x: 1500, y: 500, label: "Press E to play the coin game", go: () => this.goTo("MiniGameScene", "HallwayScene", 1500, 560) },
+    ];
+
+    if (!this.registry.get("hallwayHintShown")) {
+      this.registry.set("hallwayHintShown", true);
+      this.time.delayedCall(500, () =>
+        this.toast("🗄️ ARCHIVE has my resume  ·  🗺️ JOURNEY has my story  ·  🕹️ the arcade has a game", 4500));
+    }
+  }
+
+  update() {
+    this.moveHero(380);
+    this.prompt.setVisible(false);
+    for (const s of this.spots) {
+      if (this.near(s, 110)) {
+        this.showPrompt(s.label);
+        if (Phaser.Input.Keyboard.JustDown(this.keyE)) s.go();
+        break;
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+class ArchiveScene extends WorldScene {
+  constructor() { super("ArchiveScene"); }
+
+  create() {
+    // archive.png is the room (1536x1024) cleared, dimmed and lined with shelves
+    this.add.image(0, 0, "w_archive").setOrigin(0).setDepth(-20);
+    this.setupWorld(1536, 1024, { x1: 110, y1: 350, x2: 1430, y2: 850 },
+      takeSpawn("ArchiveScene", { x: 1145, y: 400 }));
+
+    this.hud(this.sw / 2, 16, "🗄️ THE ARCHIVE", 0.5);
+
+    // sticky note with the skip hint, next to the door
+    const note = this.add.graphics().setDepth(-10);
+    note.fillStyle(0xfff38a).fillRect(1225, 120, 92, 92).lineStyle(3, OUTLINE).strokeRect(1225, 120, 92, 92);
+    this.add.text(1271, 166, "In a hurry?\nPress Q\nto skip!", {
+      fontSize: "14px", fill: "#32201a", align: "center"
+    }).setOrigin(0.5).setDepth(-9);
+
+    this.exitDoor = { x: 1145, y: 370 };
+
+    // the copier is the "printer"
+    this.copier = this.prop("w_copier", 760, 520);
+    this.printer = { x: 760, y: 540 };
+
+    // clutter that hides the pages
+    this.prop("w_box_big", 430, 720);
+    this.prop("w_box_small", 480, 660);
+    this.prop("w_cabinet", 1240, 600);
+    this.prop("w_box_big", 1080, 800);
+
+    this.makePageTexture();
+    const pageData = [
+      { x: 540, y: 700, name: "Education", tease: "B.E. CSE @ Newton School of Technology · CGPA 8.17" },
+      { x: 1310, y: 585, name: "Projects", tease: "LessonLingo, Setu, Pathglass & this very game" },
+      { x: 1160, y: 790, name: "Achievements", tease: "AIR 17 Turing Cup 2k26 · ICPC Asia Amritapuri 2025" },
+    ];
+    this.pages = pageData.map(p => {
+      const sprite = this.add.image(p.x, p.y, "resume_page").setDepth(p.y - 40).setAngle(Phaser.Math.Between(-20, 20));
+      const glow = this.add.circle(p.x, p.y, 34, 0xfff38a, 0.35).setDepth(p.y - 41);
+      this.tweens.add({ targets: glow, scale: 1.4, alpha: 0.1, duration: 900, yoyo: true, repeat: -1 });
+      return { ...p, sprite, glow, found: false };
+    });
+    this.found = 0;
+    this.counter = this.hud(20, 16, "📄 Pages 0/3");
+
+    this.buildDownloadPanel();
+    this.time.delayedCall(450, () => this.toast("My resume pages blew everywhere! Find all 3 and bring them to the 🖨️ copier.", 4200));
+  }
+
+  makePageTexture() {
+    if (this.textures.exists("resume_page")) return;
+    const g = this.make.graphics({ x: 0, y: 0, add: false });
+    g.fillStyle(0xffffff).fillRect(0, 0, 36, 46);
+    g.lineStyle(2, 0x9aa5b1);
+    for (let y = 10; y < 42; y += 7) g.lineBetween(6, y, 30, y);
+    g.lineStyle(3, OUTLINE).strokeRect(0, 0, 36, 46);
+    g.generateTexture("resume_page", 36, 46);
+    g.destroy();
+  }
+
+  buildDownloadPanel() {
+    this.panel = this.add.container(this.sw / 2, this.sh / 2).setScrollFactor(0).setDepth(9500).setVisible(false);
+    const bg = this.add.rectangle(0, 0, 620, 340, 0xfbe7c4).setStrokeStyle(8, OUTLINE);
+    const title = this.add.text(0, -120, "🖨️ Resume printed!", { fontSize: "32px", fill: "#5a3a22", fontStyle: "bold" }).setOrigin(0.5);
+    const body = this.add.text(0, -55, "Education · Projects · Achievements\nall in one page.", {
+      fontSize: "20px", fill: "#3a2a12", align: "center"
+    }).setOrigin(0.5);
+    const hint = this.add.text(0, 140, "ESC to close", { fontSize: "16px", fill: "#9a8a6a" }).setOrigin(0.5);
+    this.panel.add([bg, title, body, hint]);
+
+    // A real link (not canvas) so browsers allow the download / new tab on click or tap.
+    const a = document.createElement("a");
+    a.id = "resume-download";
+    a.href = RESUME_URL;
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.textContent = "📄 Download Resume";
+    a.style.display = "none";
+    document.body.appendChild(a);
+    this.downloadLink = a;
+    this.placeLink = () => {
+      const r = this.game.canvas.getBoundingClientRect();
+      a.style.left = `${r.left + r.width / 2}px`;
+      a.style.top = `${r.top + r.height * ((this.sh / 2 + 60) / this.sh)}px`;
+    };
+    window.addEventListener("resize", this.placeLink);
+    this.events.once("shutdown", () => {
+      window.removeEventListener("resize", this.placeLink);
+      a.remove();
+    });
+  }
+
+  openDownload(viaSkip) {
+    this.frozen = true;
+    this.panelOpen = true;
+    this.prompt.setVisible(false);
+    this.panel.setVisible(true).setScale(0.85).setAlpha(0);
+    this.tweens.add({ targets: this.panel, scale: 1, alpha: 1, duration: 400, ease: "Back.out" });
+    this.placeLink();
+    this.downloadLink.style.display = "block";
+    if (viaSkip) this.toast("Skipped the quest. No judgement 😄", 2200);
+  }
+
+  closeDownload() {
+    this.panelOpen = false;
+    this.frozen = false;
+    this.panel.setVisible(false);
+    this.downloadLink.style.display = "none";
+  }
+
+  printResume() {
+    this.frozen = true;
+    this.sfx.click.play();
+    this.tweens.add({
+      targets: this.copier, x: { from: 755, to: 765 }, duration: 60, yoyo: true, repeat: 8,
+      onComplete: () => {
+        this.copier.x = 760;
+        const sheet = this.add.image(this.printer.x, this.printer.y - 200, "resume_page").setDepth(2000).setScale(1.4);
+        this.tweens.add({
+          targets: sheet, y: this.printer.y - 110, duration: 700, ease: "Sine.out",
+          onComplete: () => { sheet.destroy(); this.printed = true; this.openDownload(false); }
+        });
+      }
+    });
+  }
+
+  update() {
+    if (this.panelOpen) {
+      if (Phaser.Input.Keyboard.JustDown(this.keyEsc) || Phaser.Input.Keyboard.JustDown(this.keyE)) this.closeDownload();
+      return;
+    }
+    this.moveHero(330);
+    this.prompt.setVisible(false);
+
+    if (Phaser.Input.Keyboard.JustDown(this.keyQ) && !this.frozen) { this.openDownload(true); return; }
+
+    for (const p of this.pages) {
+      if (!p.found && this.near(p, 55)) {
+        p.found = true;
+        this.found++;
+        this.sfx.coin.play();
+        this.tweens.add({ targets: [p.sprite, p.glow], y: "-=60", alpha: 0, duration: 400, onComplete: () => { p.sprite.destroy(); p.glow.destroy(); } });
+        this.counter.setText(`📄 Pages ${this.found}/3`);
+        this.toast(`📄 ${p.name} page found! (${this.found}/3)\n${p.tease}`, 3000);
+        if (this.found === 3) this.time.delayedCall(3100, () => this.toast("All pages found! Take them to the 🖨️ copier.", 3000));
+      }
+    }
+
+    if (this.near(this.printer, 140)) {
+      if (this.printed) this.showPrompt("Press E to get the resume again");
+      else if (this.found < 3) this.showPrompt(`Copier needs 3 pages (${this.found}/3)`);
+      else this.showPrompt("Press E to print my resume");
+      if (Phaser.Input.Keyboard.JustDown(this.keyE) && !this.frozen) {
+        if (this.printed) this.openDownload(false);
+        else if (this.found === 3) this.printResume();
+        else this.toast(`Still missing ${3 - this.found} page${3 - this.found === 1 ? "" : "s"}. Look behind the clutter 👀`);
+      }
+    } else if (this.near(this.exitDoor, 110)) {
+      this.showPrompt("Press E to go back to the hallway");
+      if (Phaser.Input.Keyboard.JustDown(this.keyE)) this.goTo("HallwayScene", "HallwayScene", 720, 410);
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Map projection for the journey: degrees -> world pixels.
+const MAP_SCALE = 48, MAP_LON0 = 66, MAP_LAT0 = 36, MAP_PAD = 80;
+const geo = (lon, lat) => ({ x: (lon - MAP_LON0) * MAP_SCALE + MAP_PAD, y: (MAP_LAT0 - lat) * MAP_SCALE + MAP_PAD });
+
+const JOURNEY = [
+  { emoji: "🏫", title: "Army Public School", place: "Chandimandir", date: "2022 – 2023",
+    text: "Finished Class X (Matriculation) with 81.86%.", at: geo(76.88, 30.73) },
+  { emoji: "🏫", title: "Shri Guru Harkrishan Sr. Sec. School", place: "Chandigarh", date: "2024 – 2025",
+    text: "Finished Class XII with 72%.", at: geo(76.78, 30.73), off: [-90, 80] },
+  { emoji: "🎓", title: "Newton School of Technology", place: "Bengaluru", date: "2025",
+    text: "Started B.E. Computer Science (2025 – 2029). Current CGPA: 8.17 / 10.", at: geo(77.59, 12.97) },
+  { emoji: "💻", title: "ICPC Asia Amritapuri Regional", place: "Amritapuri, Kerala", date: "Dec 2025",
+    text: "Competed in the ICPC Asia Amritapuri regional contest.", at: geo(76.49, 9.09) },
+  { emoji: "🏆", title: "Turing Cup 2k26", place: "Online · by Turing Hut", date: "Mar 2026",
+    text: "Secured All India Rank 17 in this competitive programming contest.", at: geo(77.59, 12.97), off: [30, -150] },
+  { emoji: "🔍", title: "Pathglass", place: "Built at Newton", date: "Jul 2026",
+    text: "Built a graph query engine from scratch, plus a visual app with a query-plan panel and step-by-step replay.", at: geo(77.59, 12.97), off: [110, -50] },
+  { emoji: "🛠️", title: "DevForge Lead", place: "Newton School of Technology", date: "Jul – Oct 2026",
+    text: "Led the college developer club: coordinated club leads and organised technical events.", at: geo(77.59, 12.97), off: [-110, -80] },
+  { emoji: "🤟", title: "Setu · Smart India Hackathon 2026", place: "Team project", date: "Sep 2026",
+    text: "Sign language bridge: full-body + face sign recognition, offline MediaPipe, and a 2D signer.", at: geo(77.59, 12.97), off: [80, 90] },
+  { emoji: "🌏", title: "openSUSE.Asia Summit 2026", place: "Yogyakarta, Indonesia", date: "Oct 2026",
+    text: "Attended at Universitas Gadjah Mada. Part of the openSUSE community since Oct 2026.", at: geo(110.36, -7.8) },
+];
+const JOURNEY_END = { emoji: "🚩", title: "To be continued…", place: "Next stop: ?", date: "2027 →",
+  text: "Wherever the next project takes me. Want to be part of it? The mailbox in my room has my contacts.", at: geo(113.5, -2.5) };
+
+class JourneyScene extends WorldScene {
+  constructor() { super("JourneyScene"); }
+
+  create() {
+    const W = (118 - MAP_LON0) * MAP_SCALE + MAP_PAD * 2;
+    const H = (MAP_LAT0 + 11) * MAP_SCALE + MAP_PAD * 2;
+    const stops = JOURNEY.map(m => ({ ...m, x: m.at.x + (m.off ? m.off[0] : 0), y: m.at.y + (m.off ? m.off[1] : 0) }));
+    const end = { ...JOURNEY_END, x: JOURNEY_END.at.x, y: JOURNEY_END.at.y, isEnd: true };
+    const start = { x: stops[0].x + 100, y: stops[0].y - 30 };
+
+    this.setupWorld(W, H, { x1: 40, y1: 40, x2: W - 40, y2: H - 40 }, takeSpawn("JourneyScene", start), 0.07);
+    this.drawMap(W, H);
+    this.drawPath([...stops, end]);
+    this.makeFlagTextures();
+
+    this.stops = [...stops, end].map((s, i) => {
+      const flag = this.add.image(s.x, s.y, "flag_off").setOrigin(0.15, 1).setDepth(s.y);
+      this.add.text(s.x, s.y + 14, s.isEnd ? "?" : String(i + 1), {
+        fontSize: "18px", fill: "#ffe9b8", fontStyle: "bold", backgroundColor: "#5a3a22", padding: { x: 6, y: 2 }
+      }).setOrigin(0.5).setDepth(s.y + 1);
+      this.add.text(s.x + 22, s.y - 70, `${s.emoji} ${s.title}`, {
+        fontSize: "16px", fill: "#3a2a12", backgroundColor: "rgba(251,231,196,0.9)", padding: { x: 5, y: 2 }
+      }).setDepth(s.y + 1);
+      return { ...s, flag, visited: false };
+    });
+    this.visited = 0;
+
+    this.counter = this.hud(20, 16, "");
+    this.updateCounter();
+    this.hud(20, 62, "ESC: back to hallway").setFontSize(16);
+
+    this.buildCard();
+    this.time.delayedCall(450, () => this.toast("Follow the dotted path · step on a flag to open its postcard", 3800));
+  }
+
+  drawMap(W, H) {
+    const g = this.add.graphics().setDepth(-20);
+    g.fillStyle(0x86c5d8).fillRect(-1000, -1000, W + 2000, H + 2000);
+    g.lineStyle(3, 0xffffff, 0.3);
+    for (let y = 60; y < H; y += 90) for (let x = (y / 90 % 2) * 60; x < W; x += 160) {
+      g.beginPath(); g.arc(x, y, 14, Math.PI * 1.1, Math.PI * 1.9); g.strokePath();
+    }
+    const poly = (pts, fill) => {
+      const p = pts.map(([lon, lat]) => geo(lon, lat));
+      g.fillStyle(fill).fillPoints(p, true);
+      g.lineStyle(6, OUTLINE, 1).strokePoints(p, true);
+    };
+    const LAND = 0xe3cfa0, INDIA = 0xf7d9a0;
+    // neighbouring land (drawn first, India goes on top)
+    poly([[60,36],[118,36],[118,22],[108.5,16],[109.3,12],[106.5,9.5],[104.8,8.6],[105,10.5],[102.5,12],[100.8,13.5],
+      [100,12],[99.3,10],[100.3,7],[102.2,6.2],[103.4,4],[104.2,1.4],[103.5,1.3],[101.3,2.8],[100.1,6.4],[98.3,8.3],
+      [98.4,10.5],[97.8,14.5],[97.6,16.5],[94.4,16],[94.3,18.8],[92.3,20.7],[91.8,22.3],[90.5,22],[89,21.9],[75,22],
+      [68.2,23.7],[66.5,25.4],[61.6,25.2],[60,25.3]], LAND);
+    // India (simplified)
+    poly([[68.2,23.7],[70,20.8],[72.8,19],[73.5,15.5],[74.8,12.9],[76.2,9.9],[77.5,8.1],[78.2,8.9],[79.8,10.3],[80.3,13.1],
+      [80.1,15.9],[82.3,16.6],[84.9,19.3],[86.9,21],[88.2,21.7],[89,21.9],[89.2,24.5],[88.2,26.5],[89.8,26.7],[92,26.8],
+      [95.2,27.9],[97.2,28.3],[96.1,27.2],[95,25.8],[94,23.9],[93.2,22.6],[92.3,23.5],[91.5,24.1],[90,25.3],[88,27.9],
+      [84.1,28.6],[81,30.2],[79,31.3],[78.3,32.5],[79.5,34.5],[77.8,35.5],[74.5,34.7],[73.9,33],[74.6,32],[74.4,30.9],
+      [73.4,29.9],[71,27.9],[70.3,26.8],[69.5,25]], INDIA);
+    // Sri Lanka, Sumatra, Java, Borneo
+    poly([[79.9,9.8],[80.9,9],[81.9,7.4],[81.4,6.1],[80.1,6.1],[79.8,7.9]], LAND);
+    poly([[95.3,5.6],[97.5,5.2],[100.4,2.3],[103.8,-1],[106,-3.3],[105.9,-5.8],[104.5,-5.9],[102.3,-4],[100.3,-1],[98.6,1.7],[95.9,4]], LAND);
+    poly([[105.2,-6.6],[106.8,-6.1],[108.5,-6.7],[110.4,-6.9],[112.7,-6.9],[114.4,-7.8],[114.6,-8.6],[112,-8.4],[110.4,-8.1],[108.2,-7.8],[106,-7.5],[105.3,-6.9]], INDIA);
+    poly([[109,1.5],[109.6,-1],[110.5,-3],[114.5,-3.8],[116.5,-3],[117.5,0],[117.8,4],[116,6.9],[113,3.2],[111,1.6]], LAND);
+
+    const label = (t, lon, lat, size, color, style = "bold") => {
+      const p = geo(lon, lat);
+      this.add.text(p.x, p.y, t, { fontSize: size, fill: color, fontStyle: style }).setOrigin(0.5).setDepth(-15).setAlpha(0.85);
+    };
+    label("I N D I A", 79, 22.5, "56px", "#a0652e");
+    label("Arabian Sea", 68, 14, "30px", "#ffffff", "italic");
+    label("Bay of Bengal", 88, 14.5, "30px", "#ffffff", "italic");
+    label("Indian Ocean", 85, -2, "34px", "#ffffff", "italic");
+    label("INDONESIA", 109, -10, "34px", "#a0652e");
+    label("Chandigarh", 75.2, 31.8, "18px", "#5a3a22");
+    label("Bengaluru", 76.3, 13.6, "18px", "#5a3a22");
+    label("Kerala", 75.3, 10.3, "18px", "#5a3a22");
+    label("Yogyakarta", 110.4, -9.1, "18px", "#5a3a22");
+  }
+
+  drawPath(points) {
+    const g = this.add.graphics().setDepth(-12);
+    g.fillStyle(OUTLINE, 0.9);
+    for (let i = 0; i < points.length - 1; i++) {
+      const a = points[i], b = points[i + 1];
+      const d = Phaser.Math.Distance.Between(a.x, a.y, b.x, b.y);
+      for (let t = 0; t < d; t += 22) {
+        const k = t / d;
+        g.fillCircle(a.x + (b.x - a.x) * k, a.y + (b.y - a.y) * k, 5);
+      }
+    }
+    // a little plane over the sea between the hackathon and Indonesia
+    const a = points[7], b = points[8];
+    const plane = this.add.text((a.x + b.x) / 2, (a.y + b.y) / 2, "✈️", { fontSize: "44px" }).setOrigin(0.5).setDepth(-11)
+      .setRotation(Math.atan2(b.y - a.y, b.x - a.x));
+    this.tweens.add({ targets: plane, y: "-=12", duration: 1200, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+  }
+
+  makeFlagTextures() {
+    if (this.textures.exists("flag_off")) return;
+    const mk = (key, color) => {
+      const g = this.make.graphics({ x: 0, y: 0, add: false });
+      g.fillStyle(0x000000, 0.25).fillEllipse(9, 72, 24, 8);
+      g.fillStyle(0x32201a).fillRect(5, 0, 7, 72);
+      g.fillStyle(0x32201a).fillTriangle(9, 0, 54, 15, 9, 31);
+      g.fillStyle(color).fillTriangle(12, 4, 46, 15, 12, 26);
+      g.generateTexture(key, 56, 78);
+      g.destroy();
+    };
+    mk("flag_off", 0xb8a98a);
+    mk("flag_on", 0xff4d6d);
+  }
+
+  buildCard() {
+    this.card = this.add.container(this.sw / 2, this.sh / 2).setScrollFactor(0).setDepth(9500).setVisible(false);
+    const bg = this.add.rectangle(0, 0, 660, 330, 0xfbe7c4).setStrokeStyle(8, OUTLINE);
+    const stamp = this.add.rectangle(270, -115, 70, 80, 0xffffff).setStrokeStyle(3, 0xff4d6d);
+    this.cardEmoji = this.add.text(270, -115, "", { fontSize: "38px" }).setOrigin(0.5);
+    this.cardTitle = this.add.text(-300, -130, "", { fontSize: "28px", fill: "#3a2a12", fontStyle: "bold", wordWrap: { width: 520 } });
+    this.cardMeta = this.add.text(-300, -60, "", { fontSize: "18px", fill: "#9a6b2f" });
+    this.cardText = this.add.text(-300, -20, "", { fontSize: "21px", fill: "#2b2b2b", wordWrap: { width: 600 }, lineSpacing: 6 });
+    const hint = this.add.text(0, 140, "E or ESC to close", { fontSize: "16px", fill: "#9a8a6a" }).setOrigin(0.5);
+    this.card.add([bg, stamp, this.cardEmoji, this.cardTitle, this.cardMeta, this.cardText, hint]);
+  }
+
+  openCard(s) {
+    this.cardOpen = true;
+    this.frozen = true;
+    this.prompt.setVisible(false);
+    this.cardEmoji.setText(s.emoji);
+    this.cardTitle.setText(s.title);
+    this.cardMeta.setText(`📍 ${s.place}   ·   🗓️ ${s.date}`);
+    this.cardText.setText(s.text);
+    this.card.setVisible(true).setScale(0.85).setAlpha(0);
+    this.tweens.add({ targets: this.card, scale: 1, alpha: 1, duration: 350, ease: "Back.out" });
+  }
+
+  closeCard() {
+    this.cardOpen = false;
+    this.frozen = false;
+    this.card.setVisible(false);
+  }
+
+  updateCounter() {
+    this.counter.setText(`🚩 Milestones ${this.visited}/${JOURNEY.length}`);
+  }
+
+  update() {
+    if (this.cardOpen) {
+      if (Phaser.Input.Keyboard.JustDown(this.keyEsc) || Phaser.Input.Keyboard.JustDown(this.keyE)) this.closeCard();
+      return;
+    }
+    if (Phaser.Input.Keyboard.JustDown(this.keyEsc)) { this.goTo("HallwayScene", "HallwayScene", 1140, 410); return; }
+
+    this.moveHero(420);
+    this.prompt.setVisible(false);
+
+    for (const s of this.stops) {
+      if (!this.near(s, 60)) continue;
+      if (!s.visited) {
+        s.visited = true;
+        s.flag.setTexture("flag_on");
+        this.tweens.add({ targets: s.flag, scaleY: { from: 0.6, to: 1 }, duration: 400, ease: "Back.out" });
+        if (!s.isEnd) {
+          this.visited++;
+          this.updateCounter();
+          if (this.visited === JOURNEY.length) {
+            this.time.delayedCall(400, () => this.toast("Journey complete! 🎉 One more flag out at sea…", 3500));
+          }
+        }
+        this.sfx.notify.play();
+        this.openCard(s);
+        return;
+      }
+      this.showPrompt("Press E to read the postcard");
+      if (Phaser.Input.Keyboard.JustDown(this.keyE)) this.openCard(s);
+      break;
+    }
+  }
+}
