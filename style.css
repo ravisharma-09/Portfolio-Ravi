@@ -15,7 +15,7 @@
   display: block;
 }
 body {
-  height:100vh;
+  min-height:100vh;
 
     background: url("assets/bg-dot.svg") black;
     color: white;
@@ -103,8 +103,8 @@ a {
 }
 /* phones: ask for landscape, then show touch controls */
 @media (pointer: coarse) and (orientation: portrait) {
-    #mobile { display: flex; }
-    #game-container, #touch-controls { display: none !important; }
+    #mobile { display: flex; position: relative; min-height: 100svh; }
+    #game-container, #touch-controls, .corner-link { display: none !important; }
     body { display: block; }
 }
 .rotate-icon {
@@ -218,3 +218,30 @@ body.touch {
 }
 .corner-link:hover, .corner-link:focus { opacity: 1; color: #FFD700; }
 body.touch .corner-link { display: none; }
+
+/* plain-text intro under the game: readable by people who skip the game and by search engines */
+#intro {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 56px 16px 72px;
+    font: 17px/1.7 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: #e8e8e8;
+    background: rgba(0, 0, 0, 0.88);
+    box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.88);
+    clip-path: inset(0 -100vmax);
+    user-select: text;
+    scroll-margin-top: 0;
+}
+#intro * { user-select: text; }
+#intro h1 { font-size: 2.2rem; color: #FFD700; margin-bottom: 4px; }
+#intro .intro-tag { color: #00ff88; font-family: monospace; margin-bottom: 20px; }
+#intro p { margin: 0 0 16px; }
+#intro a { color: #FFD700; text-decoration: underline; text-underline-offset: 3px; }
+#intro .intro-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+#intro .intro-links a {
+    text-decoration: none; padding: 8px 14px;
+    border: 2px solid #FFD700; border-radius: 10px;
+}
+#intro .intro-links a:hover, #intro .intro-links a:focus { background: #FFD700; color: #111; }
+/* while the game runs on a phone in landscape, keep the page locked to the game */
+body.touch #intro { display: none; }
