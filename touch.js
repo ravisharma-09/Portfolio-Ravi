@@ -110,7 +110,6 @@
     const inRoom = scene === "GameScene";
     const inProjects = scene === "ProjectScene";
     const inMini = scene === "MiniGameScene";
-    const doorOpen = inRoom && typeof doorPanel !== "undefined" && doorPanel && doorPanel.visible;
     const pickingLevel = inMini && s && !s.difficultySelected;
     const miniOver = inMini && s && s.gameOver;
     const inHall = scene === "HallwayScene";
@@ -119,14 +118,14 @@
     const inWorld = inHall || inArchive || inJourney;
     const popupOpen = s && (s.panelOpen || s.cardOpen);
 
-    root.querySelector(".dpad").classList.toggle("hidden", inStart || doorOpen || pickingLevel || popupOpen);
-    show("e", (inRoom && !doorOpen) || (inWorld && !popupOpen));
+    root.querySelector(".dpad").classList.toggle("hidden", inStart || pickingLevel || popupOpen);
+    show("e", inRoom || (inWorld && !popupOpen));
     show("enter", inStart || inProjects);
     btn("enter").textContent = inStart ? "START" : "OPEN";
     show("esc", !inStart && !inHall && !(inArchive && !popupOpen));
     show("q", inArchive && !popupOpen && !(s && s.printed));
-    show("1", doorOpen || pickingLevel);
-    show("2", doorOpen || pickingLevel);
+    show("1", pickingLevel);
+    show("2", pickingLevel);
     show("3", pickingLevel);
     show("r", inProjects || miniOver);
   }

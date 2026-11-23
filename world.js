@@ -2,7 +2,7 @@
 //   HallwayScene : hub with doors to the Archive, the Journey map, the arcade, and back to the room
 //   ArchiveScene : find 3 resume pages, print them on the copier, download the resume (Q skips)
 //   JourneyScene : walk a map of milestones from Chandigarh to Yogyakarta
-// Hallway/Archive backgrounds in assets/world/ were generated using assets/room.png as the style reference.
+// Hallway/Archive backgrounds in assets/world/ were generated using assets/room.webp as the style reference.
 // Loaded before main.js because main.js lists these scenes in its game config.
 // Screen width can be wider than 1280 on phones (see mobile-view.js), so fixed UI uses this.scale.width.
 
@@ -26,7 +26,7 @@ class WorldScene extends Phaser.Scene {
     if (!this.cache.audio.exists("notify")) this.load.audio("notify", "assets/sounds/notify.ogg");
     if (!this.cache.audio.exists("coin")) this.load.audio("coin", ["assets/sounds/coin.ogg", "assets/sounds/coin.mp3"]);
     if (!this.cache.audio.exists("type")) this.load.audio("type", ["assets/sounds/type.ogg", "assets/sounds/type.mp3"]);
-    // painted backgrounds (generated with room.png as the style reference) + the copier sprite
+    // painted backgrounds (generated with room.webp as the style reference) + the copier sprite
     if (!this.textures.exists("w_hallway")) this.load.image("w_hallway", "assets/world/hallway_bg.webp");
     if (!this.textures.exists("w_archive")) this.load.image("w_archive", "assets/world/archive_bg.webp");
     if (!this.textures.exists("w_copier")) this.load.image("w_copier", "assets/world/copier.png");
@@ -203,7 +203,7 @@ class ArchiveScene extends WorldScene {
   constructor() { super("ArchiveScene"); }
 
   create() {
-    // archive_bg.jpg is 1536x1024, same room shape as room.png: door at x 1160, cabinets left, box stacks right
+    // archive_bg.jpg is 1536x1024, same room shape as room.webp: door at x 1160, cabinets left, box stacks right
     this.add.image(0, 0, "w_archive").setOrigin(0).setDepth(-20);
     this.setupWorld(1536, 1024, { x1: 110, y1: 330, x2: 1430, y2: 850 },
       takeSpawn("ArchiveScene", { x: 1160, y: 440 }));

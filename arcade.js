@@ -213,7 +213,7 @@ class MiniGameScene extends Phaser.Scene {
     this.timeText.setText(`${Math.ceil(this.timeLeft / 1000)}s`);
   }
 
-  multiplier() { return Math.min(3, 1 + Math.floor(this.streak / 3)); }
+  multiplier() { return GameLogic.multiplier(this.streak); }
 
   floatText(x, y, text, color) {
     const t = this.add.text(x, y, text, {
@@ -224,7 +224,7 @@ class MiniGameScene extends Phaser.Scene {
 
   collect(coin) {
     const now = this.time.now;
-    this.streak = now - this.lastPickup < 1500 ? this.streak + 1 : 1;
+    this.streak = GameLogic.nextStreak(this.streak, this.lastPickup, now);
     this.lastPickup = now;
     const gain = this.multiplier();
     this.score += gain;
@@ -257,9 +257,7 @@ class MiniGameScene extends Phaser.Scene {
 
     let scores = [];
     try { scores = JSON.parse(localStorage.getItem("miniScores") || "[]"); } catch (e) {}
-    scores.push(this.score);
-    scores.sort((a, b) => b - a);
-    scores = scores.slice(0, 5);
+    scores = GameLogic.topScores(scores, this.score);
     try { localStorage.setItem("miniScores", JSON.stringify(scores)); } catch (e) {}
     const newBest = scores[0] === this.score && this.score > 0;
 

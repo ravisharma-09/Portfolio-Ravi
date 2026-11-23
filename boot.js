@@ -5,6 +5,7 @@
 (function () {
   const SCRIPTS = [
     "https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js",
+    "logic.js",
     "mobile-view.js",
     "world.js",
     "arcade.js",
